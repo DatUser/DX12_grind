@@ -13,22 +13,44 @@
 	  }
 	},
 	"tasks": [
-	  {
-		"type": "shell",
-		"label": "cl.exe build active file",
-		"command": "cl.exe",
-		"args": [
-		  "/Zi",
-		  "/EHsc",
-		  "/Fe:${worskpaceFolder}\\build\\",
-		  "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe",
-		  "${file}"
-		],
-		"problemMatcher": ["$msCompile"],
-		"group": {
-		  "kind": "build",
-		  "isDefault": true
-		}
-	  }
+		{
+"type": "shell",
+    	    "label": "Set dependencies for build",
+    	    "command": "if not exist ${config:buildDir} mkdir ${config:buildDir}"
+    	},
+    	{
+    	    "type": "shell",
+    	    "label": "Meson build",
+    	    "command": "meson setup build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+    	}//,
+		//{
+		//"type": "shell",
+		//"label": "cl.exe build active file",
+		//"command": "cl.exe",
+		//"args": [
+		//	"/Zi",
+		//	"/EHsc",
+		//	"/Fe:",
+		//		"${config:buildDir}\\${fileBasenameNoExtension}.exe",
+		//		"/Fo${config:buildDir}\\",
+		//		"/Fd${config:buildDir}\\",
+		//	"${file}"
+		//],
+		//	"options": {
+		//		"cwd": "${workspaceFolder}"
+		//	},
+		//"problemMatcher": ["$msCompile"],
+		//	"group": {
+		//	"kind": "build",
+		//	"isDefault": true
+		//},
+		//	"dependsOn": [
+		//		"Set dependencies for build"
+		//	]
+		//}
 	]
   }

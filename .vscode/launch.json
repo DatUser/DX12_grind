@@ -1,13 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "PowerShell Launch Script",
-            "type": "PowerShell",
-            "request": "launch",
-            "script": "VsDevCmd.bat",
-            "cwd": "${workspaceFolder}"
-        },
+        //{
+        //    "name": "PowerShell Launch Script",
+        //    "type": "shell",
+        //    "request": "launch",
+        //    "script": "VsDevCmd.bat",
+        //    "cwd": "${workspaceFolder}"
+        //},
         {
             "name": "cl.exe - Build and debug active file",
             "type": "cppvsdbg",
@@ -15,9 +15,10 @@
             "program": "${workspaceRoot}\\build\\${fileBasenameNoExtension}.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${env:buildDir}",
             "environment": [],
-            "console": "externalTerminal"
+            "externalConsole": "false",
+            "preLaunchTask": "cl.exe build active file"
         }
     ]
 }
