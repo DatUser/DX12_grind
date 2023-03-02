@@ -1,0 +1,34 @@
+{
+	"version": "2.0.0",
+	"windows": {
+	  "options": {
+		"shell": {
+		  "executable": "cmd.exe",
+		  "args": [
+			"/C",
+			"VsDevCmd.bat",
+			"&&"
+		  ]
+		}
+	  }
+	},
+	"tasks": [
+	  {
+		"type": "shell",
+		"label": "cl.exe build active file",
+		"command": "cl.exe",
+		"args": [
+		  "/Zi",
+		  "/EHsc",
+		  "/Fe:${worskpaceFolder}\\build\\",
+		  "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe",
+		  "${file}"
+		],
+		"problemMatcher": ["$msCompile"],
+		"group": {
+		  "kind": "build",
+		  "isDefault": true
+		}
+	  }
+	]
+  }
