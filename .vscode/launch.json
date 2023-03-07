@@ -12,13 +12,13 @@
             "name": "cl.exe - Build and debug active file",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceRoot}\\build\\${fileBasenameNoExtension}.exe",
+            "program": "${workspaceRoot}\\build\\window.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${env:buildDir}",
             "environment": [],
             "externalConsole": "false",
-            "preLaunchTask": "cl.exe build active file"
+            "preLaunchTask": "Meson build"
         }
     ]
 }

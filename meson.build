@@ -1,7 +1,7 @@
 project('engine', 'cpp')
 
 python = find_program(['python.exe', 'python'])
-glob = run_command('python', 'file_glob.py')
-src_files = files(glob)
+glob = run_command('python', 'file_glob.py', check : true)
+src_files = files(glob.stdout().split(' '))
 
-executable('window.exe', sources : src_files)
+executable('window', sources : src_files)
