@@ -15,7 +15,7 @@
             "program": "${workspaceRoot}\\build\\window.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${env:buildDir}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": "false",
             "preLaunchTask": "Meson build"
