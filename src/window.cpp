@@ -1,4 +1,19 @@
+#include <sstream>
 #include <Windows.h>
+
+void OnKeyPressed(WPARAM wKeyCode)
+{
+    std::stringstream stream;
+    stream << "Pressed " << (char) wKeyCode << " key!" << std::endl;
+    OutputDebugString(stream.str().c_str());
+}
+
+void OnKeyReleased(WPARAM wKeyCode)
+{
+    std::stringstream stream;
+    stream << "Released " << (char) wKeyCode << " key!" << std::endl;
+    OutputDebugString(stream.str().c_str());
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
                         LPARAM lParam)
@@ -7,6 +22,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
     {
     case WM_CLOSE:
         PostQuitMessage(0);
+        break;
+    case WM_KEYDOWN:
+        OnKeyPressed(wParam);
+        break;
+    case WM_KEYUP:
+        OnKeyReleased(wParam);
         break;
     }
 
