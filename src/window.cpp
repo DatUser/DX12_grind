@@ -1,3 +1,5 @@
+//#include "window.h"
+
 #include <sstream>
 #include <Windows.h>
 
@@ -15,6 +17,16 @@ void OnKeyReleased(WPARAM wKeyCode)
     OutputDebugString(stream.str().c_str());
 }
 
+void OnMouseMove(LPARAM lMousePos)
+{
+    //Retrieve Mouse Pos: Px Pos relative to window
+    POINTS ptMousePos = MAKEPOINTS(lMousePos);
+
+    std::stringstream stream;
+    stream << "Mouse pos is: (" << ptMousePos.x << ", " << ptMousePos.y << ")" << std::endl;
+    OutputDebugString(stream.str().c_str());
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
                         LPARAM lParam)
 {
@@ -28,6 +40,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
         break;
     case WM_KEYUP:
         OnKeyReleased(wParam);
+        break;
+    case WM_MOUSEMOVE:
+        OnMouseMove(lParam);
         break;
     }
 
