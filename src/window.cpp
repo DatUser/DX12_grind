@@ -1,7 +1,89 @@
-//#include "window.h"
+#include "window.h"
 
 #include <sstream>
 #include <Windows.h>
+
+Window::WindowClass Window::WindowClass::m_Wc;
+
+Window::WindowClass::WindowClass()
+: m_hInstance(GetModuleHandle(nullptr))
+{
+    //window class
+    WNDCLASSEX WndClassEx;
+    ZeroMemory(&WndClassEx, sizeof(WndClassEx));
+    WndClassEx.cbSize = sizeof(WndClassEx);
+    WndClassEx.style = CS_OWNDC;
+    WndClassEx.lpfnWndProc = &Window::RegHandleMsg;
+    WndClassEx.cbClsExtra = 0;
+    WndClassEx.cbWndExtra = 0;
+    WndClassEx.hInstance = m_hInstance;
+    WndClassEx.hIcon = nullptr;
+    WndClassEx.hCursor = nullptr;
+    WndClassEx.hbrBackground = nullptr;
+    WndClassEx.lpszMenuName = nullptr;
+    WndClassEx.lpszClassName = GetName();
+    WndClassEx.hIconSm = nullptr;
+
+    //Register window class
+    RegisterClassEx(&WndClassEx);
+}
+
+Window::WindowClass::~WindowClass()
+{
+    UnregisterClass(GetName(), m_hInstance);
+}
+
+Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
+{
+    //Adjust window size to hold content
+    RECT rect;
+    rect.left = 200;
+    rect.right = rect.left + nWidth;
+    rect.top = 200;
+    rect.bottom = rect.bottom + nHeight;
+    AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE);
+
+    m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
+        WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU,
+        200, 200, 600, 600, nullptr, nullptr,
+        WindowClass::GetInstance(),
+        this);
+
+    ShowWindow(m_hWnd, SW_SHOW);
+}
+
+Window::~Window()
+{
+    DestroyWindow(m_hWnd);
+}
+
+LRESULT CALLBACK Window::RegHandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
+                        LPARAM lParam)
+{
+    //Handle pre window creation
+    if (uMsg == WM_NCCREATE)
+    {
+        CREATESTRUCTW* pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
+
+        //Gets instance address passed in CreateWindow function
+        Window* pWin = (Window*) pCreate->lpCreateParams;
+
+        //Register actual HandleMsg
+        SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Window::AcceptMsg));
+
+        //Register actual Window ptr
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWin));
+    }
+
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK Window::AcceptMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
+                        LPARAM lParam)
+{
+    Window* pWin = (Window*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    return pWin->HandleMsg(hWnd, uMsg, wParam, lParam);
+}
 
 void OnKeyPressed(WPARAM wKeyCode)
 {
@@ -27,10 +109,10 @@ void OnMouseMove(LPARAM lMousePos)
     OutputDebugString(stream.str().c_str());
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
+LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
                         LPARAM lParam)
 {
-    switch (oMsg)
+    switch (uMsg)
     {
     case WM_CLOSE:
         PostQuitMessage(0);
@@ -46,51 +128,5 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT oMsg, WPARAM wParam,
         break;
     }
 
-    return DefWindowProc(hWnd, oMsg, wParam, lParam);
-}
-
-int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    PSTR lpCmdLine, int nCmdShow)
-{
-    const LPCSTR pClassName = LPCSTR("DefaultWindow");
-    const LPCSTR pWinName = LPCSTR("Default");
-
-    //window class
-    WNDCLASSEX WndClassEx;
-    ZeroMemory(&WndClassEx, sizeof(WndClassEx));
-    WndClassEx.cbSize = sizeof(WndClassEx);
-    WndClassEx.style = CS_OWNDC;
-    WndClassEx.lpfnWndProc = WndProc;
-    WndClassEx.cbClsExtra = 0;
-    WndClassEx.cbWndExtra = 0;
-    WndClassEx.hInstance = hInstance;
-    WndClassEx.hIcon = nullptr;
-    WndClassEx.hCursor = nullptr;
-    WndClassEx.hbrBackground = nullptr;
-    WndClassEx.lpszMenuName = nullptr;
-    WndClassEx.lpszClassName = pClassName;
-    WndClassEx.hIconSm = nullptr;
-
-
-    //Register window class
-    RegisterClassEx(&WndClassEx);
-
-    HWND hWnd = CreateWindowEx(
-        0, pClassName, pWinName,
-        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
-        200, 200, 600, 600, nullptr, nullptr, hInstance, nullptr
-    );
-
-    ShowWindow(hWnd, SW_SHOW);
-
-    MSG oMsg;
-    BOOL wbMsgResult;
-
-    while ((wbMsgResult = GetMessage(&oMsg, nullptr, 0, 0)) > 0)
-    {
-        TranslateMessage(&oMsg);
-        DispatchMessage(&oMsg);
-    }
-
-    return (wbMsgResult == -1) ? -1 : oMsg.wParam;
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
