@@ -1,6 +1,20 @@
 #pragma once
 
 #include <Windows.h>
+#include <comdef.h>
+#include <sstream>
+
+#define LOG_LAST_ERROR()                                                                    \
+    {                                                                                       \
+        HRESULT hr = HRESULT_FROM_WIN32(GetLastError());                                    \
+        std::stringstream ss;                                                               \
+        _com_error err(hr);                                                                 \
+        ss <<  __FILE__ << ": " << __LINE__ << std::endl <<                                 \
+            err.ErrorMessage() << std::endl;                                                \
+        MessageBox(nullptr, reinterpret_cast<LPCSTR>(ss.str().c_str()), nullptr,            \
+            MB_OK|MB_ICONERROR);                                                            \
+        PostQuitMessage(hr);                                                                \
+    }
 
 class Window
 {

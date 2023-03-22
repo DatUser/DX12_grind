@@ -1,8 +1,5 @@
 #include "window.h"
 
-#include <sstream>
-#include <Windows.h>
-
 Window::WindowClass Window::WindowClass::m_Wc;
 
 Window::WindowClass::WindowClass()
@@ -41,15 +38,23 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
     rect.right = rect.left + nWidth;
     rect.top = 200;
     rect.bottom = rect.bottom + nHeight;
-    AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE);
 
-    m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
-        WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU,
-        200, 200, 600, 600, nullptr, nullptr,
-        WindowClass::GetInstance(),
-        this);
+    if (!FAILED(AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE)))
+    {
+        m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
+            WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU,
+            200, 200, 600, 600, nullptr, nullptr,
+            WindowClass::GetInstance(),
+            this);
 
-    ShowWindow(m_hWnd, SW_SHOW);
+        if (m_hWnd)
+            ShowWindow(m_hWnd, SW_SHOW);
+        else
+            LOG_LAST_ERROR();
+
+    }
+    else
+        LOG_LAST_ERROR();
 }
 
 Window::~Window()
