@@ -32,6 +32,8 @@ Window::WindowClass::~WindowClass()
 
 Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 {
+    m_pKeyboard = new Keyboard();
+
     //Adjust window size to hold content
     RECT rect;
     rect.left = 200;
@@ -123,14 +125,29 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
         PostQuitMessage(0);
         break;
     case WM_KEYDOWN:
-        OnKeyPressed(wParam);
+    case WM_SYSKEYDOWN:
+        if (!(lParam&0x40000000) || m_pKeyboard->HasAutoRepeat())
+        {
+            std::stringstream dnStream;
+            dnStream << "Pressed " << (char) wParam << " key!" << std::endl;
+            OutputDebugString(dnStream.str().c_str());
+            m_pKeyboard->OnKeyPressed(wParam);
+        }
         break;
     case WM_KEYUP:
-        OnKeyReleased(wParam);
+    case WM_SYSKEYUP:
+        {
+            std::stringstream upStream;
+            upStream << "Released " << (char) wParam << " key!" << std::endl;
+            OutputDebugString(upStream.str().c_str());
+            m_pKeyboard->OnKeyReleased(wParam);
+        }
         break;
     case WM_MOUSEMOVE:
         OnMouseMove(lParam);
         break;
+    case WM_KILLFOCUS:
+        m_pKeyboard->FlushPressedKeys();
     }
 
     return DefWindowProc(hWnd, uMsg, wParam, lParam);

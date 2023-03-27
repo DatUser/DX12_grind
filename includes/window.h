@@ -4,6 +4,8 @@
 #include <comdef.h>
 #include <sstream>
 
+#include "keyboard.h"
+
 #define LOG_LAST_ERROR()                                                                    \
     {                                                                                       \
         HRESULT hr = HRESULT_FROM_WIN32(GetLastError());                                    \
@@ -50,4 +52,6 @@ private:
                         LPARAM lParam);
 
     HWND m_hWnd;
+
+    Keyboard* m_pKeyboard;
 };
