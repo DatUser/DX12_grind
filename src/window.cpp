@@ -41,7 +41,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
     rect.top = 200;
     rect.bottom = rect.bottom + nHeight;
 
-    if (!FAILED(AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE)))
+    if (AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE) != 0)
     {
         m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
             WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU,
