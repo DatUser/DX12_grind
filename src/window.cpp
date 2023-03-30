@@ -33,6 +33,11 @@ Window::WindowClass::~WindowClass()
 Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 {
     m_pKeyboard = new Keyboard();
+    m_pMouse = new Mouse();
+    m_pInputEvent = new InputEvent();
+
+    if (!m_pKeyboard || !m_pMouse || !m_pInputEvent)
+        return;
 
     //Adjust window size to hold content
     RECT rect;
@@ -61,6 +66,9 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 
 Window::~Window()
 {
+    delete m_pKeyboard;
+    delete m_pMouse;
+    delete m_pInputEvent;
     DestroyWindow(m_hWnd);
 }
 

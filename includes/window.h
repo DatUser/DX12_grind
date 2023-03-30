@@ -5,6 +5,8 @@
 #include <sstream>
 
 #include "keyboard.h"
+#include "inputevent.h"
+#include "mouse.h"
 
 #define LOG_LAST_ERROR()                                                                    \
     {                                                                                       \
@@ -54,4 +56,7 @@ private:
     HWND m_hWnd;
 
     Keyboard* m_pKeyboard;
+    Mouse* m_pMouse;
+
+    InputEvent* m_pInputEvent;
 };
