@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 enum EMouseState
 {
     NONE,
@@ -21,7 +23,7 @@ public:
 
 
     //GETTERS
-    inline std::pair<int, int> GetMousePos();
+    inline std::pair<int, int> GetMousePos() { return { m_nX, m_nY }; }
     inline int GetXPos() { return m_nX; }
     inline int GetYPos() { return m_nY; }
 

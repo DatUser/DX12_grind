@@ -25,6 +25,19 @@
 				"dependsOn": ["Set VsEnv"]
 			},
 			"dependsOn": []
+    	},
+    	{
+    	    "type": "shell",
+    	    "label": "Meson rebuild",
+    	    "command": "meson setup build --wipe && cd build && ninja",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"windows": {
+				"dependsOn": ["Set VsEnv"]
+			},
+			"dependsOn": []
     	}
 	]
   }

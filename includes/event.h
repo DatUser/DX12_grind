@@ -9,12 +9,12 @@ public:
     Event();
     ~Event();
 
-    virtual void AddAction(RetType action(ParamsType...));
+    virtual void AddAction(RetType (*)(ParamsType...));
     virtual void Broadcast(ParamsType... params);
-    virtual void RemoveAction(RetType action(ParamsType...));
+    virtual void RemoveAction(RetType (*)(ParamsType...));
 
 protected:
-    std::vector<RetType *(ParamsType...)> m_vCallbacks;
+    std::vector<RetType (*)(ParamsType...)> m_vCallbacks;
 };
 
 #include "event.hpp"

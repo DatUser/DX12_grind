@@ -9,7 +9,7 @@
         //    "cwd": "${workspaceFolder}"
         //},
         {
-            "name": "cl.exe - Build and debug active file",
+            "name": "Meson Build & Run",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceRoot}\\build\\window.exe",
@@ -19,6 +19,18 @@
             "environment": [],
             "externalConsole": "false",
             "preLaunchTask": "Meson build"
+        },
+        {
+            "name": "Meson Rebuild & Run",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}\\build\\window.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": "false",
+            "preLaunchTask": "Meson rebuild"
         }
     ]
 }

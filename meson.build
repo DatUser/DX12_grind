@@ -1,5 +1,7 @@
-project('engine', 'cpp')
+project('engine', 'cpp',
+    default_options : ['cpp_std=c++20'])
 
+# Files
 python = find_program(['python.exe', 'python'])
 glob = run_command('python', 'file_glob.py', check : true)
 src_files = files(glob.stdout().split(' '))
