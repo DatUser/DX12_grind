@@ -7,6 +7,7 @@
 #include "keyboard.h"
 #include "inputevent.h"
 #include "mouse.h"
+#include "moveevent.h"
 
 #define LOG_LAST_ERROR()                                                                    \
     {                                                                                       \
@@ -19,6 +20,7 @@
             MB_OK|MB_ICONERROR);                                                            \
         PostQuitMessage(hr);                                                                \
     }
+
 
 class Window
 {
@@ -43,6 +45,8 @@ public:
     Window(LPCSTR pWinName, int nWidth, int nHeight);
     ~Window();
 
+    inline InputEvent* GetInputEvent() { return m_pInputEvent; }
+
 private:
     static LRESULT CALLBACK RegHandleMsg(HWND hWnd, UINT oMsg, WPARAM wParam,
                         LPARAM lParam);
@@ -59,4 +63,9 @@ private:
     Mouse* m_pMouse;
 
     InputEvent* m_pInputEvent;
+    MoveEvent* m_pMoveEvent;
 };
+
+//DEBUG PURPOSE
+void OnInputEvent(Window* pSender, unsigned int uKeyCode, EInputType eType);
+void OnMouseMove(Window* pSender, int nX, int nY);

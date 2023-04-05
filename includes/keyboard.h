@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "inputevent.h"
+
 // https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 #define NUM_WIN_KEYCODES 0xFF
 
@@ -30,8 +32,8 @@ public:
     inline void SetAutoRepeat(bool bUseAutoRepeat) { m_bUseAutoRepeat = bUseAutoRepeat; }
 
 protected:
-    virtual void OnKeyPressed(unsigned int uKeyCode);
-    virtual void OnKeyReleased(unsigned int uKeyCode);
+    void OnKeyPressed(Window* pSender, unsigned int uKeyCode);
+    void OnKeyReleased(Window* pSender, unsigned int uKeyCode);
 
 
     std::vector<EKeyState> m_vKeyStates;

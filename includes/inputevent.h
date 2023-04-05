@@ -4,9 +4,11 @@
 
 class Window;
 
-enum EKeyEvent
+enum EInputType
 {
-
+    KEY_PRESSED,
+    KEY_RELEASED,
+    KEY_DOUBLE_CLICK
 };
 
 /**
@@ -15,7 +17,7 @@ enum EKeyEvent
  *  Window: Holds the event sender
  *  EKeyEvent: Contains event information
  */
-class InputEvent : public Event<int, Window*, EKeyEvent>
+class InputEvent : public Event<void, Window*, unsigned int, EInputType>
 {
 public:
     InputEvent() = default;
