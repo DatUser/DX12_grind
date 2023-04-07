@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <comdef.h>
+#include <optional>
 #include <sstream>
 
 #include "keyboard.h"
@@ -45,7 +46,11 @@ public:
     Window(LPCSTR pWinName, int nWidth, int nHeight);
     ~Window();
 
+    std::optional<int> ProcessMessage();
+
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
+
+    inline void SetTitle(LPCSTR pTitle)   { SetWindowText(m_hWnd, pTitle); }
 
 private:
     static LRESULT CALLBACK RegHandleMsg(HWND hWnd, UINT oMsg, WPARAM wParam,

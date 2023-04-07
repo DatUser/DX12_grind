@@ -11,7 +11,7 @@ Window::WindowClass::WindowClass()
     WNDCLASSEX WndClassEx;
     ZeroMemory(&WndClassEx, sizeof(WndClassEx));
     WndClassEx.cbSize = sizeof(WndClassEx);
-    WndClassEx.style = CS_OWNDC;
+    WndClassEx.style = CS_OWNDC; //|CS_DBLCLKS;
     WndClassEx.lpfnWndProc = &Window::RegHandleMsg;
     WndClassEx.cbClsExtra = 0;
     WndClassEx.cbWndExtra = 0;
@@ -149,7 +149,9 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
     case WM_CLOSE:
         PostQuitMessage(0);
         break;
+    case WM_LBUTTONDBLCLK:
     case WM_MBUTTONDBLCLK:
+    case WM_RBUTTONDBLCLK:
         {
             //Register state
             m_pMouse->OnKeyPressed(this, wParam);
@@ -158,7 +160,9 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
             m_pInputEvent->Broadcast(this, wParam, EInputType::KEY_DOUBLE_CLICK);
         }
         break;
+    case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
+    case WM_RBUTTONDOWN:
         {
             //Register state
             m_pMouse->OnKeyPressed(this, wParam);
@@ -167,7 +171,9 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
             m_pInputEvent->Broadcast(this, wParam, EInputType::KEY_PRESSED);
         }
         break;
+    case WM_LBUTTONUP:
     case WM_MBUTTONUP:
+    case WM_RBUTTONUP:
         {
             //Register state
             m_pMouse->OnKeyReleased(this, wParam);
@@ -213,4 +219,19 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
     }
 
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+std::optional<int> Window::ProcessMessage()
+{
+    MSG uMsg;
+
+    while (PeekMessage(&uMsg, nullptr, 0, 0, PM_REMOVE))
+    {
+        if (uMsg.message == WM_QUIT)
+            return uMsg.wParam;
+        TranslateMessage(&uMsg);
+        DispatchMessage(&uMsg);
+    }
+
+    return {};
 }
