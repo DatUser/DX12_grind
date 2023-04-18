@@ -22,6 +22,7 @@
         PostQuitMessage(hr);                                                                \
     }
 
+class DXG;
 
 class Window
 {
@@ -48,8 +49,11 @@ public:
 
     std::optional<int> ProcessMessage();
 
+    // GETTERS
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
+    inline DXG* GetDXG() { return m_pDxGraphics; }
 
+    // SETTER
     inline void SetTitle(LPCSTR pTitle)   { SetWindowText(m_hWnd, pTitle); }
 
 private:
@@ -69,6 +73,8 @@ private:
 
     InputEvent* m_pInputEvent;
     MoveEvent* m_pMoveEvent;
+
+    DXG* m_pDxGraphics;
 };
 
 //DEBUG PURPOSE

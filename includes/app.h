@@ -11,6 +11,7 @@ public:
     ~App();
 
     int Execute();
+    void RetrieveFrame();
 
     inline double GetExecutionTime();
 

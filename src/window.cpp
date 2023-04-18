@@ -1,4 +1,5 @@
 #include "window.h"
+#include "dxg.h"
 
 #define DEBUG_INPUT
 
@@ -63,7 +64,10 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
             this);
 
         if (m_hWnd)
+        {
             ShowWindow(m_hWnd, SW_SHOW);
+            m_pDxGraphics = new DXG(m_hWnd);
+        }
         else
             LOG_LAST_ERROR();
 
@@ -79,6 +83,7 @@ Window::~Window()
     delete m_pInputEvent;
     delete m_pMoveEvent;
     DestroyWindow(m_hWnd);
+    delete m_pDxGraphics;
 }
 
 LRESULT CALLBACK Window::RegHandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
