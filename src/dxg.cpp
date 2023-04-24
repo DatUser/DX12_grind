@@ -1,5 +1,7 @@
 #include "dxg.h"
 
+#include <atldef.h>
+
 #pragma comment(lib, "d3d11.lib")
 
 DXG::DXG(HWND hWnd)
@@ -20,12 +22,12 @@ DXG::DXG(HWND hWnd)
     oSwapDesc.SampleDesc.Quality = 0;
     oSwapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     oSwapDesc.BufferCount = 1;
-    oSwapDesc.OutputWindow = hWnd;
+    oSwapDesc.OutputWindow = (HWND) hWnd;
     oSwapDesc.Windowed = TRUE;
     oSwapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     oSwapDesc.Flags = 0;
 
-    D3D11CreateDeviceAndSwapChain(
+    HRESULT hr = D3D11CreateDeviceAndSwapChain(
         nullptr,
         D3D_DRIVER_TYPE_HARDWARE,
         nullptr,
@@ -39,12 +41,15 @@ DXG::DXG(HWND hWnd)
         nullptr,
         &m_pContext
     );
+    ATLASSERT(hr == S_OK);
 
     // Access to swapchain back buffer resource
     ID3D11Resource* pBackBuffer = nullptr;
-    m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
+    hr = m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
+    ATLASSERT(hr == S_OK);
 
-    m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_pTarget);
+    hr = m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_pTarget);
+    ATLASSERT(hr == S_OK);
 }
 
 DXG::~DXG()
@@ -55,11 +60,14 @@ DXG::~DXG()
         m_pSwapchain->Release();
     if (m_pContext)
         m_pContext->Release();
+    if (m_pTarget)
+        m_pTarget->Release();
 }
 
 void DXG::PresentFrame()
 {
-    m_pSwapchain->Present(1, 0);
+    HRESULT hr = m_pSwapchain->Present(1, 0);
+    ATLASSERT(hr == S_OK);
 }
 
 void DXG::ClearRenderView(float r, float g, float b, float a)
