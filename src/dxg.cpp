@@ -4,6 +4,8 @@
 
 #pragma comment(lib, "d3d11.lib")
 
+namespace wrl = Microsoft::WRL;
+
 DXG::DXG(HWND hWnd)
 : m_pDevice(nullptr)
 , m_pSwapchain(nullptr)
@@ -35,6 +37,7 @@ DXG::DXG(HWND hWnd)
         nullptr,
         0,
         D3D11_SDK_VERSION,
+        //Here pointer is released then we access its address
         &oSwapDesc,
         &m_pSwapchain,
         &m_pDevice,
@@ -44,24 +47,24 @@ DXG::DXG(HWND hWnd)
     ATLASSERT(hr == S_OK);
 
     // Access to swapchain back buffer resource
-    ID3D11Resource* pBackBuffer = nullptr;
+    wrl::ComPtr<ID3D11Resource> pBackBuffer;
     hr = m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
     ATLASSERT(hr == S_OK);
 
-    hr = m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_pTarget);
+    hr = m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &m_pTarget);
     ATLASSERT(hr == S_OK);
 }
 
 DXG::~DXG()
 {
-    if (m_pDevice)
-        m_pDevice->Release();
-    if (m_pSwapchain)
-        m_pSwapchain->Release();
-    if (m_pContext)
-        m_pContext->Release();
-    if (m_pTarget)
-        m_pTarget->Release();
+    //if (m_pDevice)
+    //    m_pDevice->Release();
+    //if (m_pSwapchain)
+    //    m_pSwapchain->Release();
+    //if (m_pContext)
+    //    m_pContext->Release();
+    //if (m_pTarget)
+    //    m_pTarget->Release();
 }
 
 void DXG::PresentFrame()

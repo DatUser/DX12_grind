@@ -4,6 +4,8 @@
 #include <d3d11.h>
 #include <dxgi.h>
 
+#include <wrl/client.h>
+
 #define GET_LAST_GRAPHICS_ERROR(hr)                                                         \
     {                                                                                       \
         std::stringstream ss;                                                               \
@@ -22,14 +24,14 @@ class DXG
 public:
     DXG(HWND hWnd);
     DXG(const DXG& oDxg) = delete;
-    ~DXG();
+    ~DXG() = default;
 
     void PresentFrame();
     void ClearRenderView(float r, float g, float b, float a = 1.f);
 
 private:
-    ID3D11Device* m_pDevice;
-    IDXGISwapChain* m_pSwapchain;
-    ID3D11DeviceContext* m_pContext;
-    ID3D11RenderTargetView* m_pTarget;
+    Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
+    Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapchain;
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pContext;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pTarget;
 };
