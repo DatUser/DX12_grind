@@ -48,23 +48,11 @@ DXG::DXG(HWND hWnd)
 
     // Access to swapchain back buffer resource
     wrl::ComPtr<ID3D11Resource> pBackBuffer;
-    hr = m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
+    hr = m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
     ATLASSERT(hr == S_OK);
 
     hr = m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &m_pTarget);
     ATLASSERT(hr == S_OK);
-}
-
-DXG::~DXG()
-{
-    //if (m_pDevice)
-    //    m_pDevice->Release();
-    //if (m_pSwapchain)
-    //    m_pSwapchain->Release();
-    //if (m_pContext)
-    //    m_pContext->Release();
-    //if (m_pTarget)
-    //    m_pTarget->Release();
 }
 
 void DXG::PresentFrame()
@@ -76,5 +64,5 @@ void DXG::PresentFrame()
 void DXG::ClearRenderView(float r, float g, float b, float a)
 {
     float pColor[] = {r, g, b, a};
-    m_pContext->ClearRenderTargetView(m_pTarget, pColor);
+    m_pContext->ClearRenderTargetView(m_pTarget.Get(), pColor);
 }
