@@ -1,15 +1,17 @@
 #include "dxg.h"
 
 #include <atldef.h>
+#include <d3dcompiler.h>
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler")
 
 namespace wrl = Microsoft::WRL;
 
 DXG::DXG(HWND hWnd)
-: m_pDevice(nullptr)
-, m_pSwapchain(nullptr)
-, m_pContext(nullptr)
+: m_spDevice(nullptr)
+, m_spSwapchain(nullptr)
+, m_spContext(nullptr)
 {
     DXGI_SWAP_CHAIN_DESC oSwapDesc;
     ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -39,30 +41,66 @@ DXG::DXG(HWND hWnd)
         D3D11_SDK_VERSION,
         //Here pointer is released then we access its address
         &oSwapDesc,
-        &m_pSwapchain,
-        &m_pDevice,
+        &m_spSwapchain,
+        &m_spDevice,
         nullptr,
-        &m_pContext
+        &m_spContext
     );
     ATLASSERT(hr == S_OK);
 
     // Access to swapchain back buffer resource
-    wrl::ComPtr<ID3D11Resource> pBackBuffer;
-    hr = m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
+    wrl::ComPtr<ID3D11Resource> spBackBuffer;
+    hr = m_spSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), &spBackBuffer);
     ATLASSERT(hr == S_OK);
 
-    hr = m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &m_pTarget);
+    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
+
+    compileShader(nullptr, nullptr, nullptr);
 }
 
 void DXG::PresentFrame()
 {
-    HRESULT hr = m_pSwapchain->Present(1, 0);
+    HRESULT hr = m_spSwapchain->Present(1, 0);
     ATLASSERT(hr == S_OK);
 }
 
 void DXG::ClearRenderView(float r, float g, float b, float a)
 {
     float pColor[] = {r, g, b, a};
-    m_pContext->ClearRenderTargetView(m_pTarget.Get(), pColor);
+    m_spContext->ClearRenderTargetView(m_spTarget.Get(), pColor);
+}
+
+wrl::ComPtr<ID3D10Blob> DXG::compileShader(
+        LPCWSTR pFilename,
+        LPCSTR pEntryPoint,
+        LPCSTR pShaderModel,
+        const D3D10_SHADER_MACRO* pDefines)
+{
+    wrl::ComPtr<ID3D10Blob> spShaderBuffer;
+    wrl::ComPtr<ID3DBlob> spErrorBuffer;
+
+    HRESULT hr = D3DCompileFromFile(
+        pFilename,
+        pDefines,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        pEntryPoint,
+        pShaderModel,
+        0,
+        0,
+        &spShaderBuffer,
+        &spErrorBuffer
+    );
+
+    if (FAILED(hr))
+    {
+        LOG_SHADER_COMPILE_ERROR(spErrorBuffer);
+    }
+
+    return spShaderBuffer;
+}
+
+void DXG::DrawHelloTriangle()
+{
+    //m_pContext->IASetVertexBuffers(0, 1, )
 }
