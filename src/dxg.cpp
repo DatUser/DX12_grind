@@ -95,9 +95,15 @@ wrl::ComPtr<ID3D10Blob> DXG::compileShader(
     if (FAILED(hr))
     {
         LOG_SHADER_COMPILE_ERROR(spErrorBuffer);
+        return nullptr;
     }
 
     return spShaderBuffer;
+}
+
+HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance)
+{
+
 }
 
 void DXG::DrawHelloTriangle()

@@ -44,11 +44,29 @@ public:
     void PresentFrame();
     void ClearRenderView(float r, float g, float b, float a = 1.f);
 
-    Microsoft::WRL::ComPtr<ID3D10Blob> compileShader(
+    /**
+     * @brief
+     *
+     * @param pFilename
+     * @param pEntryPoint
+     * @param pShaderModel
+     * @param pDefines
+     * @return Smart Pointer to shader buffer on success, otherwise nullptr
+     */
+    static Microsoft::WRL::ComPtr<ID3D10Blob> compileShader(
         LPCWSTR pFilename,
         LPCSTR pEntryPoint,
         LPCSTR pShaderModel,
         const D3D10_SHADER_MACRO* pDefines = nullptr);
+
+    /**
+     * @brief Create a Shader Instance object
+     *
+     * @param pShaderBuffer
+     * @param[out] pShaderInstance
+     * @return HRESULT S_OK on sucess
+     */
+    static HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance);
 
     void DrawHelloTriangle();
 
