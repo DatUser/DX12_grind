@@ -56,7 +56,7 @@ DXG::DXG(HWND hWnd)
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
 
-    compileShader(nullptr, nullptr, nullptr);
+    compileShader(L"../shaders/Default.hlsl", "VSDefaultMain", "vs_5_1");
 }
 
 void DXG::PresentFrame()
@@ -101,9 +101,20 @@ wrl::ComPtr<ID3D10Blob> DXG::compileShader(
     return spShaderBuffer;
 }
 
-HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance)
+HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
 {
+    if (!pShaderBuffer)
+        return E_INVALIDARG;
 
+    switch (eShaderStage)
+    {
+    case EShaderStage::VERTEX_SHADER:
+            return m_spDevice->CreateVertexShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11VertexShader**) pShaderInstance);
+    case EShaderStage::FRAGMENT_SHADER:
+            return m_spDevice->CreatePixelShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11PixelShader**) pShaderInstance);
+    default:
+        return E_INVALIDARG;
+    }
 }
 
 void DXG::DrawHelloTriangle()

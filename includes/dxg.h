@@ -34,6 +34,12 @@
             MB_OK|MB_ICONERROR);                                                            \
     }
 
+enum EShaderStage
+{
+    VERTEX_SHADER,
+    FRAGMENT_SHADER
+};
+
 class DXG
 {
 public:
@@ -66,7 +72,7 @@ public:
      * @param[out] pShaderInstance
      * @return HRESULT S_OK on sucess
      */
-    static HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance);
+    HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
 
     void DrawHelloTriangle();
 
