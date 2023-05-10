@@ -1,11 +1,16 @@
 struct VertexInput
 {
-    float4 position : POSITION;
+    float3 position : POSITION;
 };
 
 struct VertexOutput
 {
-    float4 position : SV_POSITION;
+    float3 position : SV_POSITION;
+};
+
+struct PSInput
+{
+    float4 color : COLOR;
 };
 
 VertexOutput VSDefaultMain(VertexInput input)
@@ -13,4 +18,9 @@ VertexOutput VSDefaultMain(VertexInput input)
     VertexOutput output;
     output.position = input.position;
     return output;
+}
+
+float4 PSDefaultMain(PSInput input) : SV_TARGET
+{
+    return input.color;
 }

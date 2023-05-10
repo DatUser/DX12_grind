@@ -55,8 +55,6 @@ DXG::DXG(HWND hWnd)
 
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
-
-    compileShader(L"../shaders/Default.hlsl", "VSDefaultMain", "vs_5_1");
 }
 
 void DXG::PresentFrame()
@@ -115,6 +113,52 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     default:
         return E_INVALIDARG;
     }
+}
+
+void DXG::AddBuffers(void** pBuffers, int nBuffers, UINT uFlags)
+{
+    // Init buffer descriptor
+    D3D11_BUFFER_DESC bufferDesc;
+    ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
+
+    bufferDesc.BindFlags = uFlags;
+    bufferDesc.ByteWidth = sizeof(float)  * 3;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+
+    // Init buffer data
+    D3D11_SUBRESOURCE_DATA bufferData;
+    ZeroMemory(&bufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+    // TODO: Fix to handle multiple buffers
+    bufferData.pSysMem = pBuffers[0];
+
+    // Create buffer object
+    wrl::ComPtr<ID3D11Buffer> spBuffer;
+    HRESULT hr = m_spDevice->CreateBuffer(&bufferDesc, &bufferData, &spBuffer);
+    ATLASSERT(hr == S_OK);
+    m_vBuffers.push_back(spBuffer);
+
+    // Set buffers to Input assembly
+    UINT uStride = sizeof(float) * 3;
+    UINT uOffset = 0;
+    m_spContext->IASetVertexBuffers(0, nBuffers, &m_vBuffers.data()[m_vBuffers.size()], &uStride, &uOffset);
+}
+
+void DXG::InitTestScene()
+{
+    // Create shader buffer
+    wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_1");
+    wrl::ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_1");
+
+    // Create shader instances
+    wrl::ComPtr<ID3D11VertexShader> spVSInst;
+    HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX_SHADER);
+    ATLASSERT(hr == S_OK);
+
+    wrl::ComPtr<ID3D11VertexShader> spPSInst;
+    hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::FRAGMENT_SHADER);
+    ATLASSERT(hr == S_OK);
 }
 
 void DXG::DrawHelloTriangle()

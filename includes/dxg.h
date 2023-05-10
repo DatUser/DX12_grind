@@ -74,6 +74,14 @@ public:
      */
     HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
 
+    void AddBuffers(void** pBuffers, int nBuffers, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
+
+    /**
+     * @brief Inits the default shader program
+     *
+     */
+    void InitTestScene();
+
     void DrawHelloTriangle();
 
 private:
@@ -81,4 +89,5 @@ private:
     Microsoft::WRL::ComPtr<IDXGISwapChain> m_spSwapchain;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_spContext;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_spTarget;
+    std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_vBuffers;
 };
