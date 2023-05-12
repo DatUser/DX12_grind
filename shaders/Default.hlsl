@@ -22,5 +22,5 @@ VertexOutput VSDefaultMain(VertexInput input)
 
 float4 PSDefaultMain(PSInput input) : SV_TARGET
 {
-    return input.color;
+    return float4(1.f, 1.f, 1.f, 1.f);//input.color;
 }

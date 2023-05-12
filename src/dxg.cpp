@@ -115,7 +115,7 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     }
 }
 
-void DXG::AddBuffers(void** pBuffers, int nBuffers, UINT uFlags)
+void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT uFlags)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
@@ -143,6 +143,36 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, UINT uFlags)
     UINT uStride = sizeof(float) * 3;
     UINT uOffset = 0;
     m_spContext->IASetVertexBuffers(0, nBuffers, &m_vBuffers.data()[m_vBuffers.size()], &uStride, &uOffset);
+
+    // Create data layout
+    D3D11_INPUT_ELEMENT_DESC inputDesc;
+    ZeroMemory(&inputDesc, sizeof(D3D11_INPUT_ELEMENT_DESC));
+    inputDesc.AlignedByteOffset = 0;
+    inputDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    inputDesc.InputSlot = 0;
+    inputDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    inputDesc.InstanceDataStepRate = 0;
+    inputDesc.SemanticIndex = 0;
+    inputDesc.SemanticName = "POSITION";
+
+    wrl::ComPtr<ID3D11InputLayout> spVertsLayout;
+    hr = m_spDevice->CreateInputLayout(&inputDesc, 1, pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), &spVertsLayout);
+    ATLASSERT(hr == S_OK);
+
+    m_spContext->IASetInputLayout(spVertsLayout.Get());
+
+    // Set triangle topology
+    m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // Viewport creation
+    D3D11_VIEWPORT viewport;
+    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Height = 600;
+    viewport.Width = 600;
+
+    m_spContext->RSSetViewports(1, &viewport);
 }
 
 void DXG::InitTestScene()
@@ -159,9 +189,15 @@ void DXG::InitTestScene()
     wrl::ComPtr<ID3D11VertexShader> spPSInst;
     hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::FRAGMENT_SHADER);
     ATLASSERT(hr == S_OK);
+
+    float Verts[9] = {  0.5f, 0.f, 0.f,
+                        -0.5f, 0.f, 0.f,
+                        0.f, 0.5f, 0.f };
+    AddBuffers((void**)&Verts, 1, spVSBuffer.Get());
 }
 
 void DXG::DrawHelloTriangle()
 {
     //m_pContext->IASetVertexBuffers(0, 1, )
+    m_spContext->Draw(3, 0);
 }

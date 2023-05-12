@@ -30,4 +30,5 @@ void App::RetrieveFrame()
 {
     m_pMainWindow->GetDXG()->PresentFrame();
     m_pMainWindow->GetDXG()->ClearRenderView(1.f, 0.f, 0.f);
+    m_pMainWindow->GetDXG()->DrawHelloTriangle();
 }

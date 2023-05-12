@@ -74,7 +74,7 @@ public:
      */
     HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
 
-    void AddBuffers(void** pBuffers, int nBuffers, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
+    void AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
 
     /**
      * @brief Inits the default shader program
@@ -85,8 +85,10 @@ public:
     void DrawHelloTriangle();
 
 private:
+    // Handles memory stuff
     Microsoft::WRL::ComPtr<ID3D11Device> m_spDevice;
     Microsoft::WRL::ComPtr<IDXGISwapChain> m_spSwapchain;
+    // Handles gfx pipeline stuff
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_spContext;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_spTarget;
     std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_vBuffers;
