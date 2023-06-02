@@ -5,7 +5,7 @@ struct VertexInput
 
 struct VertexOutput
 {
-    float3 position : SV_POSITION;
+    float4 position : SV_POSITION;
 };
 
 struct PSInput
@@ -16,7 +16,7 @@ struct PSInput
 VertexOutput VSDefaultMain(VertexInput input)
 {
     VertexOutput output;
-    output.position = input.position;
+    output.position = float4(input.position, 1.);
     return output;
 }
 

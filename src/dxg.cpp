@@ -55,11 +55,15 @@ DXG::DXG(HWND hWnd)
 
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
+
+    InitTestScene();
 }
 
 void DXG::PresentFrame()
 {
-    HRESULT hr = m_spSwapchain->Present(1, 0);
+    HRESULT hr = m_spSwapchain->Present(0, 0);
+    if (hr != S_OK)
+        LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
     ATLASSERT(hr == S_OK);
 }
 
@@ -122,7 +126,7 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
     ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 
     bufferDesc.BindFlags = uFlags;
-    bufferDesc.ByteWidth = sizeof(float)  * 3;
+    bufferDesc.ByteWidth = sizeof(float)  * 3 * 3;
     bufferDesc.CPUAccessFlags = 0;
     bufferDesc.MiscFlags = 0;
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -131,7 +135,7 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
     D3D11_SUBRESOURCE_DATA bufferData;
     ZeroMemory(&bufferData, sizeof(D3D11_SUBRESOURCE_DATA));
     // TODO: Fix to handle multiple buffers
-    bufferData.pSysMem = pBuffers[0];
+    bufferData.pSysMem = pBuffers;//[0];
 
     // Create buffer object
     wrl::ComPtr<ID3D11Buffer> spBuffer;
@@ -142,7 +146,7 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
     // Set buffers to Input assembly
     UINT uStride = sizeof(float) * 3;
     UINT uOffset = 0;
-    m_spContext->IASetVertexBuffers(0, nBuffers, &m_vBuffers.data()[m_vBuffers.size()], &uStride, &uOffset);
+    m_spContext->IASetVertexBuffers(0, nBuffers, &m_vBuffers.data()[/*m_vBuffers.size()*/0], &uStride, &uOffset);
 
     // Create data layout
     D3D11_INPUT_ELEMENT_DESC inputDesc;
@@ -178,8 +182,8 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
 void DXG::InitTestScene()
 {
     // Create shader buffer
-    wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_1");
-    wrl::ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_1");
+    wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
+    wrl::ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
 
     // Create shader instances
     wrl::ComPtr<ID3D11VertexShader> spVSInst;

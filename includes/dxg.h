@@ -10,7 +10,7 @@
     {                                                                                       \
         std::stringstream ss;                                                               \
         auto sErrMsg = (hr == DXGI_ERROR_DEVICE_REMOVED) ?                                  \
-            m_pDevice->GetDeviceRemovedReason() : "";                                       \
+            m_spDevice->GetDeviceRemovedReason() : S_OK;                                    \
                                                                                             \
         ss <<  __FILE__ << ": " << __LINE__ << std::endl <<                                 \
             sErrMsg << std::endl;                                                           \
