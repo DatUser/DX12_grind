@@ -15,11 +15,11 @@ DXG::DXG(HWND hWnd)
 {
     DXGI_SWAP_CHAIN_DESC oSwapDesc;
     ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-    oSwapDesc.BufferDesc.Width = 0;
-    oSwapDesc.BufferDesc.Height = 0;
+    oSwapDesc.BufferDesc.Width = 600;
+    oSwapDesc.BufferDesc.Height = 600;
     oSwapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    oSwapDesc.BufferDesc.RefreshRate.Numerator = 0;
-    oSwapDesc.BufferDesc.RefreshRate.Denominator = 0;
+    oSwapDesc.BufferDesc.RefreshRate.Numerator = 60;
+    oSwapDesc.BufferDesc.RefreshRate.Denominator = 1;
     oSwapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
     oSwapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     oSwapDesc.SampleDesc.Count = 1;
@@ -50,11 +50,14 @@ DXG::DXG(HWND hWnd)
 
     // Access to swapchain back buffer resource
     wrl::ComPtr<ID3D11Resource> spBackBuffer;
-    hr = m_spSwapchain->GetBuffer(0, __uuidof(ID3D11Resource), &spBackBuffer);
+    hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
     ATLASSERT(hr == S_OK);
 
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
+
+    //Set our Render Target
+    m_spContext->OMSetRenderTargets( 1, &m_spTarget, NULL );
 
     InitTestScene();
 }
@@ -131,11 +134,14 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
     bufferDesc.MiscFlags = 0;
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 
+    float Verts[9] = {  0.f, 0.5f, 0.5f,
+                        0.5f, -0.5f, 0.5f,
+                        -0.5f, -0.5f, 0.5f };
     // Init buffer data
     D3D11_SUBRESOURCE_DATA bufferData;
     ZeroMemory(&bufferData, sizeof(D3D11_SUBRESOURCE_DATA));
     // TODO: Fix to handle multiple buffers
-    bufferData.pSysMem = pBuffers;//[0];
+    bufferData.pSysMem = Verts;//*pBuffers;//[0];
 
     // Create buffer object
     wrl::ComPtr<ID3D11Buffer> spBuffer;
@@ -190,13 +196,17 @@ void DXG::InitTestScene()
     HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX_SHADER);
     ATLASSERT(hr == S_OK);
 
-    wrl::ComPtr<ID3D11VertexShader> spPSInst;
+    wrl::ComPtr<ID3D11PixelShader> spPSInst;
     hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::FRAGMENT_SHADER);
     ATLASSERT(hr == S_OK);
 
-    float Verts[9] = {  0.5f, 0.f, 0.f,
-                        -0.5f, 0.f, 0.f,
-                        0.f, 0.5f, 0.f };
+
+    m_spContext->VSSetShader(spVSInst.Get(), 0, 0);
+    m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
+
+    float Verts[9] = {  0.f, 0.5f, 0.5f,
+                        0.5f, -0.5f, 0.5f,
+                        -0.5f, -0.5f, 0.5f };
     AddBuffers((void**)&Verts, 1, spVSBuffer.Get());
 }
 

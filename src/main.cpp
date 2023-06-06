@@ -1,20 +1,24 @@
 #include "app.h"
 
-//int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-//    PSTR lpCmdLine, int nCmdShow)
-//{
-//    const LPCSTR pWinName = LPCSTR("Default");
-//
-//    App app(pWinName);
-//    return app.Execute();
-//}
+#define ME
 
+#ifdef ME
 
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+    PSTR lpCmdLine, int nCmdShow)
+{
+    const LPCSTR pWinName = LPCSTR("Default");
+
+    App app(pWinName);
+    return app.Execute();
+}
+
+#else
 
 //Include and link appropriate libraries and headers//
 #pragma comment(lib, "d3d11.lib")
-//#pragma comment(lib, "d3dx11.lib")
-//#pragma comment(lib, "d3dx10.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
 #pragma comment(lib, "d3dcompiler")
 #include <d3dcompiler.h>
 #include <windows.h>
@@ -174,7 +178,7 @@ bool InitializeWindow(HINSTANCE hInstance,
     if (!hwnd)
     {
         MessageBox(NULL, reinterpret_cast<LPCSTR>(L"Error creating window"),
-            reinterpret_cast<LPCSTR>(L"Error"), MB_OK | MB_ICONERROR);
+            reinterpret_cast<LPCSTR>(L"Error", MB_OK | MB_ICONERROR);
         return 1;
     }
 
@@ -390,3 +394,4 @@ LRESULT CALLBACK WndProc(HWND hwnd,
         wParam,
         lParam);
 }
+#endif

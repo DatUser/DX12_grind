@@ -58,7 +58,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
     if (AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE) != 0)
     {
         m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
-            WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU,
+            WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU|WS_OVERLAPPEDWINDOW,
             200, 200, 600, 600, nullptr, nullptr,
             WindowClass::GetInstance(),
             this);
