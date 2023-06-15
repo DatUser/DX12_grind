@@ -1,6 +1,6 @@
 #include "app.h"
 
-#define ME
+//#define ME
 
 #ifdef ME
 
@@ -17,16 +17,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 //Include and link appropriate libraries and headers//
 #pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dx11.lib")
-#pragma comment(lib, "d3dx10.lib")
 #pragma comment(lib, "d3dcompiler")
 #include <d3dcompiler.h>
 #include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
-//#include <d3dx11.h>
-//#include <D3DX10.h>
-//#include <xnamath.h>
 
 //Global Declarations - Interfaces//
 IDXGISwapChain* SwapChain;
@@ -178,7 +173,7 @@ bool InitializeWindow(HINSTANCE hInstance,
     if (!hwnd)
     {
         MessageBox(NULL, reinterpret_cast<LPCSTR>(L"Error creating window"),
-            reinterpret_cast<LPCSTR>(L"Error", MB_OK | MB_ICONERROR);
+            reinterpret_cast<LPCSTR>(L"Error"), MB_OK | MB_ICONERROR);
         return 1;
     }
 
@@ -270,18 +265,22 @@ bool InitScene()
     d3d11DevCon->PSSetShader(PS, 0, 0);
 
     //Create the vertex buffer
-    Vertex v[] =
-    {
-        Vertex( 0.0f, 0.5f, 0.5f ),
-        Vertex( 0.5f, -0.5f, 0.5f ),
-        Vertex( -0.5f, -0.5f, 0.5f ),
-    };
+    //Vertex v[] =
+    //{
+    //    Vertex( 0.0f, 0.5f, 0.5f ),
+    //    Vertex( 0.5f, -0.5f, 0.5f ),
+    //    Vertex( -0.5f, -0.5f, 0.5f )
+    //};
+    float v[9] = {  0.f, 0.5f, 0.5f,
+                        0.5f, -0.5f, 0.5f,
+                        -0.5f, -0.5f, 0.5f };
 
     D3D11_BUFFER_DESC vertexBufferDesc;
     ZeroMemory( &vertexBufferDesc, sizeof(vertexBufferDesc) );
 
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof( Vertex ) * 3;
+    //vertexBufferDesc.ByteWidth = sizeof( Vertex ) * 3;
+    vertexBufferDesc.ByteWidth = sizeof(float)  * 3 * 3;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = 0;
     vertexBufferDesc.MiscFlags = 0;
@@ -293,7 +292,8 @@ bool InitScene()
     hr = d3d11Device->CreateBuffer( &vertexBufferDesc, &vertexBufferData, &triangleVertBuffer);
 
     //Set the vertex buffer
-    UINT stride = sizeof( Vertex );
+    //UINT stride = sizeof( Vertex );
+    UINT stride = sizeof( float ) * 3;
     UINT offset = 0;
     d3d11DevCon->IASetVertexBuffers( 0, 1, &triangleVertBuffer, &stride, &offset );
 

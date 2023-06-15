@@ -66,7 +66,10 @@ void DXG::PresentFrame()
 {
     HRESULT hr = m_spSwapchain->Present(0, 0);
     if (hr != S_OK)
+    {
+        LOG_LAST_ERROR();
         LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
+    }
     ATLASSERT(hr == S_OK);
 }
 
@@ -152,7 +155,7 @@ void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT 
     // Set buffers to Input assembly
     UINT uStride = sizeof(float) * 3;
     UINT uOffset = 0;
-    m_spContext->IASetVertexBuffers(0, nBuffers, &m_vBuffers.data()[/*m_vBuffers.size()*/0], &uStride, &uOffset);
+    m_spContext->IASetVertexBuffers(0, nBuffers, &spBuffer/*&m_vBuffers.data()[/*m_vBuffers.size()0]*/, &uStride, &uOffset);
 
     // Create data layout
     D3D11_INPUT_ELEMENT_DESC inputDesc;
