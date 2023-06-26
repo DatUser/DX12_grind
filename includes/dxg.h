@@ -74,7 +74,37 @@ public:
      */
     HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
 
-    void AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
+    /**
+     * @brief Create a Buffer object in GPU memory
+     *
+     * @param pData
+     * @param uByteWidth
+     * @param opBuffer
+     * @param uFlags
+     * @return HRESULT
+     */
+    HRESULT createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
+
+    /**
+     * @brief Create a Input Layout containing information about buffer data layout
+     *
+     * @param pVSBuffer
+     * @param eFormat
+     * @param pName
+     * @param pLayout
+     * @return HRESULT
+     */
+    HRESULT createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout);
+
+    /**
+     * @brief Adds buffer as input of given Vertex buffer
+     *
+     * @param pBuffers
+     * @param nBuffers
+     * @param pVSBuffer
+     * @param uFlags
+     */
+    void AddBuffers(std::vector<ID3D11Buffer*> vBuffers, Microsoft::WRL::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset);
 
     /**
      * @brief Inits the default shader program

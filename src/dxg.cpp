@@ -57,7 +57,7 @@ DXG::DXG(HWND hWnd)
     ATLASSERT(hr == S_OK);
 
     //Set our Render Target
-    m_spContext->OMSetRenderTargets( 1, &m_spTarget, NULL );
+    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
 
     InitTestScene();
 }
@@ -125,52 +125,55 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     }
 }
 
-void DXG::AddBuffers(void** pBuffers, int nBuffers, ID3D10Blob* pVSBuffer, UINT uFlags)
+HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 
     bufferDesc.BindFlags = uFlags;
-    bufferDesc.ByteWidth = sizeof(float)  * 3 * 3;
+    bufferDesc.ByteWidth = uByteWidth;//sizeof(float)  * 3 * 3;
     bufferDesc.CPUAccessFlags = 0;
     bufferDesc.MiscFlags = 0;
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 
-    float Verts[9] = {  0.f, 0.5f, 0.5f,
-                        0.5f, -0.5f, 0.5f,
-                        -0.5f, -0.5f, 0.5f };
+    //float Verts[9] = {  0.f, 0.5f, 0.5f,
+    //                    0.5f, -0.5f, 0.5f,
+    //                    -0.5f, -0.5f, 0.5f };
     // Init buffer data
     D3D11_SUBRESOURCE_DATA bufferData;
     ZeroMemory(&bufferData, sizeof(D3D11_SUBRESOURCE_DATA));
     // TODO: Fix to handle multiple buffers
-    bufferData.pSysMem = Verts;//*pBuffers;//[0];
+    bufferData.pSysMem = pData;
 
     // Create buffer object
     wrl::ComPtr<ID3D11Buffer> spBuffer;
-    HRESULT hr = m_spDevice->CreateBuffer(&bufferDesc, &bufferData, &spBuffer);
-    ATLASSERT(hr == S_OK);
-    m_vBuffers.push_back(spBuffer);
+    return m_spDevice->CreateBuffer(&bufferDesc, &bufferData, (ID3D11Buffer**) opBuffer);
+}
 
-    // Set buffers to Input assembly
-    UINT uStride = sizeof(float) * 3;
-    UINT uOffset = 0;
-    m_spContext->IASetVertexBuffers(0, nBuffers, &spBuffer/*&m_vBuffers.data()[/*m_vBuffers.size()0]*/, &uStride, &uOffset);
-
+HRESULT DXG::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
+{
     // Create data layout
     D3D11_INPUT_ELEMENT_DESC inputDesc;
     ZeroMemory(&inputDesc, sizeof(D3D11_INPUT_ELEMENT_DESC));
     inputDesc.AlignedByteOffset = 0;
-    inputDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    inputDesc.Format = eFormat;//DXGI_FORMAT_R32G32B32_FLOAT;
     inputDesc.InputSlot = 0;
     inputDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     inputDesc.InstanceDataStepRate = 0;
     inputDesc.SemanticIndex = 0;
-    inputDesc.SemanticName = "POSITION";
+    inputDesc.SemanticName = pName;// "POSITION";
 
     wrl::ComPtr<ID3D11InputLayout> spVertsLayout;
-    hr = m_spDevice->CreateInputLayout(&inputDesc, 1, pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), &spVertsLayout);
-    ATLASSERT(hr == S_OK);
+    return m_spDevice->CreateInputLayout(&inputDesc, 1, pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), (ID3D11InputLayout**) pLayout);
+    //ATLASSERT(hr == S_OK);
+}
+
+void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset)
+{
+    // Set buffers to Input assembly
+    m_spContext->IASetVertexBuffers(0, vBuffers.size(), vBuffers.data(), &uStride, &uOffset);
+
 
     m_spContext->IASetInputLayout(spVertsLayout.Get());
 
@@ -210,7 +213,31 @@ void DXG::InitTestScene()
     float Verts[9] = {  0.f, 0.5f, 0.5f,
                         0.5f, -0.5f, 0.5f,
                         -0.5f, -0.5f, 0.5f };
-    AddBuffers((void**)&Verts, 1, spVSBuffer.Get());
+
+    std::vector<ID3D11Buffer*> vBuffers;
+    wrl::ComPtr<ID3D11Buffer> spBuffer;
+    ATLASSERT(createBuffer(
+        Verts,              //Buffer data
+        sizeof(float) * 9,  //Buffer byte size
+        &spBuffer           //OutputBuffer
+        ) == S_OK);
+    vBuffers.push_back(spBuffer.Get());
+
+    wrl::ComPtr<ID3D11InputLayout> spInputLayout;
+    ATLASSERT(
+        createInputLayout(
+            spVSBuffer.Get(),               //Shader text data
+            DXGI_FORMAT_R32G32B32_FLOAT,    //Data format
+            "POSITION",                     //Structure semantic name
+            &spInputLayout
+        ) == S_OK);
+
+    AddBuffers(
+        vBuffers,           //Buffers to be bound
+        spInputLayout,      //Layout for these buffers
+        sizeof(float) * 3,  //Size of buffer elements
+        0                   //Byte shift before 1st elt
+        );
 }
 
 void DXG::DrawHelloTriangle()
