@@ -2,6 +2,7 @@
 
 #include <atldef.h>
 #include <d3dcompiler.h>
+#include <DirectXMath.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
@@ -125,7 +126,7 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     }
 }
 
-HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags)
+HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags, D3D11_USAGE eUsage)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
@@ -135,7 +136,7 @@ HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uF
     bufferDesc.ByteWidth = uByteWidth;//sizeof(float)  * 3 * 3;
     bufferDesc.CPUAccessFlags = 0;
     bufferDesc.MiscFlags = 0;
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.Usage = eUsage;//D3D11_USAGE_DEFAULT;
 
     //float Verts[9] = {  0.f, 0.5f, 0.5f,
     //                    0.5f, -0.5f, 0.5f,
@@ -148,7 +149,7 @@ HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uF
 
     // Create buffer object
     wrl::ComPtr<ID3D11Buffer> spBuffer;
-    return m_spDevice->CreateBuffer(&bufferDesc, &bufferData, (ID3D11Buffer**) opBuffer);
+    return m_spDevice->CreateBuffer(&bufferDesc, (pData) ? &bufferData : nullptr, (ID3D11Buffer**) opBuffer);
 }
 
 HRESULT DXG::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
@@ -174,6 +175,7 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11Inpu
     // Set buffers to Input assembly
     m_spContext->IASetVertexBuffers(0, vBuffers.size(), vBuffers.data(), &uStride, &uOffset);
 
+    //m_spContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, uOffset);
 
     m_spContext->IASetInputLayout(spVertsLayout.Get());
 
@@ -193,11 +195,11 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11Inpu
 
 void DXG::InitTestScene()
 {
-    // Create shader buffer
+    //----Create shader buffer----//
     wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
     wrl::ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
 
-    // Create shader instances
+    //----Create shader instances----//
     wrl::ComPtr<ID3D11VertexShader> spVSInst;
     HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX_SHADER);
     ATLASSERT(hr == S_OK);
@@ -210,6 +212,7 @@ void DXG::InitTestScene()
     m_spContext->VSSetShader(spVSInst.Get(), 0, 0);
     m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
 
+    //----Bind vertices----//
     float Verts[9] = {  0.f, 0.5f, 0.5f,
                         0.5f, -0.5f, 0.5f,
                         -0.5f, -0.5f, 0.5f };
@@ -217,9 +220,10 @@ void DXG::InitTestScene()
     std::vector<ID3D11Buffer*> vBuffers;
     wrl::ComPtr<ID3D11Buffer> spBuffer;
     ATLASSERT(createBuffer(
-        Verts,              //Buffer data
-        sizeof(float) * 9,  //Buffer byte size
-        &spBuffer           //OutputBuffer
+        Verts,                      //Buffer data
+        sizeof(float) * 9,          //Buffer byte size
+        &spBuffer,                  //OutputBuffer
+        D3D11_BIND_VERTEX_BUFFER    //Buffer flags
         ) == S_OK);
     vBuffers.push_back(spBuffer.Get());
 
@@ -238,6 +242,17 @@ void DXG::InitTestScene()
         sizeof(float) * 3,  //Size of buffer elements
         0                   //Byte shift before 1st elt
         );
+
+    //----Bind uniform data----//
+
+    wrl::ComPtr<ID3D11Buffer> spMVPBuffer;
+    ATLASSERT(createBuffer(
+        nullptr,
+        sizeof(XMMATRIX),
+        &spMVPBuffer,
+        D3D11_BIND_CONSTANT_BUFFER,
+        D3D11_USAGE_DYNAMIC
+    ) == S_OK);
 }
 
 void DXG::DrawHelloTriangle()

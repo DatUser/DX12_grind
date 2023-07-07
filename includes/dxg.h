@@ -83,7 +83,10 @@ public:
      * @param uFlags
      * @return HRESULT
      */
-    HRESULT createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags = D3D11_BIND_VERTEX_BUFFER);
+    HRESULT createBuffer(void* pData, UINT uByteWidth, void** opBuffer,
+    UINT uFlags,// = D3D11_BIND_VERTEX_BUFFER,
+    D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT
+    );
 
     /**
      * @brief Create a Input Layout containing information about buffer data layout
