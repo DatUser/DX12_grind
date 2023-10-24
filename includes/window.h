@@ -34,6 +34,7 @@
     }
 
 class DXG;
+class Camera;
 
 class Window
 {
@@ -86,6 +87,8 @@ private:
     MoveEvent* m_pMoveEvent;
 
     DXG* m_pDxGraphics;
+
+    Camera* m_pCamera;
 };
 
 //DEBUG PURPOSE

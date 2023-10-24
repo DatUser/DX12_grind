@@ -34,6 +34,11 @@
             MB_OK|MB_ICONERROR);                                                            \
     }
 
+class Camera;
+namespace DirectX{
+    struct XMFLOAT3;
+}
+
 enum EShaderStage
 {
     VERTEX_SHADER,
@@ -43,7 +48,7 @@ enum EShaderStage
 class DXG
 {
 public:
-    DXG(HWND hWnd);
+    DXG(HWND hWnd, Camera* pCamera);
     DXG(const DXG& oDxg) = delete;
     ~DXG() = default;
 
@@ -113,7 +118,9 @@ public:
      * @brief Inits the default shader program
      *
      */
-    void InitTestScene();
+    void InitTestScene(DirectX::XMFLOAT3& oCameraPos/*
+        Add FWD/UP/RIGHT
+    */);
 
     void DrawHelloTriangle();
 

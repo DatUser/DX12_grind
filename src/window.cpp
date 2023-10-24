@@ -1,4 +1,6 @@
 #include "window.h"
+
+#include "camera.h"
 #include "dxg.h"
 
 #define DEBUG_INPUT
@@ -68,7 +70,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         if (m_hWnd)
         {
             ShowWindow(m_hWnd, SW_SHOW);
-            m_pDxGraphics = new DXG(m_hWnd);
+            m_pDxGraphics = new DXG(m_hWnd, new Camera());
         }
         else
             LOG_LAST_ERROR();

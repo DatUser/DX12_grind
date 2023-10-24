@@ -4,12 +4,14 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
+#include "camera.h"
+
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
 
 namespace wrl = Microsoft::WRL;
 
-DXG::DXG(HWND hWnd)
+DXG::DXG(HWND hWnd, Camera* pCamera)
 : m_spDevice(nullptr)
 , m_spSwapchain(nullptr)
 , m_spContext(nullptr)
@@ -60,7 +62,8 @@ DXG::DXG(HWND hWnd)
     //Set our Render Target
     m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
 
-    InitTestScene();
+    ATLASSERT(pCamera != nullptr);
+    InitTestScene(pCamera->oPos);
 }
 
 void DXG::PresentFrame()
@@ -193,7 +196,7 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11Inpu
     m_spContext->RSSetViewports(1, &viewport);
 }
 
-void DXG::InitTestScene()
+void DXG::InitTestScene(DirectX::XMFLOAT3& oCameraPos)
 {
     //----Create shader buffer----//
     wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
@@ -244,11 +247,12 @@ void DXG::InitTestScene()
         );
 
     //----Bind uniform data----//
+    DirectX::XMMATRIX pModelViewProjection;
 
     wrl::ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(createBuffer(
         nullptr,
-        sizeof(XMMATRIX),
+        sizeof(DirectX::XMMATRIX),
         &spMVPBuffer,
         D3D11_BIND_CONSTANT_BUFFER,
         D3D11_USAGE_DYNAMIC
