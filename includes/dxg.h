@@ -1,6 +1,8 @@
 #pragma once
 
 #include "window.h"
+#include "fwdtypes.h"
+
 #include <d3d11.h>
 #include <dxgi.h>
 
@@ -35,9 +37,6 @@
     }
 
 class Camera;
-namespace DirectX{
-    struct XMFLOAT3;
-}
 
 enum EShaderStage
 {
@@ -90,7 +89,8 @@ public:
      */
     HRESULT createBuffer(void* pData, UINT uByteWidth, void** opBuffer,
     UINT uFlags,// = D3D11_BIND_VERTEX_BUFFER,
-    D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT
+    D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT,
+    UINT uCPUAccess = 0
     );
 
     /**
@@ -118,7 +118,7 @@ public:
      * @brief Inits the default shader program
      *
      */
-    void InitTestScene(DirectX::XMFLOAT3& oCameraPos/*
+    void InitTestScene(Vec3& oCameraPos/*
         Add FWD/UP/RIGHT
     */);
 

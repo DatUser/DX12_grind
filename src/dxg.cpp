@@ -10,6 +10,7 @@
 #pragma comment(lib, "d3dcompiler")
 
 namespace wrl = Microsoft::WRL;
+namespace dx = DirectX;
 
 DXG::DXG(HWND hWnd, Camera* pCamera)
 : m_spDevice(nullptr)
@@ -129,7 +130,7 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     }
 }
 
-HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags, D3D11_USAGE eUsage)
+HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags, D3D11_USAGE eUsage, UINT uCPUAccess)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
@@ -196,7 +197,7 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11Inpu
     m_spContext->RSSetViewports(1, &viewport);
 }
 
-void DXG::InitTestScene(DirectX::XMFLOAT3& oCameraPos)
+void DXG::InitTestScene(Vec3& oCameraPos)
 {
     //----Create shader buffer----//
     wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
@@ -247,16 +248,30 @@ void DXG::InitTestScene(DirectX::XMFLOAT3& oCameraPos)
         );
 
     //----Bind uniform data----//
-    DirectX::XMMATRIX pModelViewProjection;
+    Vec3 oPos = {0.f, 0.f, -10.f};
+    Vec3 oLookAt =  {0.f, 0.f, 0.f};
+    Vec3 oUp = {0.f, 1.f, 0.f};
+
+    Mat4x4 oMvp;
+    dx::XMStoreFloat4x4(&oMvp,
+        dx::XMMatrixLookAtLH(
+            dx::XMLoadFloat3(&oPos),
+            dx::XMLoadFloat3(&oLookAt),
+            dx::XMLoadFloat3(&oUp)));
+
+        //DirectX::XMStoreFloat4x4(&constants.model, DirectX::XMMatrixIdentity());
+        //DirectX::XMStoreFloat4x4(&constants.view, DirectX::XMMatrixTranspose(create_view_matrix(main_camera.position, main_camera.look_at)));
+        //DirectX::XMStoreFloat4x4(&constants.projection, DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(main_camera.fov, main_camera.aspect_ratio, main_camera.near_clip, main_camera.far_clip)))
 
     wrl::ComPtr<ID3D11Buffer> spMVPBuffer;
-    ATLASSERT(createBuffer(
-        nullptr,
-        sizeof(DirectX::XMMATRIX),
+    ATLASSERT(!FAILED(createBuffer(
+        &oMvp,
+        sizeof(Mat4x4),
         &spMVPBuffer,
         D3D11_BIND_CONSTANT_BUFFER,
-        D3D11_USAGE_DYNAMIC
-    ) == S_OK);
+        D3D11_USAGE_DYNAMIC,
+        D3D11_CPU_ACCESS_WRITE
+    )));
 }
 
 void DXG::DrawHelloTriangle()

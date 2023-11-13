@@ -1,9 +1,9 @@
 #pragma once
 
-#include <DirectXMath.h>
+#include "fwdtypes.h"
 
 class Camera
 {
 public:
-    DirectX::XMFLOAT3 oPos;
+    Vec3 oPos;
 };
