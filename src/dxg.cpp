@@ -138,7 +138,7 @@ HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uF
 
     bufferDesc.BindFlags = uFlags;
     bufferDesc.ByteWidth = uByteWidth;//sizeof(float)  * 3 * 3;
-    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.CPUAccessFlags = uCPUAccess;
     bufferDesc.MiscFlags = 0;
     bufferDesc.Usage = eUsage;//D3D11_USAGE_DEFAULT;
 
@@ -253,7 +253,7 @@ void DXG::InitTestScene(Vec3& oCameraPos)
     Vec3 oUp = {0.f, 1.f, 0.f};
 
     Mat4x4 oMvp;
-    dx::XMStoreFloat4x4(&oMvp,
+    dx::XMStoreFloat4x4((dx::XMFLOAT4X4*) &oMvp,
         dx::XMMatrixLookAtLH(
             dx::XMLoadFloat3(&oPos),
             dx::XMLoadFloat3(&oLookAt),
