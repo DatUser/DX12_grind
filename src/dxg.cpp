@@ -16,6 +16,7 @@ DXG::DXG(HWND hWnd, Camera* pCamera)
 : m_spDevice(nullptr)
 , m_spSwapchain(nullptr)
 , m_spContext(nullptr)
+, m_pMainCamera(pCamera)
 {
     DXGI_SWAP_CHAIN_DESC oSwapDesc;
     ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -63,8 +64,7 @@ DXG::DXG(HWND hWnd, Camera* pCamera)
     //Set our Render Target
     m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
 
-    ATLASSERT(pCamera != nullptr);
-    InitTestScene(pCamera->oPos);
+    InitTestScene();
 }
 
 void DXG::PresentFrame()
@@ -197,7 +197,7 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11Inpu
     m_spContext->RSSetViewports(1, &viewport);
 }
 
-void DXG::InitTestScene(Vec3& oCameraPos)
+void DXG::InitTestScene()
 {
     //----Create shader buffer----//
     wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
@@ -217,9 +217,9 @@ void DXG::InitTestScene(Vec3& oCameraPos)
     m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
 
     //----Bind vertices----//
-    float Verts[9] = {  0.f, 0.5f, 0.5f,
-                        0.5f, -0.5f, 0.5f,
-                        -0.5f, -0.5f, 0.5f };
+    float Verts[9] = {  0.f, 5.f, 5.f,
+                        5.f, -5.f, 5.f,
+                        -5.f, -5.f, 5.f };
 
     std::vector<ID3D11Buffer*> vBuffers;
     wrl::ComPtr<ID3D11Buffer> spBuffer;
@@ -247,31 +247,47 @@ void DXG::InitTestScene(Vec3& oCameraPos)
         0                   //Byte shift before 1st elt
         );
 
+    ATLASSERT(m_pMainCamera != nullptr);
+
     //----Bind uniform data----//
-    Vec3 oPos = {0.f, 0.f, -10.f};
+
+    // TODO: Move ViewMat compute to camera
+    Vec3 oPos = m_pMainCamera->GetPosition();
     Vec3 oLookAt =  {0.f, 0.f, 0.f};
-    Vec3 oUp = {0.f, 1.f, 0.f};
+    Vec3 oUp = m_pMainCamera->GetUpVector();
 
-    Mat4x4 oMvp;
-    dx::XMStoreFloat4x4((dx::XMFLOAT4X4*) &oMvp,
-        dx::XMMatrixLookAtLH(
-            dx::XMLoadFloat3(&oPos),
-            dx::XMLoadFloat3(&oLookAt),
-            dx::XMLoadFloat3(&oUp)));
+    // Not useful yet => we just try to place an object at (0, 0, 0)
+    Mat4x4 oModelMat = dx::XMMatrixIdentity();
 
+    Mat4x4 oViewMat = dx::XMMatrixLookAtLH(
+                        dx::XMLoadFloat3(&oPos),
+                        dx::XMLoadFloat3(&oLookAt),
+                        dx::XMLoadFloat3(&oUp));
+
+    Mat4x4 oViewProj = dx::XMMatrixTranspose(dx::XMMatrixPerspectiveFovLH(
+            m_pMainCamera->GetFOV(),
+            m_pMainCamera->GetAspectRatio(),
+            m_pMainCamera->GetNearClipping(),
+            m_pMainCamera->GetFarClipping()
+        ));
         //DirectX::XMStoreFloat4x4(&constants.model, DirectX::XMMatrixIdentity());
         //DirectX::XMStoreFloat4x4(&constants.view, DirectX::XMMatrixTranspose(create_view_matrix(main_camera.position, main_camera.look_at)));
         //DirectX::XMStoreFloat4x4(&constants.projection, DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(main_camera.fov, main_camera.aspect_ratio, main_camera.near_clip, main_camera.far_clip)))
 
+    Mat4x4 oMVP = oModelMat * oViewMat * oViewProj;
+
     wrl::ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(!FAILED(createBuffer(
-        &oMvp,
+        &oMVP,
         sizeof(Mat4x4),
         &spMVPBuffer,
         D3D11_BIND_CONSTANT_BUFFER,
         D3D11_USAGE_DYNAMIC,
         D3D11_CPU_ACCESS_WRITE
     )));
+
+    m_spContext->VSSetConstantBuffers(0u, 1u, spMVPBuffer.GetAddressOf());
+    //spMVPBuffer->
 }
 
 void DXG::DrawHelloTriangle()

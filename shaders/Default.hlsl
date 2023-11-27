@@ -15,16 +15,18 @@ struct PSInput
     float3 color : COLOR;
 };
 
+matrix iMVPMat;
+
 VertexOutput VSDefaultMain(VertexInput input)
 {
     VertexOutput output;
-    output.position = float4(input.position, 1.);
+    output.position = mul(float4(input.position, 1.), iMVPMat);
     output.color = input.position;
     return output;
 }
 
 float4 PSDefaultMain(PSInput input) : SV_TARGET
 {
-    //return float4(1.f, 1.f, 1.f, 1.f);//input.color;
-    return float4(input.color, 1.0f);
+    return float4(1.f, 1.f, 1.f, 1.f);//input.color;
+    //return float4(input.color, 1.0f);
 }

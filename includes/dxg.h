@@ -118,9 +118,7 @@ public:
      * @brief Inits the default shader program
      *
      */
-    void InitTestScene(Vec3& oCameraPos/*
-        Add FWD/UP/RIGHT
-    */);
+    void InitTestScene();
 
     void DrawHelloTriangle();
 
@@ -132,4 +130,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_spContext;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_spTarget;
     std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_vBuffers;
+
+    Camera* m_pMainCamera;
 };
