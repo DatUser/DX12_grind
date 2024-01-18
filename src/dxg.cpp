@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 
 #include "camera.h"
+#include "Shapes/teapot.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
@@ -174,12 +175,12 @@ HRESULT DXG::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCST
     //ATLASSERT(hr == S_OK);
 }
 
-void DXG::AddBuffers(std::vector<ID3D11Buffer*> vBuffers, wrl::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset)
+void DXG::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, wrl::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset)
 {
     // Set buffers to Input assembly
-    m_spContext->IASetVertexBuffers(0, vBuffers.size(), vBuffers.data(), &uStride, &uOffset);
-
-    //m_spContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, uOffset);
+    m_spContext->IASetVertexBuffers(0, vVertBuffers.size(), vVertBuffers.data(), &uStride, &uOffset);
+    if (pIdxBuffer)
+        m_spContext->IASetIndexBuffer(pIdxBuffer, DXGI_FORMAT_R32_UINT, uOffset);
 
     m_spContext->IASetInputLayout(spVertsLayout.Get());
 
@@ -220,16 +221,26 @@ void DXG::InitTestScene()
     float Verts[9] = {  0.f, 5.f, 5.f,
                         5.f, -5.f, 5.f,
                         -5.f, -5.f, 5.f };
+    std::vector<ID3D11Buffer*> vVertBuffers;
 
-    std::vector<ID3D11Buffer*> vBuffers;
-    wrl::ComPtr<ID3D11Buffer> spBuffer;
+    size_t ullVertsSize = sizeof(TeapotVertices);
+    wrl::ComPtr<ID3D11Buffer> spBufferVerts;
+    ATLASSERT(createBuffer(
+        (void*) (TeapotVertices),       //Buffer data
+        ullVertsSize,                   //Buffer byte size
+        &spBufferVerts,                 //OutputBuffer
+        D3D11_BIND_VERTEX_BUFFER        //Buffer flags
+        ) == S_OK);
+    vVertBuffers.push_back(spBufferVerts.Get());
+
+    size_t ullIdxSize = sizeof(TeapotIndices);
+    wrl::ComPtr<ID3D11Buffer> spBufferIndices;
     ATLASSERT(createBuffer(
         Verts,                      //Buffer data
-        sizeof(float) * 9,          //Buffer byte size
-        &spBuffer,                  //OutputBuffer
-        D3D11_BIND_VERTEX_BUFFER    //Buffer flags
+        ullIdxSize,                 //Buffer byte size
+        &spBufferIndices,           //OutputBuffer
+        D3D11_BIND_INDEX_BUFFER     //Buffer flags
         ) == S_OK);
-    vBuffers.push_back(spBuffer.Get());
 
     wrl::ComPtr<ID3D11InputLayout> spInputLayout;
     ATLASSERT(
@@ -241,10 +252,11 @@ void DXG::InitTestScene()
         ) == S_OK);
 
     AddBuffers(
-        vBuffers,           //Buffers to be bound
-        spInputLayout,      //Layout for these buffers
-        sizeof(float) * 3,  //Size of buffer elements
-        0                   //Byte shift before 1st elt
+        vVertBuffers,           //Buffers to be bound
+        spBufferIndices.Get(),  //Index buffer
+        spInputLayout,          //Layout for these buffers
+        sizeof(float) * 3,      //Size of buffer elements
+        0                       //Byte shift before 1st elt
         );
 
     ATLASSERT(m_pMainCamera != nullptr);

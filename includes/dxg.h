@@ -112,7 +112,7 @@ public:
      * @param pVSBuffer
      * @param uFlags
      */
-    void AddBuffers(std::vector<ID3D11Buffer*> vBuffers, Microsoft::WRL::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset);
+    void AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, Microsoft::WRL::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset);
 
     /**
      * @brief Inits the default shader program
