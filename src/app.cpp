@@ -1,5 +1,5 @@
 #include "app.h"
-#include "dxg.h"
+#include "rhi.h"
 
 App::App(LPCSTR pWinName)
 :   m_pMainWindow(new Window(pWinName, 600, 600))
@@ -28,7 +28,7 @@ int App::Execute()
 
 void App::RetrieveFrame()
 {
-    m_pMainWindow->GetDXG()->ClearRenderView(1.f, 0.f, 0.f);
-    m_pMainWindow->GetDXG()->DrawHelloTriangle();
-    m_pMainWindow->GetDXG()->PresentFrame();
+    m_pMainWindow->GetRHI()->ClearRenderView();
+    m_pMainWindow->GetRHI()->Draw();
+    m_pMainWindow->GetRHI()->PresentFrame();
 }

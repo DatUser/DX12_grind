@@ -1,19 +1,16 @@
-#include "dxg.h"
-
-#include <atldef.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
-
-#include "camera.h"
-#include "Shapes/teapot.h"
+#include "D3D11/D3D11Interface.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
 
+#include "Core/asserts.h"
+#include "D3D11/D3D11Common.h"
+#include "camera.h"
+
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
-DXG::DXG(HWND hWnd, Camera* pCamera)
+D3D11Interface::D3D11Interface(HWND hWnd, Camera* pCamera)
 : m_spDevice(nullptr)
 , m_spSwapchain(nullptr)
 , m_spContext(nullptr)
@@ -55,8 +52,9 @@ DXG::DXG(HWND hWnd, Camera* pCamera)
     ATLASSERT(hr == S_OK);
 
     // Access to swapchain back buffer resource
-    wrl::ComPtr<ID3D11Resource> spBackBuffer;
-    hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
+    ComPtr<ID3D11Resource> spBackBuffer;
+    //hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
+    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
     ATLASSERT(hr == S_OK);
 
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
@@ -66,56 +64,10 @@ DXG::DXG(HWND hWnd, Camera* pCamera)
     m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
 
     InitTestScene();
+
 }
 
-void DXG::PresentFrame()
-{
-    HRESULT hr = m_spSwapchain->Present(0, 0);
-    if (hr != S_OK)
-    {
-        LOG_LAST_ERROR();
-        LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
-    }
-    ATLASSERT(hr == S_OK);
-}
-
-void DXG::ClearRenderView(float r, float g, float b, float a)
-{
-    float pColor[] = {r, g, b, a};
-    m_spContext->ClearRenderTargetView(m_spTarget.Get(), pColor);
-}
-
-wrl::ComPtr<ID3D10Blob> DXG::compileShader(
-        LPCWSTR pFilename,
-        LPCSTR pEntryPoint,
-        LPCSTR pShaderModel,
-        const D3D10_SHADER_MACRO* pDefines)
-{
-    wrl::ComPtr<ID3D10Blob> spShaderBuffer;
-    wrl::ComPtr<ID3DBlob> spErrorBuffer;
-
-    HRESULT hr = D3DCompileFromFile(
-        pFilename,
-        pDefines,
-        D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        pEntryPoint,
-        pShaderModel,
-        0,
-        0,
-        &spShaderBuffer,
-        &spErrorBuffer
-    );
-
-    if (FAILED(hr))
-    {
-        LOG_SHADER_COMPILE_ERROR(spErrorBuffer);
-        return nullptr;
-    }
-
-    return spShaderBuffer;
-}
-
-HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
+HRESULT D3D11Interface::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
 {
     if (!pShaderBuffer)
         return E_INVALIDARG;
@@ -131,7 +83,7 @@ HRESULT DXG::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInsta
     }
 }
 
-HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags, D3D11_USAGE eUsage, UINT uCPUAccess)
+HRESULT D3D11Interface::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uFlags, D3D11_USAGE eUsage, UINT uCPUAccess)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
@@ -153,11 +105,11 @@ HRESULT DXG::createBuffer(void* pData, UINT uByteWidth, void** opBuffer, UINT uF
     bufferData.pSysMem = pData;
 
     // Create buffer object
-    wrl::ComPtr<ID3D11Buffer> spBuffer;
+    ComPtr<ID3D11Buffer> spBuffer;
     return m_spDevice->CreateBuffer(&bufferDesc, (pData) ? &bufferData : nullptr, (ID3D11Buffer**) opBuffer);
 }
 
-HRESULT DXG::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
+HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
 {
     // Create data layout
     D3D11_INPUT_ELEMENT_DESC inputDesc;
@@ -170,12 +122,12 @@ HRESULT DXG::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCST
     inputDesc.SemanticIndex = 0;
     inputDesc.SemanticName = pName;// "POSITION";
 
-    wrl::ComPtr<ID3D11InputLayout> spVertsLayout;
+    ComPtr<ID3D11InputLayout> spVertsLayout;
     return m_spDevice->CreateInputLayout(&inputDesc, 1, pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), (ID3D11InputLayout**) pLayout);
     //ATLASSERT(hr == S_OK);
 }
 
-void DXG::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, wrl::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset)
+void D3D11Interface::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset)
 {
     // Set buffers to Input assembly
     m_spContext->IASetVertexBuffers(0, vVertBuffers.size(), vVertBuffers.data(), &uStride, &uOffset);
@@ -198,18 +150,58 @@ void DXG::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdx
     m_spContext->RSSetViewports(1, &viewport);
 }
 
-void DXG::InitTestScene()
+HRESULT D3D11Interface::PresentFrame()
+{
+    HRESULT hr = m_spSwapchain->Present(0, 0);
+    if (hr != S_OK)
+    {
+        LOG_LAST_ERROR();
+        LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
+    }
+
+    ATLASSERT(hr == S_OK);
+    return hr;
+}
+
+HRESULT D3D11Interface::CreateBuffer()
+{
+    return E_NOTIMPL;
+}
+
+HRESULT D3D11Interface::CreateSwapchain()
+{
+    return E_NOTIMPL;
+}
+
+void D3D11Interface::ClearRenderView()
+{
+    ClearRenderView(1.f, 0.f, 0.f);
+}
+
+void D3D11Interface::ClearRenderView(float r, float g, float b, float a)
+{
+    float pColor[] = {r, g, b, a};
+    m_spContext->ClearRenderTargetView(m_spTarget.Get(), pColor);
+}
+
+void D3D11Interface::Draw()
+{
+    //m_pContext->IASetVertexBuffers(0, 1, )
+    m_spContext->Draw(3, 0);
+}
+
+void D3D11Interface::InitTestScene()
 {
     //----Create shader buffer----//
-    wrl::ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
-    wrl::ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
+    ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
+    ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
 
     //----Create shader instances----//
-    wrl::ComPtr<ID3D11VertexShader> spVSInst;
+    ComPtr<ID3D11VertexShader> spVSInst;
     HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX_SHADER);
     ATLASSERT(hr == S_OK);
 
-    wrl::ComPtr<ID3D11PixelShader> spPSInst;
+    ComPtr<ID3D11PixelShader> spPSInst;
     hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::FRAGMENT_SHADER);
     ATLASSERT(hr == S_OK);
 
@@ -223,26 +215,28 @@ void DXG::InitTestScene()
                         -5.f, -5.f, 5.f };
     std::vector<ID3D11Buffer*> vVertBuffers;
 
-    size_t ullVertsSize = sizeof(TeapotVertices);
-    wrl::ComPtr<ID3D11Buffer> spBufferVerts;
+    //size_t ullVertsSize = sizeof(TeapotVertices);
+    size_t ullVertsSize = sizeof(Verts);
+    ComPtr<ID3D11Buffer> spBufferVerts;
     ATLASSERT(createBuffer(
-        (void*) (TeapotVertices),       //Buffer data
+        //(void*) (TeapotVertices),       //Buffer data
+        (void*) (Verts),                //Buffer data
         ullVertsSize,                   //Buffer byte size
         &spBufferVerts,                 //OutputBuffer
         D3D11_BIND_VERTEX_BUFFER        //Buffer flags
         ) == S_OK);
     vVertBuffers.push_back(spBufferVerts.Get());
 
-    size_t ullIdxSize = sizeof(TeapotIndices);
-    wrl::ComPtr<ID3D11Buffer> spBufferIndices;
-    ATLASSERT(createBuffer(
-        Verts,                      //Buffer data
-        ullIdxSize,                 //Buffer byte size
-        &spBufferIndices,           //OutputBuffer
-        D3D11_BIND_INDEX_BUFFER     //Buffer flags
-        ) == S_OK);
+    //size_t ullIdxSize = sizeof(TeapotIndices);
+    //ComPtr<ID3D11Buffer> spBufferIndices;
+    //ATLASSERT(createBuffer(
+    //    Verts,                      //Buffer data
+    //    ullIdxSize,                 //Buffer byte size
+    //    &spBufferIndices,           //OutputBuffer
+    //    D3D11_BIND_INDEX_BUFFER     //Buffer flags
+    //    ) == S_OK);
 
-    wrl::ComPtr<ID3D11InputLayout> spInputLayout;
+    ComPtr<ID3D11InputLayout> spInputLayout;
     ATLASSERT(
         createInputLayout(
             spVSBuffer.Get(),               //Shader text data
@@ -253,7 +247,7 @@ void DXG::InitTestScene()
 
     AddBuffers(
         vVertBuffers,           //Buffers to be bound
-        spBufferIndices.Get(),  //Index buffer
+        /*spBufferIndices.Get()*/nullptr,  //Index buffer
         spInputLayout,          //Layout for these buffers
         sizeof(float) * 3,      //Size of buffer elements
         0                       //Byte shift before 1st elt
@@ -288,7 +282,7 @@ void DXG::InitTestScene()
 
     Mat4x4 oMVP = oModelMat * oViewMat * oViewProj;
 
-    wrl::ComPtr<ID3D11Buffer> spMVPBuffer;
+    ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(!FAILED(createBuffer(
         &oMVP,
         sizeof(Mat4x4),
@@ -300,10 +294,4 @@ void DXG::InitTestScene()
 
     m_spContext->VSSetConstantBuffers(0u, 1u, spMVPBuffer.GetAddressOf());
     //spMVPBuffer->
-}
-
-void DXG::DrawHelloTriangle()
-{
-    //m_pContext->IASetVertexBuffers(0, 1, )
-    m_spContext->Draw(3, 0);
 }

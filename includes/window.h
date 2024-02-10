@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#include <comdef.h>
+#include "Core/Core.h"
 #include <optional>
 #include <sstream>
 
@@ -10,30 +9,7 @@
 #include "mouse.h"
 #include "moveevent.h"
 
-#define LOG_LAST_ERROR()                                                                    \
-    {                                                                                       \
-        HRESULT hr = HRESULT_FROM_WIN32(GetLastError());                                    \
-        std::stringstream ss;                                                               \
-        _com_error err(hr);                                                                 \
-        ss <<  __FILE__ << ": " << __LINE__ << std::endl <<                                 \
-            err.ErrorMessage() << std::endl;                                                \
-        MessageBox(nullptr, reinterpret_cast<LPCSTR>(ss.str().c_str()), nullptr,            \
-            MB_OK|MB_ICONERROR);                                                            \
-        PostQuitMessage(hr);                                                                \
-    }
-
-#define LOG_ERROR(hr)                                                                       \
-    {                                                                                       \
-        std::stringstream ss;                                                               \
-        _com_error err(hr);                                                                 \
-        ss <<  __FILE__ << ": " << __LINE__ << std::endl <<                                 \
-            err.ErrorMessage() << std::endl;                                                \
-        MessageBox(nullptr, reinterpret_cast<LPCSTR>(ss.str().c_str()), nullptr,            \
-            MB_OK|MB_ICONERROR);                                                            \
-        PostQuitMessage(hr);                                                                \
-    }
-
-class DXG;
+class RHI;
 class Camera;
 
 class Window
@@ -63,7 +39,7 @@ public:
 
     // GETTERS
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
-    inline DXG* GetDXG() { return m_pDxGraphics; }
+    inline RHI* GetRHI() { return m_pDxGraphics; }
 
     // SETTER
     inline void SetTitle(LPCSTR pTitle)   { SetWindowText(m_hWnd, pTitle); }
@@ -86,7 +62,7 @@ private:
     InputEvent* m_pInputEvent;
     MoveEvent* m_pMoveEvent;
 
-    DXG* m_pDxGraphics;
+    RHI* m_pDxGraphics;
 
     Camera* m_pCamera;
 };

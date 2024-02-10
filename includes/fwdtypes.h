@@ -1,7 +1,11 @@
 #pragma once
 
-#include <DirectXMath.h>
+//#include <DirectXMath.h>
+namespace Microsoft::WRL
+{
+	template<typename T>
+	class ComPtr;
+}
 
-typedef DirectX::XMFLOAT3 Vec3;
-typedef DirectX::XMVECTOR Vec4;
-typedef DirectX::XMMATRIX Mat4x4;
+template<typename T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;

@@ -47,5 +47,5 @@
         "vector": "cpp"
     },
     "mesonbuild.configureOnOpen": true,
-    "C_Cpp.default.compileCommands": "c:\\Users\\xavig\\OneDrive\\Bureau\\DX12_grind\\builddir/compile_commands.json"
+    "C_Cpp.default.compileCommands": "c:\\Users\\xavig\\OneDrive\\Bureau\\Projects\\DX12_grind\\builddir/compile_commands.json"
 }

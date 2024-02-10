@@ -9,6 +9,7 @@
 #define DEFAULT_CAMERA_ASPECT_RATIO     16.f/9.f
 
 #include "fwdtypes.h"
+#include "Core/Core.h"
 
 class Camera
 {
