@@ -18,7 +18,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": "false",
-            "preLaunchTask": "Meson build"
+            "preLaunchTask": "Meson build",
+            "console": "integratedTerminal"
         },
         {
             "name": "Meson Rebuild & Run",
@@ -30,7 +31,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": "false",
-            "preLaunchTask": "Meson rebuild"
+            "preLaunchTask": "Meson rebuild",
+            "console": "integratedTerminal"
         }
     ]
 }

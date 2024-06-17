@@ -2,7 +2,7 @@
 
 #include "Core/Core.h"
 #include "fwdtypes.h"
-#include "rhi.h"
+#include "RHI/rhi.h"
 
 enum EShaderStage
 {
@@ -18,6 +18,11 @@ class Camera;
 class D3D11Interface : public RHI
 {
 public:
+    [[nodiscard]] static RHI* CreateInterface(HWND hWnd, Camera* pCamera)
+    {
+        return new D3D11Interface(hWnd, pCamera);
+    }
+
     D3D11Interface(HWND hWnd, Camera* pCamera);
     ~D3D11Interface();
 

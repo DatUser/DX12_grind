@@ -1,5 +1,5 @@
 #include "app.h"
-#include "rhi.h"
+#include "RHI/rhi.h"
 
 App::App(LPCSTR pWinName)
 :   m_pMainWindow(new Window(pWinName, 600, 600))

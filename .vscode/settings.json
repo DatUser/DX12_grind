@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.ll": "lex",
         "iostream": "cpp",
         "iosfwd": "cpp",
         "atomic": "cpp",
@@ -44,8 +45,11 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "map": "cpp",
+        "array": "cpp"
     },
     "mesonbuild.configureOnOpen": true,
-    "C_Cpp.default.compileCommands": "c:\\Users\\xavig\\OneDrive\\Bureau\\Projects\\DX12_grind\\builddir/compile_commands.json"
+    "C_Cpp.default.compileCommands": "c:\\Users\\xavig\\OneDrive\\Bureau\\Projects\\DX12_grind\\builddir/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
 }

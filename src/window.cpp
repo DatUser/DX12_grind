@@ -2,7 +2,8 @@
 
 #include "camera.h"
 #include "Core/asserts.h"
-#include "rhi.h"
+#include "RHI/rhi.h"
+#include "RHI/fwd_rhi.h"
 #include "D3D11/D3D11Interface.h"
 
 #define DEBUG_INPUT
@@ -72,7 +73,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         if (m_hWnd)
         {
             ShowWindow(m_hWnd, SW_SHOW);
-            m_pDxGraphics = new D3D11Interface(m_hWnd, new Camera());
+            m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
         }
         else
             LOG_LAST_ERROR();
