@@ -15,12 +15,18 @@ struct PSInput
     float3 color : COLOR;
 };
 
-matrix iMVPMat;
+uniform matrix iMVPMat;
+//float4x4 iMVPMat = {
+//     2.41421356f, 0.0f,        0.0f,        0.0f ,
+//     0.0f,        2.41421356f, 0.0f,        0.0f ,
+//     0.0f,        0.0f,       -1.001001f,   1.0f ,
+//     0.0f,        0.0f,       -0.1001001f,  0.0f
+//};
 
 VertexOutput VSDefaultMain(VertexInput input)
 {
     VertexOutput output;
-    output.position = mul(float4(input.position, 1.), iMVPMat);
+    output.position = mul(iMVPMat, float4(input.position, 1.));
     output.color = input.position;
     return output;
 }

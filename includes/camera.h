@@ -4,9 +4,10 @@
 #define DEFAULT_CAMERA_UP               {0.f, 1.f, 0.f}
 #define DEFAULT_CAMERA_FOV              90.f
 #define DEFAULT_CAMERA_NEAR             1.f
-#define DEFAULT_CAMERA_FAR              1000.f
+#define DEFAULT_CAMERA_FAR              100000.f
 // This one is temporary (until resolution is added there)
-#define DEFAULT_CAMERA_ASPECT_RATIO     16.f/9.f
+#define DEFAULT_CAMERA_ASPECT_RATIO     1.f
+//#define DEFAULT_CAMERA_ASPECT_RATIO     16.f/9.f
 
 #include "fwdtypes.h"
 #include "Core/Core.h"

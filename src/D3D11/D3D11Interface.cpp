@@ -3,9 +3,12 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
 
+#include "camera.h"
 #include "Core/asserts.h"
 #include "D3D11/D3D11Common.h"
-#include "camera.h"
+#include "Engine/Mesh.h"
+#include "IO/objloader.h"
+#include "Shapes/teapot.h"
 
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
@@ -52,10 +55,21 @@ D3D11Interface::D3D11Interface(HWND hWnd, Camera* pCamera)
     ATLASSERT(hr == S_OK);
 
     // Access to swapchain back buffer resource
-    ComPtr<ID3D11Resource> spBackBuffer;
+    ComPtr<ID3D11Resource> spBackBuffer{};
     //hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
     hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
     ATLASSERT(hr == S_OK);
+
+	// Create wireframe rasterizer state
+	ComPtr<ID3D11RasterizerState> spWireframe{};
+	D3D11_RASTERIZER_DESC oWfDesc{};
+	ZeroMemory(&oWfDesc, sizeof(D3D11_RASTERIZER_DESC));
+	oWfDesc.FillMode = D3D11_FILL_WIREFRAME;
+	oWfDesc.CullMode = D3D11_CULL_NONE;
+	hr = m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe);
+
+	// Set rasterizer state
+	m_spContext->RSSetState(spWireframe.Get());
 
     hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
     ATLASSERT(hr == S_OK);
@@ -187,7 +201,10 @@ void D3D11Interface::ClearRenderView(float r, float g, float b, float a)
 void D3D11Interface::Draw()
 {
     //m_pContext->IASetVertexBuffers(0, 1, )
-    m_spContext->Draw(3, 0);
+    //m_spContext->Draw(3, 0);
+	//m_spContext->Draw(NumTeapotVertices, 0);
+	//m_spContext->Draw(56880, 0);
+	m_spContext->DrawIndexed(18960, 0, 0);
 }
 
 void D3D11Interface::InitTestScene()
@@ -209,34 +226,59 @@ void D3D11Interface::InitTestScene()
     m_spContext->VSSetShader(spVSInst.Get(), 0, 0);
     m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
 
+    //----Load obj file----//
+	std::vector<Mesh*> vMeshes;
+	load_obj("models/teapot.obj", vMeshes);
+	Mesh* pMesh = vMeshes[0];
+
     //----Bind vertices----//
     float Verts[9] = {  0.f, 5.f, 5.f,
                         5.f, -5.f, 5.f,
                         -5.f, -5.f, 5.f };
     std::vector<ID3D11Buffer*> vVertBuffers;
 
+	// IDX BUFFER
+
+    size_t ullIdxSize = pMesh->GetNumIndices() * sizeof(int);
+    //size_t ullIdxSize = sizeof(TeapotIndices);
+    ComPtr<ID3D11Buffer> spBufferIndices;
+    ATLASSERT(createBuffer(
+		pMesh->GetIndiceData(),
+        //Verts,                      //Buffer data
+        ullIdxSize,                 //Buffer byte size
+        &spBufferIndices,           //OutputBuffer
+        D3D11_BIND_INDEX_BUFFER     //Buffer flags
+        ) == S_OK);
+
+    //m_spContext->IASetIndexBuffer(spBufferIndices.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	// END
+
+	// VERT BUFFER
+
+ 	size_t ullVertsSize = pMesh->GetNumVerts() * 3 * sizeof(float);
     //size_t ullVertsSize = sizeof(TeapotVertices);
-    size_t ullVertsSize = sizeof(Verts);
+    //size_t ullVertsSize = sizeof(Verts);
     ComPtr<ID3D11Buffer> spBufferVerts;
     ATLASSERT(createBuffer(
+		pMesh->GetVerticeData(),
         //(void*) (TeapotVertices),       //Buffer data
-        (void*) (Verts),                //Buffer data
+        //(void*) (Verts),                //Buffer data
         ullVertsSize,                   //Buffer byte size
         &spBufferVerts,                 //OutputBuffer
         D3D11_BIND_VERTEX_BUFFER        //Buffer flags
         ) == S_OK);
     vVertBuffers.push_back(spBufferVerts.Get());
 
-    //size_t ullIdxSize = sizeof(TeapotIndices);
-    //ComPtr<ID3D11Buffer> spBufferIndices;
-    //ATLASSERT(createBuffer(
-    //    Verts,                      //Buffer data
-    //    ullIdxSize,                 //Buffer byte size
-    //    &spBufferIndices,           //OutputBuffer
-    //    D3D11_BIND_INDEX_BUFFER     //Buffer flags
-    //    ) == S_OK);
+	//Set the vertex buffer
+    //UINT stride = sizeof(float) * 3;
+    //UINT offset = 0;
+    //m_spContext->IASetVertexBuffers( 0, 1, spBufferVerts.GetAddressOf(), &stride, &offset );
 
-    ComPtr<ID3D11InputLayout> spInputLayout;
+	//END
+
+	// LAYOUT
+    ComPtr<ID3D11InputLayout> spInputLayout{};
     ATLASSERT(
         createInputLayout(
             spVSBuffer.Get(),               //Shader text data
@@ -245,13 +287,29 @@ void D3D11Interface::InitTestScene()
             &spInputLayout
         ) == S_OK);
 
-    AddBuffers(
-        vVertBuffers,           //Buffers to be bound
-        /*spBufferIndices.Get()*/nullptr,  //Index buffer
-        spInputLayout,          //Layout for these buffers
-        sizeof(float) * 3,      //Size of buffer elements
-        0                       //Byte shift before 1st elt
-        );
+    //m_spContext->IASetInputLayout(spInputLayout.Get());
+    //m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    ////Create the Viewport
+    //D3D11_VIEWPORT viewport;
+    //ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+    //viewport.TopLeftX = 0;
+    //viewport.TopLeftY = 0;
+    //viewport.Width = 600;
+    //viewport.Height = 600;
+
+    ////Set the Viewport
+    //m_spContext->RSSetViewports(1, &viewport);
+
+	AddBuffers(
+		vVertBuffers,           //Buffers to be bound
+		spBufferIndices.Get(),
+		//nullptr,  //Index buffer
+		spInputLayout,          //Layout for these buffers
+		sizeof(float) * 3,      //Size of buffer elements
+		0                       //Byte shift before 1st elt
+		);
 
     ATLASSERT(m_pMainCamera != nullptr);
 
@@ -270,17 +328,17 @@ void D3D11Interface::InitTestScene()
                         dx::XMLoadFloat3(&oLookAt),
                         dx::XMLoadFloat3(&oUp));
 
-    Mat4x4 oViewProj = dx::XMMatrixTranspose(dx::XMMatrixPerspectiveFovLH(
+    Mat4x4 oViewProj = dx::XMMatrixPerspectiveFovLH(
             m_pMainCamera->GetFOV(),
             m_pMainCamera->GetAspectRatio(),
             m_pMainCamera->GetNearClipping(),
             m_pMainCamera->GetFarClipping()
-        ));
+        );
         //DirectX::XMStoreFloat4x4(&constants.model, DirectX::XMMatrixIdentity());
         //DirectX::XMStoreFloat4x4(&constants.view, DirectX::XMMatrixTranspose(create_view_matrix(main_camera.position, main_camera.look_at)));
         //DirectX::XMStoreFloat4x4(&constants.projection, DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(main_camera.fov, main_camera.aspect_ratio, main_camera.near_clip, main_camera.far_clip)))
 
-    Mat4x4 oMVP = oModelMat * oViewMat * oViewProj;
+    Mat4x4 oMVP = dx::XMMatrixTranspose(oModelMat * oViewMat * oViewProj);
 
     ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(!FAILED(createBuffer(

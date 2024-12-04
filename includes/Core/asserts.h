@@ -1,5 +1,17 @@
 #pragma once
 
+#define CHECK(x) 																			\
+	{																						\
+		assert(x);																			\
+		/*ATLASSERT(x);*/																	\
+	}
+
+#define CHECK_ELSE_RET(x) 																	\
+	{																						\
+		if (!x)																				\
+			return;																			\
+	}
+
 #define GET_LAST_GRAPHICS_ERROR(hr)                                                         \
     {                                                                                       \
         std::stringstream ss;                                                               \

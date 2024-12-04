@@ -331,7 +331,7 @@ static const float TeapotVertices[NumTeapotVertices][3] = {
 //      Utah teapot.
 //
 
-static const GLint TeapotIndices[NumTeapotPatches][4][4] = {
+static const int TeapotIndices[NumTeapotPatches][4][4] = {
     {
 	{0, 1, 2, 3},
 	{4, 5, 6, 7},

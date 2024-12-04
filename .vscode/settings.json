@@ -50,6 +50,6 @@
         "array": "cpp"
     },
     "mesonbuild.configureOnOpen": true,
-    "C_Cpp.default.compileCommands": "c:\\Users\\xavig\\OneDrive\\Bureau\\Projects\\DX12_grind\\builddir/compile_commands.json",
+    "C_Cpp.default.compileCommands": "c:\\Users\\xgo\\Desktop\\XGO\\DX12_grind\\builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
 }
