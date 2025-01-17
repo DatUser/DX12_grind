@@ -6,6 +6,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
     const LPCSTR pWinName = LPCSTR("Default");
 
-    App app(pWinName);
-    return app.Execute();
+	return App::GetInstance()->Execute();
+    //App app(pWinName);
+    //return app.Execute();
 }

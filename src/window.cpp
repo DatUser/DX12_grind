@@ -8,7 +8,7 @@
 
 #define DEBUG_INPUT
 
-Window::WindowClass Window::WindowClass::m_Wc;
+//Window::WindowClass Window::WindowClass::m_Wc;
 
 Window::WindowClass::WindowClass()
 : m_hInstance(GetModuleHandle(nullptr))
@@ -62,12 +62,13 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 
     if (AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE) != 0)
     {
+		//const WindowClass& oWinClass{WindowClass::GetInstance()};
         m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
             WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU|WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT, CW_USEDEFAULT,
             //200, 200,
             600, 600, nullptr, nullptr,
-            WindowClass::GetInstance(),
+            WindowClass::GetHInstance(),
             this);
 
         if (m_hWnd)

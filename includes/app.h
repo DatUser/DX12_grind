@@ -4,20 +4,31 @@
 
 #include "window.h"
 
+/**
+ * @brief Singleton class representing engine app
+ *
+ */
 class App
 {
+	friend std::unique_ptr<App>::deleter_type;
+
 public:
-    App(LPCSTR pWinName);
-    ~App();
 
     int Execute();
     void RetrieveFrame();
 
     inline double GetExecutionTime();
+    inline RHI* GetRHI();
 
-
+    inline static std::unique_ptr<App>& GetInstance();
 
 private:
+	App() = delete;
+    App(LPCSTR pWinName);
+    ~App();
+
+	static std::unique_ptr<App> m_spAppInstance;
+
     Window* m_pMainWindow;
     std::chrono::time_point<std::chrono::steady_clock> m_oStartTime;
 };

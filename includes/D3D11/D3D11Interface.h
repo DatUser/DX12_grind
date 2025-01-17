@@ -4,13 +4,16 @@
 #include "fwdtypes.h"
 #include "RHI/rhi.h"
 
+class Camera;
+class D3D11Buffer;
+class RHIBuffer;
+
 enum EShaderStage
 {
     VERTEX_SHADER,
     FRAGMENT_SHADER
 };
 
-class Camera;
 
 /**
  *  Initializes and handles the device, the swapchain and the context
@@ -44,14 +47,18 @@ public:
      * @param uFlags
      * @return HRESULT
      */
-    HRESULT createBuffer(void* pData, UINT uByteWidth, void** opBuffer,
-    UINT uFlags,// = D3D11_BIND_VERTEX_BUFFER,
-    D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT,
-    UINT uCPUAccess = 0
+    HRESULT createBufferInternal(
+		void* pData,
+		UINT uByteWidth,
+		D3D11Buffer* pRHIBuffer,
+		//void** opBuffer,
+		UINT uFlags,// = D3D11_BIND_VERTEX_BUFFER,
+		D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT,
+		UINT uCPUAccess = 0
     );
 
     virtual HRESULT PresentFrame() override;
-    virtual HRESULT CreateBuffer() override;
+    virtual HRESULT CreateBuffer(void* pData, UINT uByteWidth, RHIBuffer* pBuffer) override;
     virtual HRESULT CreateSwapchain() override;
     virtual void ClearRenderView() override;
 

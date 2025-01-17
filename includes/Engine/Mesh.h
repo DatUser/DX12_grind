@@ -5,6 +5,8 @@
 
 // TODO: Create enunm for rendering state managemenent
 
+class RHIBuffer;
+
 class Mesh
 {
 	friend void load_obj(const std::string& path, std::vector<Mesh*>& arrMeshes);
@@ -26,4 +28,8 @@ public:
 private:
 	std::vector<float>	m_vVertices;
 	std::vector<int>	m_vIndices;
+
+	// Rendering resources
+	RHIBuffer*	m_pVertexBuffer;
+	RHIBuffer*	m_pVertexBuffer;
 };

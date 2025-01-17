@@ -18,7 +18,14 @@ public:
     class WindowClass
     {
     public:
-        inline static HINSTANCE GetInstance() { return m_Wc.m_hInstance; };
+		//inline static WindowClass& GetInstance() { return m_Wc; }
+		//inline static const WindowClass& GetInstance() { return m_Wc; }
+
+        inline static HINSTANCE GetHInstance()// const
+		{
+			static WindowClass m_Wc;
+			return m_Wc.m_hInstance;
+		};
 
         inline static LPCSTR GetName() { return "DefaultWindow"; }
 
@@ -29,7 +36,7 @@ public:
 
         HINSTANCE m_hInstance;
 
-        static WindowClass m_Wc;
+        //static WindowClass m_Wc;
     };
 
     Window(LPCSTR pWinName, int nWidth, int nHeight);

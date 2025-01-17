@@ -1,6 +1,10 @@
 #include "app.h"
 #include "RHI/rhi.h"
 
+// TODO: Set a random name in compile time
+std::unique_ptr<App> App::m_spAppInstance{new App("Default")};
+//std::unique_ptr<App> App::m_spAppInstance{std::make_unique<App>("Default")};
+
 App::App(LPCSTR pWinName)
 :   m_pMainWindow(new Window(pWinName, 600, 600))
 ,   m_oStartTime(std::chrono::steady_clock::now())
