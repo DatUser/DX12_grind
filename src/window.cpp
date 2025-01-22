@@ -74,7 +74,8 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         if (m_hWnd)
         {
             ShowWindow(m_hWnd, SW_SHOW);
-            m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
+			CreateInterface(m_hWnd, new Camera());
+            //m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
         }
         else
             LOG_LAST_ERROR();
@@ -91,7 +92,7 @@ Window::~Window()
     delete m_pInputEvent;
     delete m_pMoveEvent;
     DestroyWindow(m_hWnd);
-    delete m_pDxGraphics;
+    //delete m_pDxGraphics;
 }
 
 LRESULT CALLBACK Window::RegHandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,

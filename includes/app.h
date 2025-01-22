@@ -18,7 +18,7 @@ public:
     void RetrieveFrame();
 
     inline double GetExecutionTime();
-    inline RHI* GetRHI();
+    //inline RHI* GetRHI();
 
     inline static std::unique_ptr<App>& GetInstance();
 

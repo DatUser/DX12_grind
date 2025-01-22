@@ -11,9 +11,8 @@
 #endif
 
 class Camera;
-class RHI;
 
-typedef RHI* (*RHICreationInterface)(HWND d, Camera* pCam);
+typedef void (*RHICreationInterface)(HWND d, Camera* pCam);
 typedef std::array<std::pair<std::string_view, RHICreationInterface>, 1> ConstExprMap;
 
 constexpr ConstExprMap mapInterfaces{

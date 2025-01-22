@@ -10,8 +10,8 @@ inline std::unique_ptr<App>& App::GetInstance()
 	return m_spAppInstance;
 }
 
-inline RHI* App::GetRHI()
-{
-	//return nullptr;
-	return m_pMainWindow->GetRHI();
-}
+//inline RHI* App::GetRHI()
+//{
+//	//return nullptr;
+//	return m_pMainWindow->GetRHI();
+//}

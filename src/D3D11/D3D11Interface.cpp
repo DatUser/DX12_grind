@@ -12,6 +12,7 @@
 #include "Engine/Mesh.h"
 #include "IO/objloader.h"
 #include "Shapes/teapot.h"
+#include "D3D11/D3D11Interface.h"
 
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
@@ -84,6 +85,11 @@ D3D11Interface::D3D11Interface(HWND hWnd, Camera* pCamera)
 
 }
 
+D3D11Interface::~D3D11Interface()
+{
+	delete m_pMainCamera;
+}
+
 HRESULT D3D11Interface::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
 {
     if (!pShaderBuffer)
@@ -101,21 +107,19 @@ HRESULT D3D11Interface::createShaderInstance(ID3D10Blob* pShaderBuffer, void** p
 }
 
 HRESULT D3D11Interface::createBufferInternal(
-	void* pData,
+	const void* pData,
 	UINT uByteWidth,
-	//void** opBuffer,
-	D3D11Buffer*& pRHIBuffer,
-	UINT uFlags,
-	D3D11_USAGE eUsage,
-	UINT uCPUAccess)
+	D3D11Buffer* pRHIBuffer,
+	D3D11_USAGE eUsage
+	)
 {
     // Init buffer descriptor
     D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 
-    bufferDesc.BindFlags = uFlags;
+    bufferDesc.BindFlags = D3D11Buffer::CastToInterfaceFlag(pRHIBuffer->m_eFlags);
     bufferDesc.ByteWidth = uByteWidth;//sizeof(float)  * 3 * 3;
-    bufferDesc.CPUAccessFlags = uCPUAccess;
+    bufferDesc.CPUAccessFlags = D3D11Buffer::CastToInterfaceCPUAccess(pRHIBuffer->m_eCPUAccess);
     bufferDesc.MiscFlags = 0;
     bufferDesc.Usage = eUsage;//D3D11_USAGE_DEFAULT;
 
@@ -129,7 +133,6 @@ HRESULT D3D11Interface::createBufferInternal(
     bufferData.pSysMem = pData;
 
     // Create buffer object
-    ComPtr<ID3D11Buffer> spBuffer;
     return m_spDevice->CreateBuffer(&bufferDesc, (pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->pInitResource);
 }
 
@@ -174,7 +177,7 @@ void D3D11Interface::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11B
     m_spContext->RSSetViewports(1, &viewport);
 }
 
-HRESULT D3D11Interface::PresentFrame()
+void D3D11Interface::PresentFrame()
 {
     HRESULT hr = m_spSwapchain->Present(0, 0);
     if (hr != S_OK)
@@ -184,17 +187,24 @@ HRESULT D3D11Interface::PresentFrame()
     }
 
     ATLASSERT(hr == S_OK);
-    return hr;
 }
 
-HRESULT D3D11Interface::CreateBuffer(void* pData, UINT uByteWidth, RHIBuffer* pBuffer)
+std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
+	const void* pData,
+	unsigned int uByteWidth,
+	ERHIBufferFlags eFlags,
+	ECPUAccessFlags eCPUAccess
+)
 {
-    return createBufferInternal(pData, uByteWidth, (D3D11Buffer*) pBuffer);
+	std::shared_ptr<D3D11Buffer> spBuffer = std::make_shared<D3D11Buffer>(eFlags, eCPUAccess);
+    ATLASSERT(createBufferInternal(pData, uByteWidth, (D3D11Buffer*) spBuffer.get()) == S_OK);
+
+	return spBuffer;
 }
 
-HRESULT D3D11Interface::CreateSwapchain()
+void D3D11Interface::CreateSwapchain()
 {
-    return E_NOTIMPL;
+    //return E_NOTIMPL;
 }
 
 void D3D11Interface::ClearRenderView()
@@ -251,15 +261,14 @@ void D3D11Interface::InitTestScene()
 
     size_t ullIdxSize = pMesh->GetNumIndices() * sizeof(int);
     //size_t ullIdxSize = sizeof(TeapotIndices);
-	D3D11Buffer* pIndiceBuffer = new D3D11Buffer();
+	D3D11Buffer* pIndiceBuffer = new D3D11Buffer(ERHIBufferFlags::INDEX, ECPUAccessFlags::NONE);
     ComPtr<ID3D11Buffer> spBufferIndices;
     ATLASSERT(createBufferInternal(
 		pMesh->GetIndiceData(),
         //Verts,                      //Buffer data
         ullIdxSize,                 //Buffer byte size
         //&spBufferIndices,           //OutputBuffer
-        pIndiceBuffer,
-        D3D11_BIND_INDEX_BUFFER     //Buffer flags
+        pIndiceBuffer
         ) == S_OK);
 
     //m_spContext->IASetIndexBuffer(spBufferIndices.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -271,7 +280,7 @@ void D3D11Interface::InitTestScene()
  	size_t ullVertsSize = pMesh->GetNumVerts() * 3 * sizeof(float);
     //size_t ullVertsSize = sizeof(TeapotVertices);
     //size_t ullVertsSize = sizeof(Verts);
-	D3D11Buffer* pVertBuffer = new D3D11Buffer();
+	D3D11Buffer* pVertBuffer = new D3D11Buffer(ERHIBufferFlags::VERTEX, ECPUAccessFlags::NONE);
     ComPtr<ID3D11Buffer> spBufferVerts;
     ATLASSERT(createBufferInternal(
 		pMesh->GetVerticeData(),
@@ -279,8 +288,7 @@ void D3D11Interface::InitTestScene()
         //(void*) (Verts),                //Buffer data
         ullVertsSize,                   //Buffer byte size
         //&spBufferVerts,                 //OutputBuffer
-		pVertBuffer,
-        D3D11_BIND_VERTEX_BUFFER        //Buffer flags
+		pVertBuffer
         ) == S_OK);
     vVertBuffers.push_back(spBufferVerts.Get());
 
@@ -354,16 +362,14 @@ void D3D11Interface::InitTestScene()
 
     Mat4x4 oMVP = dx::XMMatrixTranspose(oModelMat * oViewMat * oViewProj);
 
-	D3D11Buffer* pMVPBuffer = new D3D11Buffer();
+	D3D11Buffer* pMVPBuffer = new D3D11Buffer(ERHIBufferFlags::CONSTANT, ECPUAccessFlags::WRITE);
     ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(!FAILED(createBufferInternal(
         &oMVP,
         sizeof(Mat4x4),
         //&spMVPBuffer,
 		pMVPBuffer,
-        D3D11_BIND_CONSTANT_BUFFER,
-        D3D11_USAGE_DYNAMIC,
-        D3D11_CPU_ACCESS_WRITE
+        D3D11_USAGE_DYNAMIC
     )));
 
     m_spContext->VSSetConstantBuffers(0u, 1u, spMVPBuffer.GetAddressOf());

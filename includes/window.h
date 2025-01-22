@@ -46,7 +46,7 @@ public:
 
     // GETTERS
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
-    inline RHI* GetRHI() { return m_pDxGraphics; }
+    //inline RHI* GetRHI() { return m_pDxGraphics; }
 
     // SETTER
     inline void SetTitle(LPCSTR pTitle)   { SetWindowText(m_hWnd, pTitle); }
@@ -69,7 +69,7 @@ private:
     InputEvent* m_pInputEvent;
     MoveEvent* m_pMoveEvent;
 
-    RHI* m_pDxGraphics;
+    //RHI* m_pDxGraphics;
 
     Camera* m_pCamera;
 };

@@ -7,15 +7,26 @@ enum class ERHIBufferFlags
 	CONSTANT
 };
 
+enum class ECPUAccessFlags
+{
+	NONE,
+	READ,
+	WRITE,
+	READ_WRITE
+};
+
 class RHIBuffer
 {
 public:
-
-	virtual void Init(void* pData, unsigned int uByteWidth, ERHIBufferFlags eFlags) = 0;
+	RHIBuffer(ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess);
 
 	virtual void Update() = 0;
 
+
 protected:
 	ERHIBufferFlags		m_eFlags;
+	ECPUAccessFlags		m_eCPUAccess;
 private:
+	static constexpr int m_map = 0;
+	//static constexpr std::map<ERHIBufferFlags, unsigned int> m_map;
 };

@@ -6,7 +6,6 @@
 
 class Camera;
 class D3D11Buffer;
-class RHIBuffer;
 
 enum EShaderStage
 {
@@ -21,9 +20,9 @@ enum EShaderStage
 class D3D11Interface : public RHI
 {
 public:
-    [[nodiscard]] static RHI* CreateInterface(HWND hWnd, Camera* pCamera)
+    static void CreateInterface(HWND hWnd, Camera* pCamera)
     {
-        return new D3D11Interface(hWnd, pCamera);
+        RHI::m_spGFXInterface = std::make_unique<D3D11Interface>(hWnd, pCamera);
     }
 
     D3D11Interface(HWND hWnd, Camera* pCamera);
@@ -48,18 +47,22 @@ public:
      * @return HRESULT
      */
     HRESULT createBufferInternal(
-		void* pData,
+		const void* pData,
 		UINT uByteWidth,
 		D3D11Buffer* pRHIBuffer,
-		//void** opBuffer,
-		UINT uFlags,// = D3D11_BIND_VERTEX_BUFFER,
-		D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT,
-		UINT uCPUAccess = 0
+		D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT
     );
 
-    virtual HRESULT PresentFrame() override;
-    virtual HRESULT CreateBuffer(void* pData, UINT uByteWidth, RHIBuffer* pBuffer) override;
-    virtual HRESULT CreateSwapchain() override;
+    virtual void PresentFrame() override;
+
+    virtual std::shared_ptr<RHIBuffer> CreateBuffer(
+		const void* pData,
+		unsigned int uByteWidth,
+		ERHIBufferFlags eFlags,
+		ECPUAccessFlags eCPUAccess=ECPUAccessFlags::NONE
+	) override;
+
+    virtual void CreateSwapchain() override;
     virtual void ClearRenderView() override;
 
     void ClearRenderView(float r, float g, float b, float a = 1.f);

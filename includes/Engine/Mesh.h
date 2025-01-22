@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 // TODO: Create enunm for rendering state managemenent
 
@@ -30,6 +31,6 @@ private:
 	std::vector<int>	m_vIndices;
 
 	// Rendering resources
-	RHIBuffer*	m_pVertexBuffer;
-	RHIBuffer*	m_pVertexBuffer;
+	std::shared_ptr<RHIBuffer>	m_spVertexBuffer;
+	std::shared_ptr<RHIBuffer>	m_spIndiceBuffer;
 };
