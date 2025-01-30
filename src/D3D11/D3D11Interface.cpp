@@ -262,7 +262,7 @@ void D3D11Interface::InitTestScene()
     size_t ullIdxSize = pMesh->GetNumIndices() * sizeof(int);
     //size_t ullIdxSize = sizeof(TeapotIndices);
 	D3D11Buffer* pIndiceBuffer = new D3D11Buffer(ERHIBufferFlags::INDEX, ECPUAccessFlags::NONE);
-    ComPtr<ID3D11Buffer> spBufferIndices;
+    //ComPtr<ID3D11Buffer> spBufferIndices;
     ATLASSERT(createBufferInternal(
 		pMesh->GetIndiceData(),
         //Verts,                      //Buffer data
@@ -281,7 +281,7 @@ void D3D11Interface::InitTestScene()
     //size_t ullVertsSize = sizeof(TeapotVertices);
     //size_t ullVertsSize = sizeof(Verts);
 	D3D11Buffer* pVertBuffer = new D3D11Buffer(ERHIBufferFlags::VERTEX, ECPUAccessFlags::NONE);
-    ComPtr<ID3D11Buffer> spBufferVerts;
+    //ComPtr<ID3D11Buffer> spBufferVerts;
     ATLASSERT(createBufferInternal(
 		pMesh->GetVerticeData(),
         //(void*) (TeapotVertices),       //Buffer data
@@ -363,7 +363,7 @@ void D3D11Interface::InitTestScene()
     Mat4x4 oMVP = dx::XMMatrixTranspose(oModelMat * oViewMat * oViewProj);
 
 	D3D11Buffer* pMVPBuffer = new D3D11Buffer(ERHIBufferFlags::CONSTANT, ECPUAccessFlags::WRITE);
-    ComPtr<ID3D11Buffer> spMVPBuffer;
+    //ComPtr<ID3D11Buffer> spMVPBuffer;
     ATLASSERT(!FAILED(createBufferInternal(
         &oMVP,
         sizeof(Mat4x4),

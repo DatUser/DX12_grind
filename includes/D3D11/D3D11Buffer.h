@@ -10,7 +10,6 @@ class D3D11Buffer: public RHIBuffer
 {
 	friend class D3D11Interface;
 public:
-	D3D11Buffer(ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess);
 	~D3D11Buffer();
 
 	virtual void Update() override final;
@@ -39,5 +38,7 @@ public:
 	}
 
 private:
+	D3D11Buffer(ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess);
+
 	ComPtr<ID3D11Buffer> pInitResource;
 };
