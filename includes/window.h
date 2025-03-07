@@ -10,7 +10,7 @@
 #include "moveevent.h"
 
 class RHI;
-class Camera;
+//class Camera;
 
 class Window
 {
@@ -71,7 +71,7 @@ private:
 
     //RHI* m_pDxGraphics;
 
-    Camera* m_pCamera;
+    //Camera* m_pCamera;
 };
 
 //DEBUG PURPOSE

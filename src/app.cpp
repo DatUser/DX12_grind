@@ -1,4 +1,7 @@
 #include "app.h"
+
+#include "Engine/renderer.h"
+
 #include "RHI/rhi.h"
 
 // TODO: Set a random name in compile time
@@ -24,7 +27,7 @@ int App::Execute()
         //continue;
         //m_pMainWindow->SetTitle(std::to_string(GetExecutionTime()).c_str());
 
-		Renderer::Tick();
+		Renderer::GetInterface()->Tick();
 
         //RetrieveFrame();
     }

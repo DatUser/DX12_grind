@@ -17,3 +17,6 @@ Creating a small renderer with DX11.
 [ ] - Handle multiple viewport (1 scene -> 1 viewport)
 [ ] - RHI types and interface types
 [ ] - Core should be D3D11Core
+[ ] - Create forward .h for common STL includes (vector, string, ...)
+[ ] - Finish RHIShader + renderer implementation
+[ ] - Add CommandList system

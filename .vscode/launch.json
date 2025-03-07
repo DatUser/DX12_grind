@@ -19,7 +19,8 @@
             "environment": [],
             "externalConsole": "false",
             "preLaunchTask": "Meson build",
-            "console": "integratedTerminal"
+            "console": "externalTerminal"
+            //"console": "integratedTerminal"
         },
         {
             "name": "Meson Rebuild & Run",

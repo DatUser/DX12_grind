@@ -4,6 +4,7 @@
 #include <vector>
 
 class Mesh;
+class Camera;
 
 class Scene
 {
@@ -17,6 +18,11 @@ public:
 		return m_vMeshes;
 	}
 
+	inline Camera* GetCamera() const
+	{
+		return m_spCamera.get();
+	}
+
 	inline void AddMesh(std::shared_ptr<Mesh>& spMesh)
 	{
 		m_vMeshes.push_back(spMesh);
@@ -24,4 +30,5 @@ public:
 
 private:
 	std::vector<std::shared_ptr<Mesh>>	m_vMeshes;
+	std::shared_ptr<Camera>				m_spCamera;
 };

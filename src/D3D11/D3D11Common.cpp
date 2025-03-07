@@ -2,8 +2,10 @@
 
 #include "Core/asserts.h"
 
-ComPtr<ID3D10Blob> compileShader(LPCWSTR pFilename, LPCSTR pEntryPoint, LPCSTR pShaderModel, const D3D10_SHADER_MACRO *pDefines)
-{    ComPtr<ID3D10Blob> spShaderBuffer;
+ComPtr<ID3D10Blob> compileShader(
+	LPCWSTR pFilename, LPCSTR pEntryPoint, LPCSTR pShaderModel, const D3D10_SHADER_MACRO *pDefines)
+{
+	ComPtr<ID3D10Blob> spShaderBuffer;
     ComPtr<ID3DBlob> spErrorBuffer;
 
     HRESULT hr = D3DCompileFromFile(

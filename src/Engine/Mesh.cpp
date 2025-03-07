@@ -14,14 +14,14 @@ Mesh::Mesh(const std::vector<float>& vVertices, const std::vector<int>& vIndices
 , m_vIndices(m_vIndices)
 {
 	m_spVertexBuffer = RHI::GetInterface()->CreateBuffer(
-		vVertices.data(),
-		vVertices.size() * sizeof(float),
+		m_vVertices.data(),
+		m_vVertices.size() * sizeof(float),
 		ERHIBufferFlags::VERTEX
 		);
 
 	m_spIndiceBuffer = RHI::GetInterface()->CreateBuffer(
-		vIndices.data(),
-		vIndices.size() * sizeof(int),
+		m_vIndices.data(),
+		m_vIndices.size() * sizeof(int),
 		ERHIBufferFlags::INDEX
 		);
 }

@@ -3,8 +3,14 @@
 #include <array>
 #include <map>
 
-RHIBuffer::RHIBuffer(ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess)
-: m_eFlags(eFlags)
+RHIBuffer::RHIBuffer(
+	void* pData,
+	uint32_t uByteWidth,
+	ERHIBufferFlags eFlags,
+	ECPUAccessFlags eCPUAccess)
+: m_pData(pData)
+, m_uByteWidth(uByteWidth)
+, m_eFlags(eFlags)
 , m_eCPUAccess(eCPUAccess)
 {
 }

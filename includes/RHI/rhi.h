@@ -26,13 +26,20 @@ public:
     virtual void ClearRenderView() = 0;
     virtual void Draw() = 0;
 
-    virtual std::shared_ptr<RHIBuffer> CreateBuffer(const void* pData, unsigned int uByteWidth, ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess=ECPUAccessFlags::NONE) = 0;
+    virtual std::shared_ptr<RHIBuffer> CreateBuffer(void* pData, unsigned int uByteWidth, ERHIBufferFlags eFlags, ECPUAccessFlags eCPUAccess=ECPUAccessFlags::NONE) = 0;
+    virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) = 0;
+
     virtual void CreateSwapchain() = 0;
 
-	inline static auto&& GetInterface()
+	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
+	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
+	virtual void SetBuffer(const RHIBuffer* pBuffer) = 0;
+
+	//inline static auto&& GetInterface()
+	inline static RHI* GetInterface()
 	{
-		return m_spGFXInterface;
-		//return m_spGFXInterface.get();
+		//return m_spGFXInterface;
+		return m_spGFXInterface.get();
 	}
 protected:
 	static std::unique_ptr<RHI>	m_spGFXInterface;

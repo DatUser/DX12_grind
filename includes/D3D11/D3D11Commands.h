@@ -5,7 +5,7 @@
 class D3D11Commands
 {
 public:
-	void SetVertexBuffers();
+	void SetVertexBuffers(RHIBuffer* pBuffer);
 
 private:
 	D3D11Commands();

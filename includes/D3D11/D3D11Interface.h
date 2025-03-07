@@ -7,12 +7,7 @@
 class Camera;
 class D3D11Buffer;
 
-enum EShaderStage
-{
-    VERTEX_SHADER,
-    FRAGMENT_SHADER
-};
-
+enum class EShaderStage : uint32_t;
 
 /**
  *  Initializes and handles the device, the swapchain and the context
@@ -25,6 +20,13 @@ public:
         RHI::m_spGFXInterface = std::make_unique<D3D11Interface>(hWnd, pCamera);
     }
 
+	inline static D3D11Interface* GetInterface()
+	{
+		RHI* p = RHI::m_spGFXInterface.get();
+		return dynamic_cast<D3D11Interface*>(p);
+	}
+
+    D3D11Interface() = delete;
     D3D11Interface(HWND hWnd, Camera* pCamera);
     ~D3D11Interface();
 
@@ -47,8 +49,6 @@ public:
      * @return HRESULT
      */
     HRESULT createBufferInternal(
-		const void* pData,
-		UINT uByteWidth,
 		D3D11Buffer* pRHIBuffer,
 		D3D11_USAGE eUsage = D3D11_USAGE_DEFAULT
     );
@@ -56,16 +56,22 @@ public:
     virtual void PresentFrame() override;
 
     virtual std::shared_ptr<RHIBuffer> CreateBuffer(
-		const void* pData,
+		void* pData,
 		unsigned int uByteWidth,
 		ERHIBufferFlags eFlags,
 		ECPUAccessFlags eCPUAccess=ECPUAccessFlags::NONE
 	) override;
 
+	virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) override;
+
     virtual void CreateSwapchain() override;
     virtual void ClearRenderView() override;
 
     void ClearRenderView(float r, float g, float b, float a = 1.f);
+
+	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
+	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) override;
+	virtual void SetBuffer(const RHIBuffer* pBuffer) override;
 
     /**
      * @brief Create a Input Layout containing information about buffer data layout
@@ -76,6 +82,7 @@ public:
      * @param pLayout
      * @return HRESULT
      */
+	// To remove
     HRESULT createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout);
 
     /**
@@ -86,14 +93,10 @@ public:
      * @param pVSBuffer
      * @param uFlags
      */
+	// To remove
     void AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, Microsoft::WRL::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset);
 
     void Draw();
-
-    /**
-     * @brief Inits the default shader program
-     */
-    void InitTestScene();
 private:
     // Handles memory stuff
     ComPtr<ID3D11Device> m_spDevice;
