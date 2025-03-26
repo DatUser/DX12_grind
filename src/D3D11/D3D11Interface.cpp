@@ -225,20 +225,24 @@ void D3D11Interface::ClearRenderView(float r, float g, float b, float a)
 
 void D3D11Interface::SetVertexBuffer(const RHIBuffer* pBuffer)
 {
-	D3D11Buffer* pD3D11Buffer = dynamic_cast<D3D11Buffer*>(pBuffer);
-	m_spContext->IASetVertexBuffers(0, 1, &pD3D11Buffer->pInitResource, &pD3D11Buffer->uStride, &pD3D11Buffer->uOffset);
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	uint32_t uStride = 0;
+	uint32_t uOffset = sizeof(float) * 3;
+	m_spContext->IASetVertexBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf(), &uStride, &uOffset);
+	//m_spContext->IASetVertexBuffers(0, 1, &pD3D11Buffer->pInitResource, &pD3D11Buffer->uStride, &pD3D11Buffer->uOffset);
 }
 
 void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 {
-	D3D11Buffer* pD3D11Buffer = dynamic_cast<D3D11Buffer*>(pBuffer);
-	m_spContext->IASetIndexBuffer(pD3D11Buffer->pInitResource, DXGI_FORMAT_R32_UINT, pD3D11Buffer->uOffset);
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	uint32_t uOffset = sizeof(uint32_t) * 3;
+	m_spContext->IASetIndexBuffer(pD3D11Buffer->pInitResource.Get(), DXGI_FORMAT_R32_UINT, uOffset);
 }
 
 void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer)
 {
-	D3D11Buffer* pD3D11Buffer = dynamic_cast<D3D11Buffer*>(pBuffer);
-	m_spContext->VSSetConstantBuffers(0, 1, &pD3D11Buffer->pInitResource);
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf());
 }
 
 void D3D11Interface::Draw()
@@ -250,165 +254,165 @@ void D3D11Interface::Draw()
 	m_spContext->DrawIndexed(18960, 0, 0);
 }
 
-void D3D11Interface::InitTestScene()
-{
-    //----Create shader buffer----//
-    ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
-    ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
-
-    //----Create shader instances----//
-    ComPtr<ID3D11VertexShader> spVSInst;
-    HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX);
-    ATLASSERT(hr == S_OK);
-
-    ComPtr<ID3D11PixelShader> spPSInst;
-    hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::PIXEL);
-    ATLASSERT(hr == S_OK);
-
-
-    m_spContext->VSSetShader(spVSInst.Get(), 0, 0);
-    m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
-
-    //----Load obj file----//
-	std::vector<Mesh*> vMeshes;
-	load_obj("models/teapot.obj", vMeshes);
-	Mesh* pMesh = vMeshes[0];
-
-    //----Bind vertices----//
-    float Verts[9] = {  0.f, 5.f, 5.f,
-                        5.f, -5.f, 5.f,
-                        -5.f, -5.f, 5.f };
-    std::vector<ID3D11Buffer*> vVertBuffers;
-
-	// IDX BUFFER
-
-    size_t ullIdxSize = pMesh->GetNumIndices() * sizeof(int);
-    //size_t ullIdxSize = sizeof(TeapotIndices);
-	D3D11Buffer* pIndiceBuffer = new D3D11Buffer(
-		pMesh->GetIndiceData(),		//Buffer data
-        ullIdxSize,                 //Buffer byte size
-		ERHIBufferFlags::INDEX,
-		ECPUAccessFlags::NONE);
-    //ComPtr<ID3D11Buffer> spBufferIndices;
-    ATLASSERT(createBufferInternal(
-		//pMesh->GetIndiceData(),
-        //Verts,                      //Buffer data
-        //ullIdxSize,                 //Buffer byte size
-        //&spBufferIndices,           //OutputBuffer
-        pIndiceBuffer
-        ) == S_OK);
-
-    //m_spContext->IASetIndexBuffer(spBufferIndices.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	// END
-
-	// VERT BUFFER
-
- 	size_t ullVertsSize = pMesh->GetNumVerts() * 3 * sizeof(float);
-    //size_t ullVertsSize = sizeof(TeapotVertices);
-    //size_t ullVertsSize = sizeof(Verts);
-	D3D11Buffer* pVertBuffer = new D3D11Buffer(
-		pMesh->GetVerticeData(),
-		ullVertsSize,
-		ERHIBufferFlags::VERTEX,
-		ECPUAccessFlags::NONE);
-    //ComPtr<ID3D11Buffer> spBufferVerts;
-    ATLASSERT(createBufferInternal(
-		//pMesh->GetVerticeData(),
-        //(void*) (TeapotVertices),       //Buffer data
-        //(void*) (Verts),                //Buffer data
-        //ullVertsSize,                   //Buffer byte size
-        //&spBufferVerts,                 //OutputBuffer
-		pVertBuffer
-        ) == S_OK);
-    //vVertBuffers.push_back(spBufferVerts.Get());
-
-	//Set the vertex buffer
-    //UINT stride = sizeof(float) * 3;
-    //UINT offset = 0;
-    //m_spContext->IASetVertexBuffers( 0, 1, spBufferVerts.GetAddressOf(), &stride, &offset );
-
-	//END
-
-	// LAYOUT
-    //ComPtr<ID3D11InputLayout> spInputLayout{};
-    //ATLASSERT(
-    //    createInputLayout(
-    //        spVSBuffer.Get(),               //Shader text data
-    //        DXGI_FORMAT_R32G32B32_FLOAT,    //Data format
-    //        "POSITION",                     //Structure semantic name
-    //        &spInputLayout
-    //    ) == S_OK);
-
-    //m_spContext->IASetInputLayout(spInputLayout.Get());
-    //m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    ////Create the Viewport
-    //D3D11_VIEWPORT viewport;
-    //ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-
-    //viewport.TopLeftX = 0;
-    //viewport.TopLeftY = 0;
-    //viewport.Width = 600;
-    //viewport.Height = 600;
-
-    ////Set the Viewport
-    //m_spContext->RSSetViewports(1, &viewport);
-
-	//AddBuffers(
-	//	vVertBuffers,           //Buffers to be bound
-	//	spBufferIndices.Get(),
-	//	//nullptr,  //Index buffer
-	//	spInputLayout,          //Layout for these buffers
-	//	sizeof(float) * 3,      //Size of buffer elements
-	//	0                       //Byte shift before 1st elt
-	//	);
-
-    ATLASSERT(m_pMainCamera != nullptr);
-
-    //----Bind uniform data----//
-
-    // TODO: Move ViewMat compute to camera
-    Vec3 oPos = m_pMainCamera->GetPosition();
-    Vec3 oLookAt =  {0.f, 0.f, 0.f};
-    Vec3 oUp = m_pMainCamera->GetUpVector();
-
-    // Not useful yet => we just try to place an object at (0, 0, 0)
-    Mat4x4 oModelMat = dx::XMMatrixIdentity();
-
-    Mat4x4 oViewMat = dx::XMMatrixLookAtLH(
-                        dx::XMLoadFloat3(&oPos),
-                        dx::XMLoadFloat3(&oLookAt),
-                        dx::XMLoadFloat3(&oUp));
-
-    Mat4x4 oViewProj = dx::XMMatrixPerspectiveFovLH(
-            m_pMainCamera->GetFOV(),
-            m_pMainCamera->GetAspectRatio(),
-            m_pMainCamera->GetNearClipping(),
-            m_pMainCamera->GetFarClipping()
-        );
-        //DirectX::XMStoreFloat4x4(&constants.model, DirectX::XMMatrixIdentity());
-        //DirectX::XMStoreFloat4x4(&constants.view, DirectX::XMMatrixTranspose(create_view_matrix(main_camera.position, main_camera.look_at)));
-        //DirectX::XMStoreFloat4x4(&constants.projection, DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(main_camera.fov, main_camera.aspect_ratio, main_camera.near_clip, main_camera.far_clip)))
-
-    Mat4x4* pMVP = new Mat4x4(dx::XMMatrixTranspose(oModelMat * oViewMat * oViewProj));
-
-	D3D11Buffer* pMVPBuffer = new D3D11Buffer(
-		pMVP,
-		sizeof(Mat4x4),
-		ERHIBufferFlags::CONSTANT,
-		ECPUAccessFlags::WRITE);
-
-    //ComPtr<ID3D11Buffer> spMVPBuffer;
-    ATLASSERT(!FAILED(createBufferInternal(
-        //&oMVP,
-        //sizeof(Mat4x4),
-        //&spMVPBuffer,
-		pMVPBuffer,
-        D3D11_USAGE_DYNAMIC
-    )));
-
-    m_spContext->VSSetConstantBuffers(0u, 1u, (ID3D11Buffer**) pMVPBuffer->pInitResource.GetAddressOf());
-    //m_spContext->VSSetConstantBuffers(0u, 1u, spMVPBuffer.GetAddressOf());
-    //spMVPBuffer->
-}
+//void D3D11Interface::InitTestScene()
+//{
+//    //----Create shader buffer----//
+//    ComPtr<ID3D10Blob> spVSBuffer = compileShader(L"shaders/Default.hlsl", "VSDefaultMain", "vs_5_0");
+//    ComPtr<ID3D10Blob> spPSBuffer = compileShader(L"shaders/Default.hlsl", "PSDefaultMain", "ps_5_0");
+//
+//    //----Create shader instances----//
+//    ComPtr<ID3D11VertexShader> spVSInst;
+//    HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX);
+//    ATLASSERT(hr == S_OK);
+//
+//    ComPtr<ID3D11PixelShader> spPSInst;
+//    hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::PIXEL);
+//    ATLASSERT(hr == S_OK);
+//
+//
+//    m_spContext->VSSetShader(spVSInst.Get(), 0, 0);
+//    m_spContext->PSSetShader(spPSInst.Get(), 0, 0);
+//
+//    //----Load obj file----//
+//	std::vector<Mesh*> vMeshes;
+//	load_obj("models/teapot.obj", vMeshes);
+//	Mesh* pMesh = vMeshes[0];
+//
+//    //----Bind vertices----//
+//    float Verts[9] = {  0.f, 5.f, 5.f,
+//                        5.f, -5.f, 5.f,
+//                        -5.f, -5.f, 5.f };
+//    std::vector<ID3D11Buffer*> vVertBuffers;
+//
+//	// IDX BUFFER
+//
+//    size_t ullIdxSize = pMesh->GetNumIndices() * sizeof(int);
+//    //size_t ullIdxSize = sizeof(TeapotIndices);
+//	D3D11Buffer* pIndiceBuffer = new D3D11Buffer(
+//		pMesh->GetIndiceData(),		//Buffer data
+//        ullIdxSize,                 //Buffer byte size
+//		ERHIBufferFlags::INDEX,
+//		ECPUAccessFlags::NONE);
+//    //ComPtr<ID3D11Buffer> spBufferIndices;
+//    ATLASSERT(createBufferInternal(
+//		//pMesh->GetIndiceData(),
+//        //Verts,                      //Buffer data
+//        //ullIdxSize,                 //Buffer byte size
+//        //&spBufferIndices,           //OutputBuffer
+//        pIndiceBuffer
+//        ) == S_OK);
+//
+//    //m_spContext->IASetIndexBuffer(spBufferIndices.Get(), DXGI_FORMAT_R32_UINT, 0);
+//
+//	// END
+//
+//	// VERT BUFFER
+//
+// 	size_t ullVertsSize = pMesh->GetNumVerts() * 3 * sizeof(float);
+//    //size_t ullVertsSize = sizeof(TeapotVertices);
+//    //size_t ullVertsSize = sizeof(Verts);
+//	D3D11Buffer* pVertBuffer = new D3D11Buffer(
+//		pMesh->GetVerticeData(),
+//		ullVertsSize,
+//		ERHIBufferFlags::VERTEX,
+//		ECPUAccessFlags::NONE);
+//    //ComPtr<ID3D11Buffer> spBufferVerts;
+//    ATLASSERT(createBufferInternal(
+//		//pMesh->GetVerticeData(),
+//        //(void*) (TeapotVertices),       //Buffer data
+//        //(void*) (Verts),                //Buffer data
+//        //ullVertsSize,                   //Buffer byte size
+//        //&spBufferVerts,                 //OutputBuffer
+//		pVertBuffer
+//        ) == S_OK);
+//    //vVertBuffers.push_back(spBufferVerts.Get());
+//
+//	//Set the vertex buffer
+//    //UINT stride = sizeof(float) * 3;
+//    //UINT offset = 0;
+//    //m_spContext->IASetVertexBuffers( 0, 1, spBufferVerts.GetAddressOf(), &stride, &offset );
+//
+//	//END
+//
+//	// LAYOUT
+//    //ComPtr<ID3D11InputLayout> spInputLayout{};
+//    //ATLASSERT(
+//    //    createInputLayout(
+//    //        spVSBuffer.Get(),               //Shader text data
+//    //        DXGI_FORMAT_R32G32B32_FLOAT,    //Data format
+//    //        "POSITION",                     //Structure semantic name
+//    //        &spInputLayout
+//    //    ) == S_OK);
+//
+//    //m_spContext->IASetInputLayout(spInputLayout.Get());
+//    //m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//
+//    ////Create the Viewport
+//    //D3D11_VIEWPORT viewport;
+//    //ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+//
+//    //viewport.TopLeftX = 0;
+//    //viewport.TopLeftY = 0;
+//    //viewport.Width = 600;
+//    //viewport.Height = 600;
+//
+//    ////Set the Viewport
+//    //m_spContext->RSSetViewports(1, &viewport);
+//
+//	//AddBuffers(
+//	//	vVertBuffers,           //Buffers to be bound
+//	//	spBufferIndices.Get(),
+//	//	//nullptr,  //Index buffer
+//	//	spInputLayout,          //Layout for these buffers
+//	//	sizeof(float) * 3,      //Size of buffer elements
+//	//	0                       //Byte shift before 1st elt
+//	//	);
+//
+//    ATLASSERT(m_pMainCamera != nullptr);
+//
+//    //----Bind uniform data----//
+//
+//    // TODO: Move ViewMat compute to camera
+//    Vec3 oPos = m_pMainCamera->GetPosition();
+//    Vec3 oLookAt =  {0.f, 0.f, 0.f};
+//    Vec3 oUp = m_pMainCamera->GetUpVector();
+//
+//    // Not useful yet => we just try to place an object at (0, 0, 0)
+//    Mat4x4 oModelMat = dx::XMMatrixIdentity();
+//
+//    Mat4x4 oViewMat = dx::XMMatrixLookAtLH(
+//                        dx::XMLoadFloat3(&oPos),
+//                        dx::XMLoadFloat3(&oLookAt),
+//                        dx::XMLoadFloat3(&oUp));
+//
+//    Mat4x4 oViewProj = dx::XMMatrixPerspectiveFovLH(
+//            m_pMainCamera->GetFOV(),
+//            m_pMainCamera->GetAspectRatio(),
+//            m_pMainCamera->GetNearClipping(),
+//            m_pMainCamera->GetFarClipping()
+//        );
+//        //DirectX::XMStoreFloat4x4(&constants.model, DirectX::XMMatrixIdentity());
+//        //DirectX::XMStoreFloat4x4(&constants.view, DirectX::XMMatrixTranspose(create_view_matrix(main_camera.position, main_camera.look_at)));
+//        //DirectX::XMStoreFloat4x4(&constants.projection, DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(main_camera.fov, main_camera.aspect_ratio, main_camera.near_clip, main_camera.far_clip)))
+//
+//    Mat4x4* pMVP = new Mat4x4(dx::XMMatrixTranspose(oModelMat * oViewMat * oViewProj));
+//
+//	D3D11Buffer* pMVPBuffer = new D3D11Buffer(
+//		pMVP,
+//		sizeof(Mat4x4),
+//		ERHIBufferFlags::CONSTANT,
+//		ECPUAccessFlags::WRITE);
+//
+//    //ComPtr<ID3D11Buffer> spMVPBuffer;
+//    ATLASSERT(!FAILED(createBufferInternal(
+//        //&oMVP,
+//        //sizeof(Mat4x4),
+//        //&spMVPBuffer,
+//		pMVPBuffer,
+//        D3D11_USAGE_DYNAMIC
+//    )));
+//
+//    m_spContext->VSSetConstantBuffers(0u, 1u, (ID3D11Buffer**) pMVPBuffer->pInitResource.GetAddressOf());
+//    //m_spContext->VSSetConstantBuffers(0u, 1u, spMVPBuffer.GetAddressOf());
+//    //spMVPBuffer->
+//}

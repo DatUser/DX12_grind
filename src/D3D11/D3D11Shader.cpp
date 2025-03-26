@@ -30,7 +30,7 @@ bool D3D11Shader::Compile()
 
 	if (m_eStage == EShaderStage::VERTEX)
 		ATLASSERT(
-			createInputLayout(
+			D3D11Interface::GetInterface()->createInputLayout(
 				m_spShaderBuffer.Get(),          //Shader text data
 				DXGI_FORMAT_R32G32B32_FLOAT,    //Data format
 				"POSITION",                     //Structure semantic name

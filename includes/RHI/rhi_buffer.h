@@ -31,8 +31,10 @@ public:
 
 
 protected:
-	void*				m_pData;
-	uint32_t 			m_uByteWidth;
+	void*				m_pData; 		// Buffer cpu data
+	uint32_t 			m_uByteWidth;	// Size of the buffer (bytes)
+	uint32_t 			m_uOffset;		// Size of a single element
+	uint32_t 			m_uStride;		// Size between each element
 	ERHIBufferFlags		m_eFlags;
 	ECPUAccessFlags		m_eCPUAccess;
 private:
