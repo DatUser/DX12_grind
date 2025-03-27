@@ -17,9 +17,10 @@ Renderer::Renderer()
 , m_spConstantBuffer(std::make_shared<ConstantBuffers>())
 , m_spConstantBufferResource(nullptr)
 {
+	InitResources();
 }
 
-void Renderer::Init()
+void Renderer::InitResources()
 {
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
 		&m_spConstantBuffer->oModelViewProj,

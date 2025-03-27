@@ -26,7 +26,7 @@ private:
 	 * @brief Initialiazes graphics resources of renderer
 	 *
 	 */
-	void Init();
+	void InitResources();
 
 	void GenerateFrame();
 	void UpdateConstantBuffers();
@@ -46,6 +46,6 @@ private:
 	static std::unique_ptr<Renderer> m_spInstance;
 
 	std::unique_ptr<Scene> m_spScene;
-	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;
+	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;			// CPU data of constant buffer (MVP matrix)
 	std::shared_ptr<RHIBuffer> 			m_spConstantBufferResource;
 };
