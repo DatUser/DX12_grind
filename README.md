@@ -21,8 +21,10 @@ Creating a small renderer with DX11.
 
 - [ ] - Create an InputLayout class to handle `stride` and `offset`
 - [ ] - Add CommandList system
+- [ ] - Use PSOs and create a wrapper for pipeline state
 - [ ] - Create Transform structure
 - [ ] - Add RenderState enum to Mesh to track when to upload buffer/render/...
+- [ ] - Add a submesh abstraction
 
 ### Secondary tasks
 
@@ -34,3 +36,5 @@ Creating a small renderer with DX11.
 
 - [ ] - Core should be D3D11Core
 - [ ] - Rename D3D11 classes from engine to differentiate from windows api classes
+- [ ] - Add Debug logs to keep track of what's happening, when, and how many times
+- [ ] - Create a xgo namespace

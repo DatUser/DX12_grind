@@ -37,7 +37,7 @@ int App::Execute()
 
 void App::RetrieveFrame()
 {
-    RHI::GetInterface()->ClearRenderView();
-    RHI::GetInterface()->Draw();
-    RHI::GetInterface()->PresentFrame();
+    //RHI::GetInterface()->ClearRenderView();
+    //RHI::GetInterface()->Draw();
+    //RHI::GetInterface()->PresentFrame();
 }

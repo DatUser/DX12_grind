@@ -15,10 +15,15 @@ class Mesh
 private:
 	/* data */
 public:
-	Mesh(/* args */);
 	~Mesh();
 
-	Mesh(const std::vector<float>& vVertices, const std::vector<int>& vIndices);
+	Mesh(
+		const std::vector<float>& vVertices,
+		const std::vector<int>& vIndices,
+		/* TODO: Move to submesh */
+		uint32_t uVertexOffset = 0,
+		uint32_t uIndexOffset = 0
+	);
 
 	void* GetVerticeData() { return m_vVertices.data(); }
 	void* GetIndiceData() { return m_vIndices.data(); }
@@ -26,14 +31,24 @@ public:
 	size_t GetNumVerts() const { return m_vVertices.size() / 3; }
 	size_t GetNumIndices() const { return m_vIndices.size(); }
 
+	uint32_t GetVertexOffset() const { return m_uVertexOffset; }
+	uint32_t GetIndexOffset() const { return m_uIndexOffset; }
+
 	RHIBuffer* GetVertexBuffer() const { return m_spVertexBuffer.get(); }
 	RHIBuffer* GetIndexBuffer() const { return m_spIndiceBuffer.get(); }
 
 private:
+	// Avoids to have Mesh with unitilized rendering resources
+	Mesh(/* args */);
+
 	std::vector<float>	m_vVertices;
 	std::vector<int>	m_vIndices;
 
 	// Rendering resources
 	std::shared_ptr<RHIBuffer>	m_spVertexBuffer;
 	std::shared_ptr<RHIBuffer>	m_spIndiceBuffer;
+
+	// TODO: Move to submesh
+	uint32_t m_uVertexOffset;
+	uint32_t m_uIndexOffset;
 };

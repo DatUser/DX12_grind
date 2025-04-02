@@ -33,30 +33,31 @@ void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
 
 	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path.c_str());
 
-	//std::vector<Mesh *> meshes{};
-
 	if (!err.empty())
 	{
 		std::cerr << err << std::endl;
 	}
+
 
 	if (!ret)
 		std::cerr << path << ": Could not be parsed !" << std::endl;
 	else
 		std::cout << path << ": Successfully loaded !" << std::endl;
 
-	Mesh* pCurrMesh = new Mesh{};
-	CHECK(pCurrMesh != nullptr)
+	//Mesh* pCurrMesh = new Mesh{};
+	//CHECK(pCurrMesh != nullptr)
+	//pCurrMesh->m_vVertices = attrib.vertices;
 
-	pCurrMesh->m_vVertices = attrib.vertices;
-
-	// Here we load all meshes
+	std::vector<int> vIndices{};
 	for (auto&& shape : shapes)
 	{
 		for (auto&& index : shape.mesh.indices)
-			pCurrMesh->m_vIndices.push_back(index.vertex_index);
+			vIndices.push_back(index.vertex_index);
+		//pCurrMesh->m_vIndices.push_back(index.vertex_index);
 	}
 
+	Mesh* pCurrMesh = new Mesh{ attrib.vertices, vIndices };
+	CHECK(pCurrMesh != nullptr)
 	vMeshes.push_back(pCurrMesh);
 
 	std::cout << "Shape size: " << shapes.size() << std::endl;

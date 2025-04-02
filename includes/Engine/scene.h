@@ -23,7 +23,7 @@ public:
 		return m_spCamera.get();
 	}
 
-	inline void AddMesh(std::shared_ptr<Mesh>& spMesh)
+	inline void AddMesh(std::shared_ptr<Mesh>&& spMesh)
 	{
 		m_vMeshes.push_back(spMesh);
 	}

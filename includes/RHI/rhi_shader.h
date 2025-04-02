@@ -29,7 +29,7 @@ public:
 		EShaderStage eStage
 	);
 
-	~RHIShader();
+	virtual ~RHIShader();
 
 	virtual bool Compile() = 0;
 

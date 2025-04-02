@@ -6,8 +6,9 @@
 #include "camera.h"
 #include "Core/asserts.h"
 
-#include "D3D11/D3D11Common.h"
 #include "D3D11/D3D11Buffer.h"
+#include "D3D11/D3D11Common.h"
+#include "D3D11/D3D11Shader.h"
 
 #include "RHI/rhi_shader.h"
 
@@ -110,8 +111,7 @@ HRESULT D3D11Interface::createShaderInstance(ID3D10Blob* pShaderBuffer, void** p
 }
 
 HRESULT D3D11Interface::createBufferInternal(
-	D3D11Buffer* pRHIBuffer,
-	D3D11_USAGE eUsage
+	D3D11Buffer* pRHIBuffer
 	)
 {
     // Init buffer descriptor
@@ -122,7 +122,7 @@ HRESULT D3D11Interface::createBufferInternal(
     bufferDesc.ByteWidth = pRHIBuffer->m_uByteWidth;//sizeof(float)  * 3 * 3;
     bufferDesc.CPUAccessFlags = D3D11Buffer::CastToInterfaceCPUAccess(pRHIBuffer->m_eCPUAccess);
     bufferDesc.MiscFlags = 0;
-    bufferDesc.Usage = eUsage;//D3D11_USAGE_DEFAULT;
+    bufferDesc.Usage = D3D11Buffer::CastToInterfaceUsage(pRHIBuffer->m_eUsage);
 
     //float Verts[9] = {  0.f, 0.5f, 0.5f,
     //                    0.5f, -0.5f, 0.5f,
@@ -194,10 +194,11 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 	void* pData,
 	unsigned int uByteWidth,
 	ERHIBufferFlags eFlags,
-	ECPUAccessFlags eCPUAccess
+	ERHICPUAccessFlags eCPUAccess,
+	ERHIBufferUsage eUsage
 )
 {
-	std::shared_ptr<D3D11Buffer> spBuffer = std::make_shared<D3D11Buffer>(pData, uByteWidth, eFlags, eCPUAccess);
+	std::shared_ptr<D3D11Buffer> spBuffer = std::make_shared<D3D11Buffer>(pData, uByteWidth, eFlags, eCPUAccess, eUsage);
 	return spBuffer;
 }
 
@@ -223,7 +224,13 @@ void D3D11Interface::ClearRenderView(float r, float g, float b, float a)
     m_spContext->ClearRenderTargetView(m_spTarget.Get(), pColor);
 }
 
-void D3D11Interface::SetVertexBuffer(const RHIBuffer* pBuffer)
+std::shared_ptr<RHIShader> D3D11Interface::CreateShader(ERendererShaders eShader)
+{
+	const ShaderData& oShaderData = mapD3D11ShadersPaths[static_cast<unsigned int>(eShader)];
+	return std::make_shared<D3D11Shader>(std::get<0>(oShaderData).data(), std::get<1>(oShaderData).data(), std::get<2>(oShaderData));
+}
+
+void D3D11Interface::SetVertexBuffer(const RHIBuffer *pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	uint32_t uStride = 0;
@@ -245,13 +252,35 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer)
 	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf());
 }
 
-void D3D11Interface::Draw()
+void D3D11Interface::SetVertexShader(const RHIShader* pShader)
+{
+	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
+	m_spContext->VSSetShader(dynamic_cast<ID3D11VertexShader*>(pD3D11Shader->m_spShader.Get()), nullptr, 0);
+
+	m_spContext->IASetInputLayout(dynamic_cast<ID3D11InputLayout*>(pD3D11Shader->m_spInputLayout.Get()));
+	// TODO: Make this generic
+	m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void D3D11Interface::SetPixelShader(const RHIShader* pShader)
+{
+	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
+	m_spContext->PSSetShader(dynamic_cast<ID3D11PixelShader*>(pD3D11Shader->m_spShader.Get()), nullptr, 0);
+}
+
+void D3D11Interface::DrawIndexed(
+		uint32_t uIndexCount,
+		uint32_t uIndexOffset,
+		uint32_t uVertexOffset
+	)
 {
     //m_pContext->IASetVertexBuffers(0, 1, )
     //m_spContext->Draw(3, 0);
 	//m_spContext->Draw(NumTeapotVertices, 0);
 	//m_spContext->Draw(56880, 0);
-	m_spContext->DrawIndexed(18960, 0, 0);
+
+	//m_spContext->DrawIndexed(18960, 0, 0);
+	m_spContext->DrawIndexed(uIndexCount, uIndexOffset, uVertexOffset);
 }
 
 //void D3D11Interface::InitTestScene()
@@ -292,7 +321,7 @@ void D3D11Interface::Draw()
 //		pMesh->GetIndiceData(),		//Buffer data
 //        ullIdxSize,                 //Buffer byte size
 //		ERHIBufferFlags::INDEX,
-//		ECPUAccessFlags::NONE);
+//		ERHICPUAccessFlags::NONE);
 //    //ComPtr<ID3D11Buffer> spBufferIndices;
 //    ATLASSERT(createBufferInternal(
 //		//pMesh->GetIndiceData(),
@@ -315,7 +344,7 @@ void D3D11Interface::Draw()
 //		pMesh->GetVerticeData(),
 //		ullVertsSize,
 //		ERHIBufferFlags::VERTEX,
-//		ECPUAccessFlags::NONE);
+//		ERHICPUAccessFlags::NONE);
 //    //ComPtr<ID3D11Buffer> spBufferVerts;
 //    ATLASSERT(createBufferInternal(
 //		//pMesh->GetVerticeData(),
@@ -401,7 +430,7 @@ void D3D11Interface::Draw()
 //		pMVP,
 //		sizeof(Mat4x4),
 //		ERHIBufferFlags::CONSTANT,
-//		ECPUAccessFlags::WRITE);
+//		ERHICPUAccessFlags::WRITE);
 //
 //    //ComPtr<ID3D11Buffer> spMVPBuffer;
 //    ATLASSERT(!FAILED(createBufferInternal(

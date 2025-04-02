@@ -10,3 +10,6 @@ RHIShader::RHIShader(
 , m_bIsCompiled(false)
 {
 }
+RHIShader::~RHIShader()
+{
+}

@@ -8,7 +8,12 @@
 
 #include "RHI/rhi.h"
 #include "RHI/rhi_buffer.h"
+#include "RHI/rhi_shader.h"
 
+// Creates, compiles and stores shader
+#define INIT_RENDERER_SHADER(x)\
+	m_mapShaders[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateShader(x);	\
+	m_mapShaders[static_cast<unsigned int>(x)]->Compile();
 
 std::unique_ptr<Renderer> Renderer::m_spInstance{new Renderer{}};
 
@@ -18,6 +23,9 @@ Renderer::Renderer()
 , m_spConstantBufferResource(nullptr)
 {
 	InitResources();
+	InitShaders();
+
+	InitTestScene();
 }
 
 void Renderer::InitResources()
@@ -26,14 +34,20 @@ void Renderer::InitResources()
 		&m_spConstantBuffer->oModelViewProj,
 		sizeof(Mat4x4),
 		ERHIBufferFlags::CONSTANT,
-		ECPUAccessFlags::WRITE);
+		ERHICPUAccessFlags::WRITE,
+		ERHIBufferUsage::DYNAMIC);
+}
+
+void Renderer::InitShaders()
+{
+	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_VS)
+	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_PS)
 }
 
 void Renderer::Tick()
 {
 	GenerateFrame();
 }
-
 
 void Renderer::GenerateFrame()
 {
@@ -44,7 +58,8 @@ void Renderer::GenerateFrame()
 
 	Pass_Forward();
 
-	RHI::GetInterface()->Draw();
+	// Todo : Add Render target to be filled and displayed
+	//RHI::GetInterface()->Draw();
 }
 
 void Renderer::UpdateConstantBuffers()
@@ -54,10 +69,12 @@ void Renderer::UpdateConstantBuffers()
 
 void Renderer::UpdateMesh(Mesh *pMesh)
 {
+	// Check if mesh render state is dirty and update buffers if so
 }
 
 void Renderer::DrawMesh(Mesh *pMesh)
 {
+	RHI::GetInterface()->DrawIndexed(pMesh->GetNumIndices(), pMesh->GetIndexOffset(), pMesh->GetVertexOffset());
 }
 
 void Renderer::Pass_Forward()
@@ -66,6 +83,11 @@ void Renderer::Pass_Forward()
 	{
 		UpdateMesh(pMesh.get());
 
+		// Bind shader
+		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
+
+		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
 
@@ -73,6 +95,12 @@ void Renderer::Pass_Forward()
 		//RHI::GetInterface()->Draw();
 	}
 }
+
 void Renderer::InitTestScene()
 {
+	std::vector<Mesh*> vMeshes;
+	load_obj("models/teapot.obj", vMeshes);
+	Mesh* pMesh = vMeshes[0];
+
+	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});
 }

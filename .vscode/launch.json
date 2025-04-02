@@ -17,9 +17,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": "false",
             "preLaunchTask": "Meson build",
-            "console": "externalTerminal"
+            "console": "integratedTerminal"
             //"console": "integratedTerminal"
         },
         {
@@ -31,7 +30,6 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": "false",
             "preLaunchTask": "Meson rebuild",
             "console": "integratedTerminal"
         }

@@ -17,6 +17,7 @@
 
 class D3D11Shader : public RHIShader
 {
+	friend class D3D11Interface;
 public:
 	D3D11Shader(
 		const std::wstring&	wsFilepath,
@@ -24,7 +25,7 @@ public:
 		EShaderStage 		eStage
 	);
 
-	~D3D11Shader();
+	virtual ~D3D11Shader() override;
 
 	virtual bool Compile() override;
 
@@ -32,7 +33,7 @@ public:
 private:
 	ComPtr<ID3D10Blob>	m_spShaderBuffer;
 	ComPtr<ID3D11InputLayout> m_spInputLayout;
-
+	ComPtr<ID3D11DeviceChild> m_spShader;
 };
 
 #include "D3D11/D3D11Shader.hpp"

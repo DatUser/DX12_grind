@@ -4,18 +4,23 @@
 #include "fwdtypes.h"
 #include "RHI/rhi_buffer.h"
 
-#include <map>
+#include <array>
 #include <memory>
 
 class D3D11Buffer: public RHIBuffer
 {
 	friend class D3D11Interface;
 public:
+
+	D3D11Buffer() = delete;
+
 	D3D11Buffer(
 		void* 			pData,
 		uint32_t 		uByteWidth,
 		ERHIBufferFlags eFlags,
-		ECPUAccessFlags eCPUAccess);
+		ERHICPUAccessFlags eCPUAccess,
+		ERHIBufferUsage eUsage);
+
 	~D3D11Buffer();
 
 	virtual void Update() override final;
@@ -32,25 +37,36 @@ public:
 
 	static inline unsigned int CastToInterfaceFlag(ERHIBufferFlags eFlags)
 	{
-		const static std::map<ERHIBufferFlags, unsigned int> mapFlags{
-			{ERHIBufferFlags::CONSTANT, D3D11_BIND_CONSTANT_BUFFER},
-			{ERHIBufferFlags::INDEX, D3D11_BIND_INDEX_BUFFER},
-			{ERHIBufferFlags::VERTEX, D3D11_BIND_VERTEX_BUFFER}
+		constexpr static std::array<unsigned int, static_cast<unsigned int>(ERHIBufferFlags::_size)> mapFlags{{
+			D3D11_BIND_CONSTANT_BUFFER,
+			D3D11_BIND_INDEX_BUFFER,
+			D3D11_BIND_VERTEX_BUFFER
+		}
 		};
 
-		return mapFlags.at(eFlags);
+		return mapFlags[static_cast<unsigned int>(eFlags)];
 	}
 
-	static inline unsigned int CastToInterfaceCPUAccess(ECPUAccessFlags eCPUAccess)
+	static inline unsigned int CastToInterfaceCPUAccess(ERHICPUAccessFlags eCPUAccess)
 	{
-		const static std::map<ECPUAccessFlags, unsigned int> mapFlags{
-			{ECPUAccessFlags::NONE, 0},
-			{ECPUAccessFlags::READ, D3D11_CPU_ACCESS_READ},
-			{ECPUAccessFlags::WRITE, D3D11_CPU_ACCESS_WRITE},
-			{ECPUAccessFlags::READ_WRITE, D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE}
+		constexpr static std::array<unsigned int, static_cast<unsigned int>(ERHICPUAccessFlags::_size)> mapFlags{
+			0,
+			D3D11_CPU_ACCESS_READ,
+			D3D11_CPU_ACCESS_WRITE,
+			D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE
 		};
 
-		return mapFlags.at(eCPUAccess);
+		return mapFlags[static_cast<unsigned int>(eCPUAccess)];
+	}
+
+	static inline D3D11_USAGE CastToInterfaceUsage(ERHIBufferUsage eUsage)
+	{
+		constexpr static std::array<D3D11_USAGE, static_cast<unsigned int>(ERHIBufferUsage::_size)> mapFlags{
+			D3D11_USAGE_DEFAULT,
+			D3D11_USAGE_DYNAMIC
+		};
+
+		return mapFlags[static_cast<unsigned int>(eUsage)];
 	}
 
 private:

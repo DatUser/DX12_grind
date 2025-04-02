@@ -19,6 +19,10 @@ D3D11Shader::D3D11Shader(
 
 }
 
+D3D11Shader::~D3D11Shader()
+{
+}
+
 bool D3D11Shader::Compile()
 {
 	m_spShaderBuffer = compileShader(

@@ -1,11 +1,21 @@
 #pragma once
 
+#include <array>
 #include <memory>
 
-class Mesh;
-class RHIBuffer;
-class Scene;
 struct ConstantBuffers;
+class Mesh;
+class Scene;
+class RHIBuffer;
+class RHIShader;
+
+enum class ERendererShaders : uint8_t
+{
+	FORWARD_VS,
+	FORWARD_PS,
+
+	_size
+};
 
 class Renderer
 {
@@ -28,6 +38,12 @@ private:
 	 */
 	void InitResources();
 
+	/**
+	 * @brief Initialiazes default renderer shaders
+	 *
+	 */
+	void InitShaders();
+
 	void GenerateFrame();
 	void UpdateConstantBuffers();
 	/**
@@ -48,4 +64,5 @@ private:
 	std::unique_ptr<Scene> m_spScene;
 	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;			// CPU data of constant buffer (MVP matrix)
 	std::shared_ptr<RHIBuffer> 			m_spConstantBufferResource;
+	std::array<std::shared_ptr<RHIShader>, static_cast<unsigned int>(ERendererShaders::_size)> m_mapShaders;	// TODO: Move to submesh ERendererShaders::_size> m_mapShaders;
 };

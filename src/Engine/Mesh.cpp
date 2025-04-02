@@ -9,9 +9,16 @@ Mesh::Mesh()
 {
 }
 
-Mesh::Mesh(const std::vector<float>& vVertices, const std::vector<int>& vIndices)
-: m_vVertices(m_vVertices)
-, m_vIndices(m_vIndices)
+Mesh::Mesh(
+	const std::vector<float>& vVertices,
+	const std::vector<int>& vIndices,
+	uint32_t uVertexOffset /* = 0 */,
+	uint32_t uIndexOffset /* = 0 */
+)
+: m_vVertices(vVertices)
+, m_vIndices(vIndices)
+, m_uVertexOffset(uVertexOffset)
+, m_uIndexOffset(uIndexOffset)
 {
 	m_spVertexBuffer = RHI::GetInterface()->CreateBuffer(
 		m_vVertices.data(),
