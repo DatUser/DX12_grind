@@ -32,6 +32,12 @@ bool D3D11Shader::Compile()
 								nullptr /*TODO: add defines*/
 								);
 
+	ATLASSERT(D3D11Interface::GetInterface()->createShaderInstanceInternal(
+		m_spShaderBuffer.Get(),
+		&m_spShader,
+		m_eStage
+		) == S_OK);
+
 	if (m_eStage == EShaderStage::VERTEX)
 		ATLASSERT(
 			D3D11Interface::GetInterface()->createInputLayout(

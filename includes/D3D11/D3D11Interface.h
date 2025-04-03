@@ -40,7 +40,7 @@ public:
      * @param[out] pShaderInstance
      * @return HRESULT S_OK on sucess
      */
-    HRESULT createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
+    HRESULT createShaderInstanceInternal(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage);
 
     /**
      * @brief Create a Buffer object in GPU memory

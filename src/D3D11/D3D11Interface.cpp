@@ -94,7 +94,7 @@ D3D11Interface::~D3D11Interface()
 	delete m_pMainCamera;
 }
 
-HRESULT D3D11Interface::createShaderInstance(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
+HRESULT D3D11Interface::createShaderInstanceInternal(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
 {
     if (!pShaderBuffer)
         return E_INVALIDARG;
@@ -255,9 +255,9 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer)
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)
 {
 	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
-	m_spContext->VSSetShader(dynamic_cast<ID3D11VertexShader*>(pD3D11Shader->m_spShader.Get()), nullptr, 0);
+	m_spContext->VSSetShader((ID3D11VertexShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
 
-	m_spContext->IASetInputLayout(dynamic_cast<ID3D11InputLayout*>(pD3D11Shader->m_spInputLayout.Get()));
+	m_spContext->IASetInputLayout((ID3D11InputLayout*) pD3D11Shader->m_spInputLayout.Get());
 	// TODO: Make this generic
 	m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -265,7 +265,7 @@ void D3D11Interface::SetVertexShader(const RHIShader* pShader)
 void D3D11Interface::SetPixelShader(const RHIShader* pShader)
 {
 	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
-	m_spContext->PSSetShader(dynamic_cast<ID3D11PixelShader*>(pD3D11Shader->m_spShader.Get()), nullptr, 0);
+	m_spContext->PSSetShader((ID3D11PixelShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
 }
 
 void D3D11Interface::DrawIndexed(
@@ -291,11 +291,11 @@ void D3D11Interface::DrawIndexed(
 //
 //    //----Create shader instances----//
 //    ComPtr<ID3D11VertexShader> spVSInst;
-//    HRESULT hr = createShaderInstance(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX);
+//    HRESULT hr = createShaderInstanceInternal(spVSBuffer.Get(), &spVSInst, EShaderStage::VERTEX);
 //    ATLASSERT(hr == S_OK);
 //
 //    ComPtr<ID3D11PixelShader> spPSInst;
-//    hr = createShaderInstance(spPSBuffer.Get(), &spPSInst, EShaderStage::PIXEL);
+//    hr = createShaderInstanceInternal(spPSBuffer.Get(), &spPSInst, EShaderStage::PIXEL);
 //    ATLASSERT(hr == S_OK);
 //
 //
