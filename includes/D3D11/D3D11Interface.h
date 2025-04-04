@@ -18,9 +18,9 @@ enum class EShaderStage : uint32_t;
 class D3D11Interface : public RHI
 {
 public:
-    static void CreateInterface(HWND hWnd, Camera* pCamera)
+    static void CreateInterface(Camera* pCamera)
     {
-        RHI::m_spGFXInterface = std::make_unique<D3D11Interface>(hWnd, pCamera);
+        RHI::m_spGFXInterface = std::make_unique<D3D11Interface>(pCamera);
     }
 
 	inline static D3D11Interface* GetInterface()
@@ -30,7 +30,7 @@ public:
 	}
 
     D3D11Interface() = delete;
-    D3D11Interface(HWND hWnd, Camera* pCamera);
+    D3D11Interface(Camera* pCamera);
     ~D3D11Interface();
 
     /**
@@ -67,10 +67,11 @@ public:
 
 	virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) override;
 
-    virtual void CreateSwapchain() override;
     virtual void ClearRenderView() override;
-
     void ClearRenderView(float r, float g, float b, float a = 1.f);
+
+    virtual void CreateSwapchain(HWND hWnd) override;
+	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) override;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
@@ -113,9 +114,12 @@ public:
 private:
     // Handles memory stuff
     ComPtr<ID3D11Device> m_spDevice;
-    ComPtr<IDXGISwapChain> m_spSwapchain;
     // Handles gfx pipeline stuff
     ComPtr<ID3D11DeviceContext> m_spContext;
+
+
+	ComPtr<IDXGIFactory>	m_spFactory;
+    ComPtr<IDXGISwapChain> 	m_spSwapchain;
     ComPtr<ID3D11RenderTargetView> m_spTarget;
 
     std::vector<ComPtr<ID3D11Buffer>> m_vBuffers;

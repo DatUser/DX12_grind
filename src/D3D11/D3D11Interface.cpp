@@ -2,13 +2,17 @@
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler")
+#pragma comment(lib, "dxgi.lib")
 
 #include "camera.h"
 #include "Core/asserts.h"
 
+#include "app.h"
+
 #include "D3D11/D3D11Buffer.h"
 #include "D3D11/D3D11Common.h"
 #include "D3D11/D3D11Shader.h"
+#include "D3D11/D3D11Viewport.h"
 
 #include "RHI/rhi_shader.h"
 
@@ -19,74 +23,42 @@
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
-D3D11Interface::D3D11Interface(HWND hWnd, Camera *pCamera)
+D3D11Interface::D3D11Interface(Camera *pCamera)
 	: m_spDevice(nullptr),
 	  m_spSwapchain(nullptr),
 	  m_spContext(nullptr),
 	  m_pMainCamera(pCamera)
 {
-    DXGI_SWAP_CHAIN_DESC oSwapDesc;
-    ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-    oSwapDesc.BufferDesc.Width = 600;
-    oSwapDesc.BufferDesc.Height = 600;
-    oSwapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    oSwapDesc.BufferDesc.RefreshRate.Numerator = 60;
-    oSwapDesc.BufferDesc.RefreshRate.Denominator = 1;
-    oSwapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-    oSwapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-    oSwapDesc.SampleDesc.Count = 1;
-    oSwapDesc.SampleDesc.Quality = 0;
-    oSwapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    oSwapDesc.BufferCount = 1;
-    oSwapDesc.OutputWindow = (HWND) hWnd;
-    oSwapDesc.Windowed = TRUE;
-    oSwapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    oSwapDesc.Flags = 0;
+	ATLASSERT(D3D11CreateDevice(
+			nullptr,					// Adapter
+			D3D_DRIVER_TYPE_HARDWARE,	// Driver type
+			nullptr,					// Module software
+			0,							// Flags
+			nullptr,					// Feature levels
+			0,							// Feature level count
+			D3D11_SDK_VERSION,			// SDK version
+			&m_spDevice,				// Device
+			nullptr,					// Feature level
+			&m_spContext				// Context
+		) == S_OK);
 
-    HRESULT hr = D3D11CreateDeviceAndSwapChain(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr,
-        0,
-        nullptr,
-        0,
-        D3D11_SDK_VERSION,
-        //Here pointer is released then we access its address
-        &oSwapDesc,
-        &m_spSwapchain,
-        &m_spDevice,
-        nullptr,
-        &m_spContext
-    );
-    ATLASSERT(hr == S_OK);
+	ATLASSERT(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&m_spFactory)) == S_OK);
 
-    // Access to swapchain back buffer resource
-    ComPtr<ID3D11Resource> spBackBuffer{};
-    //hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
-    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
-    ATLASSERT(hr == S_OK);
-
-	// Create wireframe rasterizer state
-	ComPtr<ID3D11RasterizerState> spWireframe{};
-	D3D11_RASTERIZER_DESC oWfDesc{};
-	ZeroMemory(&oWfDesc, sizeof(D3D11_RASTERIZER_DESC));
-	oWfDesc.FillMode = D3D11_FILL_WIREFRAME;
-	oWfDesc.CullMode = D3D11_CULL_NONE;
-	hr = m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe);
-
-	// Set rasterizer state
-	m_spContext->RSSetState(spWireframe.Get());
-
-    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
-    ATLASSERT(hr == S_OK);
-
-    //Set our Render Target
-    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
-
-    //InitTestScene();
-
-	//ID3D11CommandList* pCommandList = nullptr;
-	//pCommandList->QueryInterface(__uuidof(ID3D11CommandList), (void**)&m_spCommandList);
+    //HRESULT hr = D3D11CreateDeviceAndSwapChain(
+    //    nullptr,					// Adapter
+    //    D3D_DRIVER_TYPE_HARDWARE, 	// Driver type
+    //    nullptr,					// Module software
+    //    0,							// Flags
+    //    nullptr,					// Feature levels
+    //    0,							// Feature level count
+    //    D3D11_SDK_VERSION,			// SDK version
+    //    //Here pointer is released then we access its address
+    //    &oSwapDesc,					// Swap chain description
+    //    &m_spSwapchain,				// Swap chain
+    //    &m_spDevice,				// Device
+    //    nullptr,					// Feature level
+    //    &m_spContext				// Context
+    //);
 }
 
 D3D11Interface::~D3D11Interface()
@@ -208,9 +180,77 @@ bool D3D11Interface::UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer)
 	return spBuffer->IsValid();
 }
 
-void D3D11Interface::CreateSwapchain()
+void D3D11Interface::CreateSwapchain(HWND hWnd)
 {
-    //return E_NOTIMPL;
+	// TODO: Move this to renderer using RHI interface
+    DXGI_SWAP_CHAIN_DESC oSwapDesc;
+    ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+    oSwapDesc.BufferDesc.Width = App::GetInstance()->GetMainWindow()->GetWidth();
+    oSwapDesc.BufferDesc.Height = App::GetInstance()->GetMainWindow()->GetHeight();
+    oSwapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    oSwapDesc.BufferDesc.RefreshRate.Numerator = 60;
+    oSwapDesc.BufferDesc.RefreshRate.Denominator = 1;
+    oSwapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+    oSwapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+    oSwapDesc.SampleDesc.Count = 1;
+    oSwapDesc.SampleDesc.Quality = 0;
+    oSwapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    oSwapDesc.BufferCount = 1;
+    oSwapDesc.OutputWindow = (HWND) hWnd;
+    oSwapDesc.Windowed = TRUE;
+    oSwapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    oSwapDesc.Flags = 0;
+
+    //HRESULT hr = D3D11CreateDeviceAndSwapChain(
+    //    nullptr,
+    //    D3D_DRIVER_TYPE_HARDWARE,
+    //    nullptr,
+    //    0,
+    //    nullptr,
+    //    0,
+    //    D3D11_SDK_VERSION,
+    //    //Here pointer is released then we access its address
+    //    &oSwapDesc,
+    //    &m_spSwapchain,
+    //    &m_spDevice,
+    //    nullptr,
+    //    &m_spContext
+    //);
+	HRESULT hr = m_spFactory->CreateSwapChain(m_spDevice.Get(), &oSwapDesc, &m_spSwapchain);
+    ATLASSERT(hr == S_OK);
+
+	// TODO: Move the stuff down to renderer
+
+    // Access to swapchain back buffer resource
+    ComPtr<ID3D11Resource> spBackBuffer{};
+    //hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
+    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
+    ATLASSERT(hr == S_OK);
+
+	// Create wireframe rasterizer state
+	ComPtr<ID3D11RasterizerState> spWireframe{};
+	D3D11_RASTERIZER_DESC oWfDesc{};
+	ZeroMemory(&oWfDesc, sizeof(D3D11_RASTERIZER_DESC));
+	oWfDesc.FillMode = D3D11_FILL_WIREFRAME;
+	oWfDesc.CullMode = D3D11_CULL_NONE;
+	hr = m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe);
+
+	// Set rasterizer state
+	m_spContext->RSSetState(spWireframe.Get());
+
+    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
+    ATLASSERT(hr == S_OK);
+
+    //Set our Render Target
+    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
+
+	//ID3D11CommandList* pCommandList = nullptr;
+	//pCommandList->QueryInterface(__uuidof(ID3D11CommandList), (void**)&m_spCommandList);
+}
+
+std::shared_ptr<RHIViewport> D3D11Interface::CreateViewport(uint32_t uWidth, uint32_t uHeight)
+{
+	return std::make_shared<D3D11Viewport>(uWidth, uHeight, 0, 0);
 }
 
 void D3D11Interface::ClearRenderView()

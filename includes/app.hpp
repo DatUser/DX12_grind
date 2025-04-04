@@ -5,7 +5,12 @@ inline double App::GetExecutionTime()
     return oDuration.count();
 }
 
-inline std::unique_ptr<App>& App::GetInstance()
+inline Window* App::GetMainWindow()
+{
+	return m_pMainWindow;
+}
+
+inline auto&& App::GetInstance()
 {
 	return m_spAppInstance;
 }

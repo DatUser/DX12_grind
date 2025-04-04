@@ -18,9 +18,10 @@ public:
     void RetrieveFrame();
 
     inline double GetExecutionTime();
+	inline Window* GetMainWindow();
     //inline RHI* GetRHI();
 
-    inline static std::unique_ptr<App>& GetInstance();
+    inline static auto&& GetInstance();
 
 private:
 	App() = delete;

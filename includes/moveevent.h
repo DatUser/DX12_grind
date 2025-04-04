@@ -19,3 +19,5 @@ public:
 
 private:
 };
+
+using SizeEvent = MoveEvent;

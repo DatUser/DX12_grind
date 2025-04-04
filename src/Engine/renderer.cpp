@@ -1,5 +1,7 @@
 #include "Engine/renderer.h"
 
+#include "app.h"
+
 #include "Core/Core.h"
 
 #include "Engine/Mesh.h"
@@ -18,7 +20,9 @@
 std::unique_ptr<Renderer> Renderer::m_spInstance{new Renderer{}};
 
 Renderer::Renderer()
-: m_spScene(std::make_unique<Scene>())
+: m_mapShaders({nullptr})
+, m_spScene(std::make_unique<Scene>())
+, m_spCurrentViewport(nullptr)
 , m_spConstantBuffer(std::make_shared<ConstantBuffers>())
 , m_spConstantBufferResource(nullptr)
 {
@@ -30,12 +34,17 @@ Renderer::Renderer()
 
 void Renderer::InitResources()
 {
+	// This must be done first since it inits Device, Context and Swapchain which are needed for operations below
+	RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
+
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
 		&m_spConstantBuffer->oModelViewProj,
 		sizeof(Mat4x4),
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
 		ERHIBufferUsage::DYNAMIC);
+
+	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(600, 600);
 }
 
 void Renderer::InitShaders()
@@ -47,6 +56,7 @@ void Renderer::InitShaders()
 void Renderer::Tick()
 {
 	GenerateFrame();
+	PresentFrame();
 }
 
 void Renderer::GenerateFrame()
@@ -60,6 +70,11 @@ void Renderer::GenerateFrame()
 
 	// Todo : Add Render target to be filled and displayed
 	//RHI::GetInterface()->Draw();
+}
+
+void Renderer::PresentFrame()
+{
+	RHI::GetInterface()->PresentFrame();
 }
 
 void Renderer::UpdateConstantBuffers()

@@ -6,9 +6,39 @@
 #include "RHI/fwd_rhi.h"
 #include "D3D11/D3D11Interface.h"
 
-#define DEBUG_INPUT
+//#define DEBUG_INPUT
+//#define DEBUG_SIZE
 
 //Window::WindowClass Window::WindowClass::m_Wc;
+
+void OnWindowResize(Window*, int nWidth, int nHeight)
+{
+	std::stringstream stream;
+	stream << "Size: " << nWidth << ", " << nHeight << std::endl;
+	OutputDebugString(stream.str().c_str());
+}
+
+void OnKeyPressed(unsigned int uKeyCode)
+{
+	std::stringstream stream;
+	stream << "Pressed " << (char) uKeyCode << " key!" << std::endl;
+	OutputDebugString(stream.str().c_str());
+}
+
+void OnKeyReleased(unsigned int uKeyCode)
+{
+    std::stringstream stream;
+    stream << "Released " << (char) uKeyCode << " key!" << std::endl;
+    OutputDebugString(stream.str().c_str());
+}
+
+void OnInputEvent(Window* pSender, unsigned int uKeyCode, EInputType eType)
+{
+	if (eType == EInputType::KEY_RELEASED)
+		OnKeyReleased(uKeyCode);
+	else
+		OnKeyPressed(uKeyCode);
+}
 
 Window::WindowClass::WindowClass()
 : m_hInstance(GetModuleHandle(nullptr))
@@ -44,6 +74,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
     m_pMouse = new Mouse();
     m_pInputEvent = new InputEvent();
     m_pMoveEvent = new MoveEvent();
+	m_pSizeEvent = new SizeEvent();
 
     if (!m_pKeyboard || !m_pMouse || !m_pInputEvent || !m_pMoveEvent)
         return;
@@ -52,6 +83,9 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
     m_pInputEvent->AddAction(&OnInputEvent);
     m_pMoveEvent->AddAction(&OnMouseMove);
     #endif
+	#ifdef DEBUG_SIZE
+	m_pSizeEvent->AddAction(&OnWindowResize);
+	#endif
 
     //Adjust window size to hold content
     RECT rect;
@@ -74,7 +108,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         if (m_hWnd)
         {
             ShowWindow(m_hWnd, SW_SHOW);
-			CreateInterface(m_hWnd, new Camera());
+			CreateInterface(new Camera());
             //m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
         }
         else
@@ -91,6 +125,7 @@ Window::~Window()
     delete m_pMouse;
     delete m_pInputEvent;
     delete m_pMoveEvent;
+	delete m_pSizeEvent;
     DestroyWindow(m_hWnd);
     //delete m_pDxGraphics;
 }
@@ -121,38 +156,6 @@ LRESULT CALLBACK Window::AcceptMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
 {
     Window* pWin = (Window*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
     return pWin->HandleMsg(hWnd, uMsg, wParam, lParam);
-}
-
-void OnKeyPressed(unsigned int uKeyCode)
-{
-    std::stringstream stream;
-    stream << "Pressed " << (char) uKeyCode << " key!" << std::endl;
-    OutputDebugString(stream.str().c_str());
-}
-
-void OnKeyReleased(unsigned int uKeyCode)
-{
-    std::stringstream stream;
-    stream << "Released " << (char) uKeyCode << " key!" << std::endl;
-    OutputDebugString(stream.str().c_str());
-}
-
-void OnInputEvent(Window* pSender, unsigned int uKeyCode, EInputType eType)
-{
-    if (eType == EInputType::KEY_RELEASED)
-        OnKeyReleased(uKeyCode);
-    else
-        OnKeyPressed(uKeyCode);
-}
-
-void OnMouseMove(Window* pSender, int nX, int nY)
-{
-    //Retrieve Mouse Pos: Px Pos relative to window
-    //POINTS ptMousePos = MAKEPOINTS(lMousePos);
-
-    std::stringstream stream;
-    stream << "Mouse pos is: (" << nX << ", " << nY << ")" << std::endl;
-    OutputDebugString(stream.str().c_str());
 }
 
 LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
@@ -230,6 +233,12 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
         break;
     case WM_KILLFOCUS:
         m_pKeyboard->FlushPressedKeys();
+	case WM_SIZE:
+		m_oWindowSize = MAKEPOINTS(lParam);
+
+		// Broadcast event
+		m_pSizeEvent->Broadcast(this, m_oWindowSize.x, m_oWindowSize.y);
+		break;
     }
 
     return DefWindowProc(hWnd, uMsg, wParam, lParam);

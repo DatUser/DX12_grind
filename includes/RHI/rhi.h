@@ -7,7 +7,10 @@
 enum class ERendererShaders : uint8_t;
 class RHIBuffer;
 class RHIShader;
+class RHIViewport;
 
+struct HWND__;
+typedef struct HWND__ *HWND;
 
 /**
  *  This is the rendering interface
@@ -37,7 +40,9 @@ public:
 	) = 0;
     virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) = 0;
 
-    virtual void CreateSwapchain() = 0;
+    virtual void CreateSwapchain(HWND hWnd) = 0;
+
+	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) = 0;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;

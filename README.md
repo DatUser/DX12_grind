@@ -1,6 +1,6 @@
-# DX11 Sample project
+# Small engine with RHI (Render Hardware Interface) abstraction
 
-Creating a small renderer with DX11.
+Currently working on RHI and Dx11 specification of the interface.
 
 ## TODO:
 
@@ -9,13 +9,17 @@ Creating a small renderer with DX11.
 - [X] - Make RHI a singleton and remove interface from window.h
 - [X] - Create basic object classes -> Mesh
 - [X] - Upload buffer from RHI in Mesh
+- [X] - Finish RHIShader for Vertex and Pixel shader + renderer implementation (default tasks)
+- [X] - Make RHI buffer upload logic
+- [X] - Create scene with renderable objects
+- [X] - Separate Device and Swapchain creation
+	- [X] - Create DXGI Factory to create Swapchain
 
 ### WIP
 
-- [~] - Finish RHIShader + renderer implementation (default tasks)
 - [~] - RHI types and interface types
-- [~] - Make RHI buffer upload logic
-- [~] - Create scene with renderable objects
+	- [~] - Create a RHIViewport class holding width-height
+- [~] - Update MVP in CBO using Camera position
 
 ### Upcoming (ranked by priority)
 
@@ -31,6 +35,7 @@ Creating a small renderer with DX11.
 - [ ] - Distinguish Window & Frame
 - [ ] - Handle multiple viewport (1 scene -> 1 viewport)
 - [ ] - Create forward .h for common STL includes (vector, string, ...)
+- [ ] - Isolate CPU and GPU tasks in their own thread
 
 ### Not a feature
 
@@ -38,3 +43,4 @@ Creating a small renderer with DX11.
 - [ ] - Rename D3D11 classes from engine to differentiate from windows api classes
 - [ ] - Add Debug logs to keep track of what's happening, when, and how many times
 - [ ] - Create a xgo namespace
+- [ ] - Clean includes

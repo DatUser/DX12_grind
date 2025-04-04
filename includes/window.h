@@ -45,8 +45,11 @@ public:
     std::optional<int> ProcessMessage();
 
     // GETTERS
+	inline HWND GetHandle() const { return m_hWnd; }
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
-    //inline RHI* GetRHI() { return m_pDxGraphics; }
+	inline const POINTS& GetSize() const { return m_oWindowSize; }
+	inline uint32_t GetWidth() const { return m_oWindowSize.x; }
+	inline uint32_t GetHeight() const { return m_oWindowSize.y; }
 
     // SETTER
     inline void SetTitle(LPCSTR pTitle)   { SetWindowText(m_hWnd, pTitle); }
@@ -61,18 +64,22 @@ private:
     LRESULT CALLBACK HandleMsg(HWND hWnd, UINT oMsg, WPARAM wParam,
                         LPARAM lParam);
 
-    HWND m_hWnd;
+	POINTS 	m_oWindowSize;
+    HWND 	m_hWnd;
 
-    Keyboard* m_pKeyboard;
-    Mouse* m_pMouse;
+    Keyboard* 	m_pKeyboard;
+    Mouse* 		m_pMouse;
 
-    InputEvent* m_pInputEvent;
-    MoveEvent* m_pMoveEvent;
+    InputEvent* 	m_pInputEvent;
+    MoveEvent* 		m_pMoveEvent;
+	SizeEvent* 		m_pSizeEvent;
 
     //RHI* m_pDxGraphics;
 
     //Camera* m_pCamera;
 };
+
+void OnWindowResize(Window* pSender, int nWidth, int nHeight);
 
 //DEBUG PURPOSE
 void OnInputEvent(Window* pSender, unsigned int uKeyCode, EInputType eType);

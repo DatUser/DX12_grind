@@ -15,7 +15,7 @@
 
 class Camera;
 
-typedef void (*RHICreationInterface)(HWND d, Camera* pCam);
+typedef void (*RHICreationInterface)(Camera* pCam);
 
 template <size_t N>
 using RHIInterfaceMap = std::array<std::pair<std::string_view, RHICreationInterface>, N>;
