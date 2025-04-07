@@ -15,7 +15,16 @@ struct PSInput
     float3 color : COLOR;
 };
 
-uniform matrix iMVPMat;
+cbuffer FrameBuffer : register(b0)
+{
+    matrix mView;
+    matrix mProj;
+    matrix mViewProj;
+};
+
+uniform matrix mModel;
+
+//uniform matrix iMVPMat;
 //float4x4 iMVPMat = {
 //     2.41421356f, 0.0f,        0.0f,        0.0f ,
 //     0.0f,        2.41421356f, 0.0f,        0.0f ,

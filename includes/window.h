@@ -10,7 +10,6 @@
 #include "moveevent.h"
 
 class RHI;
-//class Camera;
 
 class Window
 {
@@ -73,10 +72,6 @@ private:
     InputEvent* 	m_pInputEvent;
     MoveEvent* 		m_pMoveEvent;
 	SizeEvent* 		m_pSizeEvent;
-
-    //RHI* m_pDxGraphics;
-
-    //Camera* m_pCamera;
 };
 
 void OnWindowResize(Window* pSender, int nWidth, int nHeight);

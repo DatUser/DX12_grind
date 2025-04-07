@@ -34,12 +34,11 @@ Renderer::Renderer()
 
 void Renderer::InitResources()
 {
-	// This must be done first since it inits Device, Context and Swapchain which are needed for operations below
 	RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
 
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
-		&m_spConstantBuffer->oModelViewProj,
-		sizeof(Mat4x4),
+		&m_spConstantBuffer,
+		sizeof(ConstantBuffers),
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
 		ERHIBufferUsage::DYNAMIC);
@@ -79,12 +78,16 @@ void Renderer::PresentFrame()
 
 void Renderer::UpdateConstantBuffers()
 {
+	//CPU update CBO
+
 	RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get());
 }
 
 void Renderer::UpdateMesh(Mesh *pMesh)
 {
 	// Check if mesh render state is dirty and update buffers if so
+
+	// Update Model view if needed
 }
 
 void Renderer::DrawMesh(Mesh *pMesh)

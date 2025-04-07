@@ -15,7 +15,9 @@ Mesh::Mesh(
 	uint32_t uVertexOffset /* = 0 */,
 	uint32_t uIndexOffset /* = 0 */
 )
-: m_vVertices(vVertices)
+: m_oPos(Vec3(0.f, 0.f, 0.f))
+, m_oModelMatrix(Mat4x4::Identity())
+, m_vVertices(vVertices)
 , m_vIndices(vIndices)
 , m_uVertexOffset(uVertexOffset)
 , m_uIndexOffset(uIndexOffset)
@@ -35,4 +37,9 @@ Mesh::Mesh(
 
 Mesh::~Mesh()
 {
+}
+
+void Mesh::UpdateModelMatrix()
+{
+	memcpy(&m_oModelMatrix.r[3], &m_oPos, sizeof(Vec3));
 }

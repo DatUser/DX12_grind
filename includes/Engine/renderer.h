@@ -66,7 +66,7 @@ private:
 	static std::unique_ptr<Renderer> m_spInstance;
 
 	std::array<std::shared_ptr<RHIShader>, static_cast<unsigned int>(ERendererShaders::_size)> m_mapShaders;	// TODO: Move to submesh ERendererShaders::_size> m_mapShaders;
-	std::unique_ptr<Scene> m_spScene;
+	std::unique_ptr<Scene> 				m_spScene;
 	std::shared_ptr<RHIViewport> 		m_spCurrentViewport;
 	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;			// CPU data of constant buffer (MVP matrix)
 	std::shared_ptr<RHIBuffer> 			m_spConstantBufferResource;

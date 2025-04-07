@@ -44,3 +44,4 @@ Currently working on RHI and Dx11 specification of the interface.
 - [ ] - Add Debug logs to keep track of what's happening, when, and how many times
 - [ ] - Create a xgo namespace
 - [ ] - Clean includes
+- [ ] - Create a Math fwd.h with DirectXMath include and typedefs

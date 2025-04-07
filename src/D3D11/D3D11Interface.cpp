@@ -286,7 +286,8 @@ void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 	m_spContext->IASetIndexBuffer(pD3D11Buffer->pInitResource.Get(), DXGI_FORMAT_R32_UINT, uOffset);
 }
 
-void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer)
+template <>
+void D3D11Interface::SetBuffer<EShaderStage::VERTEX>(const RHIBuffer *pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf());

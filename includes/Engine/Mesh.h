@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "Core/Core.h"
+
 // TODO: Create enunm for rendering state managemenent
 
 class RHIBuffer;
@@ -12,8 +14,6 @@ class Mesh
 {
 	friend void load_obj(const std::string& path, std::vector<Mesh*>& arrMeshes);
 
-private:
-	/* data */
 public:
 	~Mesh();
 
@@ -24,6 +24,19 @@ public:
 		uint32_t uVertexOffset = 0,
 		uint32_t uIndexOffset = 0
 	);
+
+	void UpdateModelMatrix();
+
+	//TODO: Move to .hpp
+	void SetPosition(const Vec3& oPos)
+	{
+		m_oPos = oPos;
+		UpdateModelMatrix();
+	}
+
+	const Vec3& GetPosition() const { return m_oPos; }
+	//TODO : Handle rotation
+	const Mat4x4& GetModelMatrix() const { return m_oModelMatrix; }
 
 	void* GetVerticeData() { return m_vVertices.data(); }
 	void* GetIndiceData() { return m_vIndices.data(); }
@@ -40,6 +53,9 @@ public:
 private:
 	// Avoids to have Mesh with unitilized rendering resources
 	Mesh(/* args */);
+
+	Vec3 				m_oPos;
+	Mat4x4				m_oModelMatrix;
 
 	std::vector<float>	m_vVertices;
 	std::vector<int>	m_vIndices;

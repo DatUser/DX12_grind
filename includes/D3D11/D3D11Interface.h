@@ -76,6 +76,7 @@ public:
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) override;
+	template <EShaderStage eShaderStage>
 	virtual void SetBuffer(const RHIBuffer* pBuffer) override;
 
 	virtual void SetVertexShader(const RHIShader* pShader) override;
@@ -123,7 +124,4 @@ private:
     ComPtr<ID3D11RenderTargetView> m_spTarget;
 
     std::vector<ComPtr<ID3D11Buffer>> m_vBuffers;
-
-    // Viewport camera
-    Camera* m_pMainCamera;
 };
