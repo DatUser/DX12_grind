@@ -15,5 +15,5 @@ public:
 	inline virtual void SetWidth(uint32_t uWidth) = 0;
 	inline virtual void SetHeight(uint32_t uHeight) = 0;
 protected:
-	std::shared_ptr<Camera> 	m_spCamera;
+	std::shared_ptr<Camera> 	m_spMainCamera;
 };

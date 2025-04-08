@@ -1,17 +1,22 @@
 #pragma once
 
 #include "RHI/rhi_buffer.h"
+#include "RHI/rhi_shader.h"
 
 #include <memory>
+#include <variant>
 
 enum class ERendererShaders : uint8_t;
-enum class EShaderStage : uint32_t;
 class RHIBuffer;
 class RHIShader;
 class RHIViewport;
 
 struct HWND__;
 typedef struct HWND__ *HWND;
+
+using ShaderType = std::variant<
+				std::integral_constant<EShaderStage, EShaderStage::VERTEX>,
+				std::integral_constant<EShaderStage, EShaderStage::PIXEL>>;
 
 /**
  *  This is the rendering interface
@@ -51,8 +56,7 @@ public:
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
-	template <EShaderStage eShaderStage>
-	virtual void SetBuffer(const RHIBuffer* pBuffer) = 0;
+	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) = 0;
 
 	virtual void DrawIndexed(uint32_t uIndexCount, uint32_t uIndexOffset, uint32_t uVertexOffset) = 0;
 

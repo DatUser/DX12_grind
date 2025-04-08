@@ -26,8 +26,7 @@ namespace dx = DirectX;
 D3D11Interface::D3D11Interface(Camera *pCamera)
 	: m_spDevice(nullptr),
 	  m_spSwapchain(nullptr),
-	  m_spContext(nullptr),
-	  m_pMainCamera(pCamera)
+	  m_spContext(nullptr)
 {
 	ATLASSERT(D3D11CreateDevice(
 			nullptr,					// Adapter
@@ -63,7 +62,6 @@ D3D11Interface::D3D11Interface(Camera *pCamera)
 
 D3D11Interface::~D3D11Interface()
 {
-	delete m_pMainCamera;
 }
 
 HRESULT D3D11Interface::createShaderInstanceInternal(ID3D10Blob* pShaderBuffer, void** pShaderInstance, EShaderStage eShaderStage)
@@ -287,10 +285,19 @@ void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 }
 
 template <>
-void D3D11Interface::SetBuffer<EShaderStage::VERTEX>(const RHIBuffer *pBuffer)
+void D3D11Interface::SetBufferInternal<EShaderStage::VERTEX>(const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf());
+}
+
+void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
+{
+	std::visit(
+		// Here eStage is replaced at compile time which allows it to be used as a template parameter
+		[this, pBuffer](auto eStage)
+		{
+			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
 }
 
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)

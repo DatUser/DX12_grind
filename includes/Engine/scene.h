@@ -18,9 +18,9 @@ public:
 		return m_vMeshes;
 	}
 
-	inline Camera* GetCamera() const
+	inline const std::vector<std::shared_ptr<Camera>>& GetCameras() const
 	{
-		return m_spCamera.get();
+		return m_vCameras;
 	}
 
 	inline void AddMesh(std::shared_ptr<Mesh>&& spMesh)
@@ -29,6 +29,6 @@ public:
 	}
 
 private:
-	std::vector<std::shared_ptr<Mesh>>	m_vMeshes;
-	std::shared_ptr<Camera>				m_spCamera;
+	std::vector<std::shared_ptr<Mesh>>		m_vMeshes;
+	std::vector<std::shared_ptr<Camera>>	m_vCameras;
 };

@@ -1,7 +1,11 @@
 #include "Engine/Mesh.h"
 
+#include "Core/Core.h"
+
 #include "RHI/rhi.h"
 #include "RHI/rhi_buffer.h"
+
+namespace dx = DirectX;
 
 Mesh::Mesh()
 : m_vVertices()
@@ -16,7 +20,7 @@ Mesh::Mesh(
 	uint32_t uIndexOffset /* = 0 */
 )
 : m_oPos(Vec3(0.f, 0.f, 0.f))
-, m_oModelMatrix(Mat4x4::Identity())
+, m_oModelMatrix(dx::XMMatrixIdentity())
 , m_vVertices(vVertices)
 , m_vIndices(vIndices)
 , m_uVertexOffset(uVertexOffset)

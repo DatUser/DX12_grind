@@ -76,8 +76,10 @@ public:
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) override;
+	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+
 	template <EShaderStage eShaderStage>
-	virtual void SetBuffer(const RHIBuffer* pBuffer) override;
+	void SetBufferInternal(const RHIBuffer* pBuffer){}
 
 	virtual void SetVertexShader(const RHIShader* pShader) override;
 	virtual void SetPixelShader(const RHIShader* pShader) override;

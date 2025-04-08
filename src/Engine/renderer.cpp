@@ -12,6 +12,8 @@
 #include "RHI/rhi_buffer.h"
 #include "RHI/rhi_shader.h"
 
+#define TO_SHADER_TYPE(x) std::integral_constant<EShaderStage, x>{}
+
 // Creates, compiles and stores shader
 #define INIT_RENDERER_SHADER(x)\
 	m_mapShaders[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateShader(x);	\
@@ -80,7 +82,7 @@ void Renderer::UpdateConstantBuffers()
 {
 	//CPU update CBO
 
-	RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get());
+	RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
 }
 
 void Renderer::UpdateMesh(Mesh *pMesh)
