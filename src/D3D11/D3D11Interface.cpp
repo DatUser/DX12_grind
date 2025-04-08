@@ -23,7 +23,7 @@
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
-D3D11Interface::D3D11Interface(Camera *pCamera)
+D3D11Interface::D3D11Interface()
 	: m_spDevice(nullptr),
 	  m_spSwapchain(nullptr),
 	  m_spContext(nullptr)

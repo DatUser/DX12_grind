@@ -1,5 +1,5 @@
 *.exe
-*.obj
 *.pdb
 *.ilk
+*.sqlite
 build/*

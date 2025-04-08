@@ -13,9 +13,7 @@
 #define GFX_INTERFACE "DX11"
 #endif
 
-class Camera;
-
-typedef void (*RHICreationInterface)(Camera* pCam);
+typedef void (*RHICreationInterface)();
 
 template <size_t N>
 using RHIInterfaceMap = std::array<std::pair<std::string_view, RHICreationInterface>, N>;

@@ -1,6 +1,5 @@
 #include "window.h"
 
-#include "camera.h"
 #include "Core/asserts.h"
 #include "RHI/rhi.h"
 #include "RHI/fwd_rhi.h"
@@ -108,7 +107,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         if (m_hWnd)
         {
             ShowWindow(m_hWnd, SW_SHOW);
-			CreateInterface(new Camera());
+			CreateInterface();
             //m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
         }
         else

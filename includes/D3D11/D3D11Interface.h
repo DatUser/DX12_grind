@@ -6,7 +6,6 @@
 
 #include <memory>
 
-class Camera;
 class D3D11Buffer;
 
 enum class EShaderStage : uint32_t;
@@ -18,9 +17,9 @@ enum class EShaderStage : uint32_t;
 class D3D11Interface : public RHI
 {
 public:
-    static void CreateInterface(Camera* pCamera)
+    static void CreateInterface()
     {
-        RHI::m_spGFXInterface = std::make_unique<D3D11Interface>(pCamera);
+        RHI::m_spGFXInterface = std::make_unique<D3D11Interface>();
     }
 
 	inline static D3D11Interface* GetInterface()
@@ -29,9 +28,8 @@ public:
 		return dynamic_cast<D3D11Interface*>(p);
 	}
 
-    D3D11Interface() = delete;
-    D3D11Interface(Camera* pCamera);
-    ~D3D11Interface();
+    D3D11Interface();
+    virtual ~D3D11Interface();
 
     /**
      * @brief Create a Shader Instance object

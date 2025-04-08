@@ -1,7 +1,6 @@
 #include "D3D11/D3D11Buffer.h"
 
 #include "app.h"
-#include "camera.h"
 #include "D3D11/D3D11Interface.h"
 
 

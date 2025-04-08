@@ -1,6 +1,7 @@
 #include "Engine/renderer.h"
 
 #include "app.h"
+#include "camera.h"
 
 #include "Core/Core.h"
 
@@ -11,6 +12,7 @@
 #include "RHI/rhi.h"
 #include "RHI/rhi_buffer.h"
 #include "RHI/rhi_shader.h"
+#include "RHI/rhi_viewport.h"
 
 #define TO_SHADER_TYPE(x) std::integral_constant<EShaderStage, x>{}
 
@@ -18,6 +20,8 @@
 #define INIT_RENDERER_SHADER(x)\
 	m_mapShaders[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateShader(x);	\
 	m_mapShaders[static_cast<unsigned int>(x)]->Compile();
+
+namespace dx = DirectX;
 
 std::unique_ptr<Renderer> Renderer::m_spInstance{new Renderer{}};
 
@@ -81,6 +85,12 @@ void Renderer::PresentFrame()
 void Renderer::UpdateConstantBuffers()
 {
 	//CPU update CBO
+	//dx::XMMatrixPerspectiveFovLH(
+	//	m_spCurrentViewport->GetCamera()->GetFOV(),
+	//	m_spCurrentViewport->GetCamera()->GetAspectRatio(),
+	//	m_spCurrentViewport->GetCamera()->GetNearClipping(),
+	//	m_spCurrentViewport->GetCamera()->GetFarClipping()
+	//);
 
 	RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
 }
@@ -110,6 +120,7 @@ void Renderer::Pass_Forward()
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
+		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();
