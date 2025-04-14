@@ -172,10 +172,13 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 	return spBuffer;
 }
 
-bool D3D11Interface::UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer)
+void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 {
-    ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
-	return spBuffer->IsValid();
+	memcpy(pBuffer->m_pData, pData, pBuffer->m_uByteWidth);
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
+    //ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
+	//return spBuffer->IsValid();
 }
 
 void D3D11Interface::CreateSwapchain(HWND hWnd)

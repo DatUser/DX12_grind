@@ -63,7 +63,7 @@ public:
 		ERHIBufferUsage eUsage=ERHIBufferUsage::DEFAULT
 	) override;
 
-	virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) override;
+	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;
 
     virtual void ClearRenderView() override;
     void ClearRenderView(float r, float g, float b, float a = 1.f);

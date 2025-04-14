@@ -44,7 +44,15 @@ public:
 		ERHICPUAccessFlags eCPUAccess = ERHICPUAccessFlags::NONE,
 		ERHIBufferUsage eUsage = ERHIBufferUsage::DEFAULT
 	) = 0;
-    virtual bool UploadBuffer(const std::shared_ptr<RHIBuffer>& spBuffer) = 0;
+
+	/**
+	 * @brief Copies pData to pBuffer CPU memory then uploads it to the GPU
+	 *
+	 * @param pData
+	 * @return true
+	 * @return false
+	 */
+    virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) = 0;
 
     virtual void CreateSwapchain(HWND hWnd) = 0;
 

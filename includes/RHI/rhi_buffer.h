@@ -31,6 +31,7 @@ enum class ERHIBufferUsage : uint8_t
 
 class RHIBuffer
 {
+	friend class D3D11Interface;
 public:
 	RHIBuffer(
 		void* pData,

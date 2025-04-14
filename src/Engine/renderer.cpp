@@ -60,6 +60,7 @@ void Renderer::InitShaders()
 
 void Renderer::Tick()
 {
+	UpdateConstantBuffers();
 	GenerateFrame();
 	PresentFrame();
 }
@@ -68,8 +69,6 @@ void Renderer::GenerateFrame()
 {
 	//Add passes for every drawable instances in scene
 	RHI::GetInterface()->ClearRenderView();
-
-	UpdateConstantBuffers();
 
 	Pass_Forward();
 
@@ -84,15 +83,29 @@ void Renderer::PresentFrame()
 
 void Renderer::UpdateConstantBuffers()
 {
-	//CPU update CBO
-	//dx::XMMatrixPerspectiveFovLH(
-	//	m_spCurrentViewport->GetCamera()->GetFOV(),
-	//	m_spCurrentViewport->GetCamera()->GetAspectRatio(),
-	//	m_spCurrentViewport->GetCamera()->GetNearClipping(),
-	//	m_spCurrentViewport->GetCamera()->GetFarClipping()
-	//);
+	// TODO: Handle a real focus
+	const static Vec3 m_oFocus{0., 0., 0.};
 
-	RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+	Camera* pCam = m_spCurrentViewport->GetCamera();
+
+	//CPU update CBO
+    m_spConstantBuffer->oView = dx::XMMatrixLookAtLH(
+                        dx::XMLoadFloat3(&pCam->GetPosition()),
+                        dx::XMLoadFloat3(&m_oFocus),
+                        dx::XMLoadFloat3(&pCam->GetUpVector())
+	);
+
+	m_spConstantBuffer->oProj = dx::XMMatrixPerspectiveFovLH(
+		pCam->GetFOV(),
+		pCam->GetAspectRatio(),
+		pCam->GetNearClipping(),
+		pCam->GetFarClipping()
+	);
+
+	m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
+
+	// GPU update
+	RHI::GetInterface()->SetBufferData(m_spConstantBufferResource.get(), &m_spConstantBuffer);
 }
 
 void Renderer::UpdateMesh(Mesh *pMesh)
@@ -111,7 +124,8 @@ void Renderer::Pass_Forward()
 {
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
-		UpdateMesh(pMesh.get());
+		// Wrong place to do this
+		//UpdateMesh(pMesh.get());
 
 		// Bind shader
 		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
