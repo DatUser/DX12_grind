@@ -3,3 +3,6 @@
 *.ilk
 *.sqlite
 build/*
+.idea/*
+.vscode/settings.json
+.qodo
