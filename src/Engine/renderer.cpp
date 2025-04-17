@@ -41,6 +41,26 @@ Renderer::Renderer()
 void Renderer::InitResources()
 {
 	RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
+	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(600, 600);
+
+	const static Vec3 m_oFocus{0., 0., 0.};
+	Camera* pCam = m_spCurrentViewport->GetCamera();
+
+	//CPU update CBO
+	m_spConstantBuffer->oView = dx::XMMatrixLookAtLH(
+						dx::XMLoadFloat3(&pCam->GetPosition()),
+						dx::XMLoadFloat3(&m_oFocus),
+						dx::XMLoadFloat3(&pCam->GetUpVector())
+	);
+
+	m_spConstantBuffer->oProj = dx::XMMatrixPerspectiveFovLH(
+		pCam->GetFOV(),
+		pCam->GetAspectRatio(),
+		pCam->GetNearClipping(),
+		pCam->GetFarClipping()
+	);
+
+	m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
 
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
 		&m_spConstantBuffer,
@@ -48,8 +68,6 @@ void Renderer::InitResources()
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
 		ERHIBufferUsage::DYNAMIC);
-
-	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(600, 600);
 }
 
 void Renderer::InitShaders()

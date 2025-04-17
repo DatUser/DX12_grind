@@ -28,11 +28,16 @@ D3D11Interface::D3D11Interface()
 	  m_spSwapchain(nullptr),
 	  m_spContext(nullptr)
 {
+	uint32_t uCreationFlags = 0;
+#ifdef DEBUG
+	uCreationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
 	ATLASSERT(D3D11CreateDevice(
 			nullptr,					// Adapter
 			D3D_DRIVER_TYPE_HARDWARE,	// Driver type
 			nullptr,					// Module software
-			0,							// Flags
+			uCreationFlags,							// Flags
 			nullptr,					// Feature levels
 			0,							// Feature level count
 			D3D11_SDK_VERSION,			// SDK version
