@@ -70,6 +70,7 @@ public:
 
     virtual void CreateSwapchain(HWND hWnd) override;
 	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) override;
+	virtual void SetViewport(const RHIViewport* pViewport) override;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;

@@ -158,6 +158,7 @@ void D3D11Interface::PresentFrame()
     HRESULT hr = m_spSwapchain->Present(0, 0);
     if (hr != S_OK)
     {
+    	LOG_ERROR(hr);
         LOG_LAST_ERROR();
         LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
     }
@@ -181,7 +182,14 @@ void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 {
 	memcpy(pBuffer->m_pData, pData, pBuffer->m_uByteWidth);
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
+	m_spContext->Map(
+		pD3D11Buffer->pInitResource.Get(),				// Resource
+		0,												// Subresource
+		D3D11_MAP_WRITE_DISCARD,						// Map type
+		0,												// Flags (What CPU does during upload)
+		nullptr											// Mapped resource (Data, rowPitch, depthPitch)
+		);
+	//m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
     //ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
 	//return spBuffer->IsValid();
 }
@@ -259,6 +267,11 @@ std::shared_ptr<RHIViewport> D3D11Interface::CreateViewport(uint32_t uWidth, uin
 	return std::make_shared<D3D11Viewport>(uWidth, uHeight, 0, 0);
 }
 
+void D3D11Interface::SetViewport(const RHIViewport *pViewport) {
+	const D3D11Viewport* pD3D11Viewport = dynamic_cast<const D3D11Viewport*>(pViewport);
+	m_spContext->RSSetViewports(1, &pD3D11Viewport->m_oViewport);
+}
+
 void D3D11Interface::ClearRenderView()
 {
     ClearRenderView(1.f, 0.f, 0.f);
@@ -279,8 +292,8 @@ std::shared_ptr<RHIShader> D3D11Interface::CreateShader(ERendererShaders eShader
 void D3D11Interface::SetVertexBuffer(const RHIBuffer *pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	uint32_t uStride = 0;
-	uint32_t uOffset = sizeof(float) * 3;
+	uint32_t uStride = sizeof(float) * 3;
+	uint32_t uOffset = 0;
 	m_spContext->IASetVertexBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf(), &uStride, &uOffset);
 	//m_spContext->IASetVertexBuffers(0, 1, &pD3D11Buffer->pInitResource, &pD3D11Buffer->uStride, &pD3D11Buffer->uOffset);
 }
@@ -288,7 +301,7 @@ void D3D11Interface::SetVertexBuffer(const RHIBuffer *pBuffer)
 void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	uint32_t uOffset = sizeof(uint32_t) * 3;
+	uint32_t uOffset = 0;
 	m_spContext->IASetIndexBuffer(pD3D11Buffer->pInitResource.Get(), DXGI_FORMAT_R32_UINT, uOffset);
 }
 

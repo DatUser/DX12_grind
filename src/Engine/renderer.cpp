@@ -42,28 +42,30 @@ void Renderer::InitResources()
 {
 	RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
 	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(600, 600);
+	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
 
 	const static Vec3 m_oFocus{0., 0., 0.};
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
 	//CPU update CBO
-	m_spConstantBuffer->oView = dx::XMMatrixLookAtLH(
-						dx::XMLoadFloat3(&pCam->GetPosition()),
-						dx::XMLoadFloat3(&m_oFocus),
-						dx::XMLoadFloat3(&pCam->GetUpVector())
+	Mat4x4 oView = dx::XMMatrixLookAtLH(
+	dx::XMLoadFloat3(&pCam->GetPosition()),
+	dx::XMLoadFloat3(&m_oFocus),
+	dx::XMLoadFloat3(&pCam->GetUpVector())
 	);
-
-	m_spConstantBuffer->oProj = dx::XMMatrixPerspectiveFovLH(
+	Mat4x4 oProj = dx::XMMatrixPerspectiveFovLH(
 		pCam->GetFOV(),
 		pCam->GetAspectRatio(),
 		pCam->GetNearClipping(),
 		pCam->GetFarClipping()
 	);
 
-	m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
+	m_spConstantBuffer->oView = dx::XMMatrixTranspose(oView);
+	m_spConstantBuffer->oProj = dx::XMMatrixTranspose(oProj);
+	m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
 
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
-		&m_spConstantBuffer,
+		m_spConstantBuffer.get(),
 		sizeof(ConstantBuffers),
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
@@ -107,23 +109,25 @@ void Renderer::UpdateConstantBuffers()
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
 	//CPU update CBO
-    m_spConstantBuffer->oView = dx::XMMatrixLookAtLH(
-                        dx::XMLoadFloat3(&pCam->GetPosition()),
-                        dx::XMLoadFloat3(&m_oFocus),
-                        dx::XMLoadFloat3(&pCam->GetUpVector())
-	);
-
-	m_spConstantBuffer->oProj = dx::XMMatrixPerspectiveFovLH(
+	Mat4x4 oView = dx::XMMatrixLookAtLH(
+		dx::XMLoadFloat3(&pCam->GetPosition()),
+		dx::XMLoadFloat3(&m_oFocus),
+		dx::XMLoadFloat3(&pCam->GetUpVector())
+		);
+	Mat4x4 oProj = dx::XMMatrixPerspectiveFovLH(
 		pCam->GetFOV(),
 		pCam->GetAspectRatio(),
 		pCam->GetNearClipping(),
 		pCam->GetFarClipping()
 	);
 
+	m_spConstantBuffer->oView = dx::XMMatrixTranspose(oView);
+	m_spConstantBuffer->oProj = dx::XMMatrixTranspose(oProj);
+	//m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
 	m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
 
 	// GPU update
-	RHI::GetInterface()->SetBufferData(m_spConstantBufferResource.get(), &m_spConstantBuffer);
+	RHI::GetInterface()->SetBufferData(m_spConstantBufferResource.get(), m_spConstantBuffer.get());
 }
 
 void Renderer::UpdateMesh(Mesh *pMesh)

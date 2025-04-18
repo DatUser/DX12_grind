@@ -57,6 +57,7 @@ public:
     virtual void CreateSwapchain(HWND hWnd) = 0;
 
 	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) = 0;
+	virtual void SetViewport(const RHIViewport* pViewport) = 0;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;

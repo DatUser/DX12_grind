@@ -5,6 +5,7 @@
 
 class D3D11Viewport : public RHIViewport
 {
+	friend class D3D11Interface;
 public:
 	D3D11Viewport();
 	D3D11Viewport(uint32_t uWidth, uint32_t uHeight, uint32_t uTopLeftX, uint32_t uTopLeftY);
@@ -13,13 +14,13 @@ public:
 
 	virtual void SetWidth(uint32_t uWidth) override
 	{
-		m_viewport.Width = uWidth;
+		m_oViewport.Width = uWidth;
 	}
 
 	virtual void SetHeight(uint32_t uHeight) override
 	{
-		m_viewport.Height = uHeight;
+		m_oViewport.Height = uHeight;
 	}
 private:
-	D3D11_VIEWPORT m_viewport;
+	D3D11_VIEWPORT m_oViewport;
 };

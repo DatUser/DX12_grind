@@ -26,21 +26,11 @@ cbuffer FrameBuffer : register(b0)
 
 matrix mModel;
 
-//uniform matrix iMVPMat;
-//float4x4 iMVPMat = {
-//     2.41421356f, 0.0f,        0.0f,        0.0f ,
-//     0.0f,        2.41421356f, 0.0f,        0.0f ,
-//     0.0f,        0.0f,       -1.001001f,   1.0f ,
-//     0.0f,        0.0f,       -0.1001001f,  0.0f
-//};
-
 VertexOutput VSDefaultMain(VertexInput input)
 {
     VertexOutput output;
-    //output.position = mul(iMVPMat, float4(input.position, 1.));
-    output.worldPos = mul(float4(input.position, 1.), mModel);
+    output.worldPos = float4(input.position, 1.);
     output.position = mul(output.worldPos, mViewProj);
-    output.color = input.position;
     return output;
 }
 
