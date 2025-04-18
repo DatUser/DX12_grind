@@ -40,6 +40,7 @@ Currently working on RHI and Dx11 specification of the interface.
 
 ### Not a feature
 
+- [ ] \- Make code cppcheck compliant
 - [ ] \- Core should be D3D11Core
 - [ ] \- Rename D3D11 classes from engine to differentiate from windows api classes
 - [ ] \- Add Debug logs to keep track of what's happening, when, and how many times

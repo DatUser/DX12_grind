@@ -13,6 +13,29 @@ tiny_obj_loader = run_command(
     'https://github.com/tinyobjloader/tinyobjloader/releases/download/v1.0.6/tiny_obj_loader.h'
 )
 
+# Test
+cppcheck = find_program(['cppcheck.exe', 'cppcheck'])
+if cppcheck.found()
+    compile_commands_json = join_paths(meson.build_root(), 'compile_commands.json')
+
+    cppcheck_args = [
+        '--project=' + compile_commands_json,
+        '--suppress-xml=' + join_paths(meson.source_root(), 'cppcheck-suppressions.xml'),
+        '--error-exitcode=2',
+        '--quiet']
+
+        #'--platform=win64',
+        #'--std=c++20',
+        #'--enable=all',
+        #'-I',
+        #'../includes',
+        #'--template="{file}:{line}: {severity}: {message}"',
+        #'../src']
+    run_target('cppcheck', command : [cppcheck] + cppcheck_args)
+
+    #test('cppcheck', cppcheck, args: cppcheck_args, suite: 'code_review')
+endif
+
 inc_dirs = include_directories('includes')
 
 executable('window',

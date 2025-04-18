@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<suppressions>
+    <suppress>
+        <id>*</id>
+        <fileName>*/include/external/*</fileName>
+    </suppress>
+</suppressions>
