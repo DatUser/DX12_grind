@@ -43,10 +43,15 @@ public:
 
     std::optional<int> ProcessMessage();
 
+	void LockMousePosition();
+	void UpdateCenterPosition();
+
     // GETTERS
 	inline HWND GetHandle() const { return m_hWnd; }
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
+	inline MoveEvent* GetMoveEvent() { return m_pMoveEvent; }
 	inline const POINTS& GetSize() const { return m_oWindowSize; }
+	inline const POINT& GetAbsoluteCenter() const { return m_oAbsoluteCenter; }
 	inline uint32_t GetWidth() const { return m_oWindowSize.x; }
 	inline uint32_t GetHeight() const { return m_oWindowSize.y; }
 
@@ -64,6 +69,7 @@ private:
                         LPARAM lParam);
 
 	POINTS 	m_oWindowSize;
+	POINT	m_oAbsoluteCenter; // Center pixel of the window (in the whole screen)
     HWND 	m_hWnd;
 
     Keyboard* 	m_pKeyboard;

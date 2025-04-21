@@ -16,6 +16,9 @@ public:
 
 	void Initialize();
 
+	void RegisterInputEvent();
+	void RegisterMouseMoveEvent();
+
     int Execute();
 
     inline double GetExecutionTime();

@@ -1,5 +1,7 @@
 #include "Engine/window.h"
 
+#include <iostream>
+
 #include "Core/asserts.h"
 #include "RHI/rhi.h"
 #include "RHI/fwd_rhi.h"
@@ -37,6 +39,17 @@ void OnInputEvent(Window* pSender, unsigned int uKeyCode, EInputType eType)
 		OnKeyReleased(uKeyCode);
 	else
 		OnKeyPressed(uKeyCode);
+}
+
+void OnMouseMove(Window* pSender, int nX, int nY)
+{
+    //Retrieve Mouse Pos: Px Pos relative to window
+    //POINTS ptMousePos = MAKEPOINTS(lMousePos);
+
+    std::stringstream stream;
+    stream << "Mouse pos is: (" << nX << ", " << nY << ")" << std::endl;
+    OutputDebugString(stream.str().c_str());
+    std::cout << "Mouse pos is: (" << nX << ", " << nY << ")" << std::endl;
 }
 
 Window::WindowClass::WindowClass()
@@ -228,6 +241,8 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
 
             //Broadcast event
             m_pMoveEvent->Broadcast(this, ptMousePos.x, ptMousePos.y);
+
+            LockMousePosition();
         }
         break;
     case WM_KILLFOCUS:
@@ -256,4 +271,21 @@ std::optional<int> Window::ProcessMessage()
     }
 
     return {};
+}
+
+void Window::LockMousePosition()
+{
+    if (GetFocus() == m_hWnd)
+        SetCursorPos(m_oAbsoluteCenter.x, m_oAbsoluteCenter.y);
+}
+
+void Window::UpdateCenterPosition()
+{
+    static RECT oRect{};
+    GetClientRect(m_hWnd, &oRect);
+
+    m_oAbsoluteCenter.x = (oRect.right - oRect.left) / 2;
+    m_oAbsoluteCenter.y = (oRect.bottom - oRect.top) / 2;
+
+    ClientToScreen(m_hWnd, &m_oAbsoluteCenter);
 }

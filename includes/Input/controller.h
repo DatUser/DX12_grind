@@ -30,6 +30,7 @@ public:
     ~Controller()  = default;
 
     void HandleMovementInput(Window*, unsigned int uKeyCode, EInputType eInputType);
+    void HandleRotationInput(Window*, int x, int y);
 
     void MoveForward();
     void MoveBackward();
@@ -44,4 +45,5 @@ private:
     std::unordered_map<unsigned int, void (Controller::*)()> m_mapInputActions;
     std::shared_ptr<Camera>     m_spControlledCam;
     float                       m_fMoveSpeed;
+    float                       m_fRotationSpeed;
 };

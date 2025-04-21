@@ -40,6 +40,7 @@ Currently working on RHI and Dx11 specification of the interface.
 - [ ] \- Create Transform structure
 - [ ] \- Add RenderState enum to Mesh to track when to upload buffer/render/...
 - [ ] \- Add a submesh abstraction
+- [ ] \- Rework inputs system to use dinput
 
 ### Secondary tasks
 

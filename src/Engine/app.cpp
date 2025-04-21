@@ -29,14 +29,32 @@ void App::Initialize()
     // Init Renderer
     Renderer::GetInterface()->Initialize();
 
+    RegisterInputEvent();
+    RegisterMouseMoveEvent();
+    m_pMainWindow->UpdateCenterPosition();
+
+}
+
+void App::RegisterInputEvent()
+{
     // Init inputs
     auto oInputLambda = [](Window* pWindow, unsigned int uKeyCode, EInputType eType)
     {
         Controller* pController = Renderer::GetInterface()->GetScene()->GetController();
         pController->HandleMovementInput(pWindow, uKeyCode, eType);
     };
-
     m_pMainWindow->GetInputEvent()->AddAction(oInputLambda);
+}
+
+void App::RegisterMouseMoveEvent()
+{
+    // Init Mouse movements
+    auto oMouseLambda = [](Window* pWindow, int x, int y)
+    {
+        Controller* pController = Renderer::GetInterface()->GetScene()->GetController();
+        pController->HandleRotationInput(pWindow, x, y);
+    };
+    m_pMainWindow->GetMoveEvent()->AddAction(oMouseLambda);
 }
 
 int App::Execute()

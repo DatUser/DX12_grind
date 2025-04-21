@@ -15,5 +15,6 @@
 
 
 using Vec3 = DirectX::XMFLOAT3;
-using Vec4 = DirectX::XMVECTOR;
+using Quat = DirectX::XMFLOAT4;
+using Vec4 = DirectX::XMFLOAT4;
 using Mat4x4 = DirectX::XMMATRIX;

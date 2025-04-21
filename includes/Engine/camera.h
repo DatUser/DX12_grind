@@ -46,6 +46,11 @@ private:
     Vec3 m_oForward;
     Vec3 m_oRight;
 
+    Quat    m_oRotation;
+    float   m_fPitch;
+    float   m_fYaw;
+    float   m_fRoll;
+
     Vec3 m_oFocusPoint;
 
     /**
