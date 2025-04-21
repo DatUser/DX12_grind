@@ -23,7 +23,13 @@ class Renderer
 {
 	friend std::unique_ptr<Renderer>::deleter_type;
 public:
+	void Initialize();
+
 	void Tick();
+
+	inline Scene* GetScene() const { return m_spScene.get(); };
+
+	inline RHIViewport* GetCurrentViewport() const { return m_spCurrentViewport.get(); };
 
 	inline static auto&& GetInterface()
 	{

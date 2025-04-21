@@ -1,5 +1,5 @@
-#include "keyboard.h"
-#include "window.h"
+#include "Input/keyboard.h"
+#include "Engine/window.h"
 
 Keyboard::Keyboard(bool bUseAutoRepeat)
 :   m_vKeyStates(std::vector<EKeyState>(NUM_WIN_KEYCODES, EKeyState::RELEASED))

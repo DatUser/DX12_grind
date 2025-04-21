@@ -4,10 +4,10 @@
 #pragma comment(lib, "d3dcompiler")
 #pragma comment(lib, "dxgi.lib")
 
-#include "camera.h"
+#include "Engine/camera.h"
 #include "Core/asserts.h"
 
-#include "app.h"
+#include "Engine/app.h"
 
 #include "D3D11/D3D11Buffer.h"
 #include "D3D11/D3D11Common.h"
@@ -180,15 +180,18 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 
 void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 {
-	memcpy(pBuffer->m_pData, pData, pBuffer->m_uByteWidth);
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	D3D11_MAPPED_SUBRESOURCE oMappedSubresource{};
+
 	m_spContext->Map(
 		pD3D11Buffer->pInitResource.Get(),				// Resource
 		0,												// Subresource
 		D3D11_MAP_WRITE_DISCARD,						// Map type
 		0,												// Flags (What CPU does during upload)
-		nullptr											// Mapped resource (Data, rowPitch, depthPitch)
+		&oMappedSubresource											// Mapped resource (Data, rowPitch, depthPitch)
 		);
+	memcpy(oMappedSubresource.pData, pData, pBuffer->m_uByteWidth);
+	m_spContext->Unmap(pD3D11Buffer->pInitResource.Get(), 0);
 	//m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
     //ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
 	//return spBuffer->IsValid();

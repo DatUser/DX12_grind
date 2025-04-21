@@ -4,14 +4,12 @@
 #include <stdint.h>
 #include <memory>
 
-#include "camera.h"
+#include "Engine/camera.h"
 
 class RHIViewport
 {
 public:
-	RHIViewport()
-	: m_spMainCamera(std::make_shared<Camera>())
-	{}
+	RHIViewport();
 	virtual ~RHIViewport() = default;
 
 	inline virtual Camera* GetCamera() const

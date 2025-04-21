@@ -12,7 +12,7 @@ void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
 	/*
 	tinyobj::ObjReader reader;
 	tinyobj::ObjReaderConfig reader_config;
-	reader_config.mtl_search_path = "../resources/";
+	reader_config.mtl_search_path = "resources/";
 
 	if (!reader.ParseFromFile(path, reader_config))
 	{

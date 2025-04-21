@@ -1,5 +1,5 @@
-# Small engine with RHI (Render Hardware Interface) abstraction
 
+# Small engine with RHI (Render Hardware Interface) abstraction
 Currently working on RHI and Dx11 specification of the interface.
 
 ## TODO:
@@ -13,20 +13,29 @@ Currently working on RHI and Dx11 specification of the interface.
 - [X] \- Make RHI buffer upload logic
 - [X] \- Create scene with renderable objects
 - [X] \- Separate Device and Swapchain creation
-	- [X] - Create DXGI Factory to create Swapchain
+	- [X] \- Create DXGI Factory to create Swapchain
+- [~] \- RHI types and interface types
+	- [X] \- Create a RHIViewport class holding width-height
+- [X] \- Update MVP in CBO using Camera position
+- [X] \- Handle input for movement
 
 ### WIP
 
-- [~] \- RHI types and interface types
-	- [~] \- Create a RHIViewport class holding width-height
-- [~] \- Update MVP in CBO using Camera position
+- [X] \- Add lookAt in camera class
+- [X] \- Handle input for rotation
+- [~] \- Fix error when minimizing the window
 
 ### Upcoming (ranked by priority)
 
-- [ ] \- Create an InputLayout class to handle `stride` and `offset`
-- [ ] \- Add CommandList system
+- [ ] \- Output texture in render target instead of backbuffer
+- [ ] \- Add simple pbr light pass
+- [ ] \- Add delta time
+- [~] \- RHI types and interface types
+	- [ ] \- Create an InputLayout class to handle `stride` and `offset`
+	- [ ] \- Add CommandList system
+	- [ ] \- Use PSOs and create a wrapper for pipeline state
+- [ ] \- Handle materials
 - [ ] \- Make Buffer upload logic generic
-- [ ] \- Use PSOs and create a wrapper for pipeline state
 - [ ] \- Create Transform structure
 - [ ] \- Add RenderState enum to Mesh to track when to upload buffer/render/...
 - [ ] \- Add a submesh abstraction
@@ -46,4 +55,5 @@ Currently working on RHI and Dx11 specification of the interface.
 - [ ] \- Add Debug logs to keep track of what's happening, when, and how many times
 - [ ] \- Create a xgo namespace
 - [ ] \- Clean includes
+- [ ] \- Create a Math fwd.h with DirectXMath include and typedefs
 - [ ] \- Create a Math fwd.h with DirectXMath include and typedefs

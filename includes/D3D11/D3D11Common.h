@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "fwdtypes.h"
+#include "Core/fwdtypes.h"
 
 /**
  * @brief Tries to compile given shader file

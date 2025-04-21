@@ -42,4 +42,5 @@ executable('window',
     sources : src_files,
     include_directories : inc_dirs,
 	#dependencies: [tiny_obj_loader_dep],
-    gui_app : true)
+    gui_app : true,
+)

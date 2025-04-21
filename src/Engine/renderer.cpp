@@ -1,7 +1,7 @@
 #include "Engine/renderer.h"
 
-#include "app.h"
-#include "camera.h"
+#include "Engine/app.h"
+#include "Engine/camera.h"
 
 #include "Core/Core.h"
 
@@ -32,6 +32,10 @@ Renderer::Renderer()
 , m_spConstantBuffer(std::make_shared<ConstantBuffers>())
 , m_spConstantBufferResource(nullptr)
 {
+}
+
+void Renderer::Initialize()
+{
 	InitResources();
 	InitShaders();
 
@@ -60,8 +64,8 @@ void Renderer::InitResources()
 		pCam->GetFarClipping()
 	);
 
-	m_spConstantBuffer->oView = dx::XMMatrixTranspose(oView);
-	m_spConstantBuffer->oProj = dx::XMMatrixTranspose(oProj);
+	m_spConstantBuffer->oView = (oView);
+	m_spConstantBuffer->oProj = (oProj);
 	m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
 
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
@@ -104,7 +108,7 @@ void Renderer::PresentFrame()
 void Renderer::UpdateConstantBuffers()
 {
 	// TODO: Handle a real focus
-	const static Vec3 m_oFocus{0., 0., 0.};
+	const static Vec3 m_oFocus{0., 0., 10.};
 
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
@@ -121,10 +125,10 @@ void Renderer::UpdateConstantBuffers()
 		pCam->GetFarClipping()
 	);
 
-	m_spConstantBuffer->oView = dx::XMMatrixTranspose(oView);
-	m_spConstantBuffer->oProj = dx::XMMatrixTranspose(oProj);
-	//m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
-	m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
+	m_spConstantBuffer->oView = (oView);
+	m_spConstantBuffer->oProj = (oProj);
+	m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
+	//m_spConstantBuffer->oViewProj = m_spConstantBuffer->oView * m_spConstantBuffer->oProj;
 
 	// GPU update
 	RHI::GetInterface()->SetBufferData(m_spConstantBufferResource.get(), m_spConstantBuffer.get());

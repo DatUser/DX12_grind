@@ -1,4 +1,4 @@
-#include "mouse.h"
+#include "Input/mouse.h"
 
 Mouse::Mouse()
 :   m_nX(0)
