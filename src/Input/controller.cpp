@@ -46,8 +46,12 @@ Controller::Controller(const std::shared_ptr<Camera>& spCamera)
 void Controller::HandleMovementInput(Window*, unsigned int uKeyCode, EInputType eInputType)
 {
     if (m_mapInputActions.find(uKeyCode) != m_mapInputActions.end())
-    // TODO: add sensivity
+    {
+        // TODO: add sensivity
+        // Move camera
         (this->*m_mapInputActions[uKeyCode])();
+        m_spControlledCam->UpdateFocusPoint();
+    }
 }
 
 void Controller::MoveForward()

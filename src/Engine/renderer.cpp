@@ -107,15 +107,12 @@ void Renderer::PresentFrame()
 
 void Renderer::UpdateConstantBuffers()
 {
-	// TODO: Handle a real focus
-	const static Vec3 m_oFocus{0., 0., 10.};
-
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
 	//CPU update CBO
 	Mat4x4 oView = dx::XMMatrixLookAtLH(
 		dx::XMLoadFloat3(&pCam->GetPosition()),
-		dx::XMLoadFloat3(&m_oFocus),
+		dx::XMLoadFloat3(&pCam->GetFocusPoint()),
 		dx::XMLoadFloat3(&pCam->GetUpVector())
 		);
 	Mat4x4 oProj = dx::XMMatrixPerspectiveFovLH(

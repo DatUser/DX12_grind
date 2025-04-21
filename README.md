@@ -18,16 +18,17 @@ Currently working on RHI and Dx11 specification of the interface.
 	- [X] \- Create a RHIViewport class holding width-height
 - [X] \- Update MVP in CBO using Camera position
 - [X] \- Handle input for movement
+- [X] \- Add lookAt in camera class
 
 ### WIP
 
-- [X] \- Add lookAt in camera class
-- [X] \- Handle input for rotation
+- [~] \- Handle input for rotation
 - [~] \- Fix error when minimizing the window
 
 ### Upcoming (ranked by priority)
 
 - [ ] \- Output texture in render target instead of backbuffer
+- [ ] \- Update camera position while button pressed and use delta time
 - [ ] \- Add simple pbr light pass
 - [ ] \- Add delta time
 - [~] \- RHI types and interface types
