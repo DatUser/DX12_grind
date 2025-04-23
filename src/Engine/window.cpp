@@ -82,23 +82,6 @@ Window::WindowClass::~WindowClass()
 
 Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 {
-    m_pKeyboard = new Keyboard();
-    m_pMouse = new Mouse();
-    m_pInputEvent = new InputEvent();
-    m_pMoveEvent = new MoveEvent();
-	m_pSizeEvent = new SizeEvent();
-
-    if (!m_pKeyboard || !m_pMouse || !m_pInputEvent || !m_pMoveEvent)
-        return;
-
-    #ifdef DEBUG_INPUT
-    m_pInputEvent->AddAction(&OnInputEvent);
-    m_pMoveEvent->AddAction(&OnMouseMove);
-    #endif
-	#ifdef DEBUG_SIZE
-	m_pSizeEvent->AddAction(&OnWindowResize);
-	#endif
-
     //Adjust window size to hold content
     RECT rect;
     rect.left = 200;
@@ -121,6 +104,7 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
         {
             ShowWindow(m_hWnd, SW_SHOW);
 			CreateInterface();
+
             //m_pDxGraphics = CreateInterface(m_hWnd, new Camera());
         }
         else
@@ -142,8 +126,29 @@ Window::~Window()
     //delete m_pDxGraphics;
 }
 
+void Window::CreateEvents()
+{
+    m_pKeyboard = new Keyboard();
+    m_pMouse = new Mouse();
+    m_pInputEvent = new InputEvent();
+    m_pMoveEvent = new MoveEvent();
+    m_pSizeEvent = new SizeEvent();
+
+    if (!m_pKeyboard || !m_pMouse || !m_pInputEvent || !m_pMoveEvent)
+        return;
+
+    m_pKeyboard->SetAutoRepeat(true);
+#ifdef DEBUG_INPUT
+    m_pInputEvent->AddAction(&OnInputEvent);
+    m_pMoveEvent->AddAction(&OnMouseMove);
+#endif
+#ifdef DEBUG_SIZE
+    m_pSizeEvent->AddAction(&OnWindowResize);
+#endif
+}
+
 LRESULT CALLBACK Window::RegHandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
-                        LPARAM lParam)
+                                      LPARAM lParam)
 {
     //Handle pre window creation
     if (uMsg == WM_NCCREATE)
@@ -242,7 +247,7 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
             //Broadcast event
             m_pMoveEvent->Broadcast(this, ptMousePos.x, ptMousePos.y);
 
-            LockMousePosition();
+            //LockMousePosition();
         }
         break;
     case WM_KILLFOCUS:
@@ -251,7 +256,7 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
 		m_oWindowSize = MAKEPOINTS(lParam);
 
 		// Broadcast event
-		m_pSizeEvent->Broadcast(this, m_oWindowSize.x, m_oWindowSize.y);
+		//m_pSizeEvent->Broadcast(this, m_oWindowSize.x, m_oWindowSize.y);
 		break;
     }
 
@@ -284,8 +289,10 @@ void Window::UpdateCenterPosition()
     static RECT oRect{};
     GetClientRect(m_hWnd, &oRect);
 
-    m_oAbsoluteCenter.x = (oRect.right - oRect.left) / 2;
-    m_oAbsoluteCenter.y = (oRect.bottom - oRect.top) / 2;
+    m_oRelativeCenter.x = (oRect.right - oRect.left) / 2;
+    m_oRelativeCenter.y = (oRect.bottom - oRect.top) / 2;
+
+    m_oAbsoluteCenter = m_oRelativeCenter;
 
     ClientToScreen(m_hWnd, &m_oAbsoluteCenter);
 }

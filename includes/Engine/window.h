@@ -41,6 +41,8 @@ public:
     Window(LPCSTR pWinName, int nWidth, int nHeight);
     ~Window();
 
+	void CreateEvents();
+
     std::optional<int> ProcessMessage();
 
 	void LockMousePosition();
@@ -50,8 +52,17 @@ public:
 	inline HWND GetHandle() const { return m_hWnd; }
     inline InputEvent* GetInputEvent() { return m_pInputEvent; }
 	inline MoveEvent* GetMoveEvent() { return m_pMoveEvent; }
+
 	inline const POINTS& GetSize() const { return m_oWindowSize; }
-	inline const POINT& GetAbsoluteCenter() const { return m_oAbsoluteCenter; }
+	inline const POINT& GetCenter() const { return m_oRelativeCenter; }
+	inline const POINT& GetCenterInScreen() const { return m_oAbsoluteCenter; }
+
+	inline int GetCursorPosX() const { return m_pMouse->GetXPos(); }
+	inline int GetCursorPosY() const { return m_pMouse->GetYPos(); }
+
+	inline int GetPrevCursorPosX() const { return m_pMouse->GetPrevXPos(); }
+	inline int GetPrevCursorPosY() const { return m_pMouse->GetPrevYPos(); }
+
 	inline uint32_t GetWidth() const { return m_oWindowSize.x; }
 	inline uint32_t GetHeight() const { return m_oWindowSize.y; }
 
@@ -68,8 +79,10 @@ private:
     LRESULT CALLBACK HandleMsg(HWND hWnd, UINT oMsg, WPARAM wParam,
                         LPARAM lParam);
 
+	Quat	m_oRotation;
 	POINTS 	m_oWindowSize;
 	POINT	m_oAbsoluteCenter; // Center pixel of the window (in the whole screen)
+	POINT	m_oRelativeCenter; // Center pixel of the window (in the whole screen)
     HWND 	m_hWnd;
 
     Keyboard* 	m_pKeyboard;

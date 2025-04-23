@@ -41,17 +41,17 @@ public:
 private:
     void UpdateFocusPoint();
 
+    Quat    m_oRotation;
     Vec3 m_oPos;
     Vec3 m_oUp;
     Vec3 m_oForward;
     Vec3 m_oRight;
 
-    Quat    m_oRotation;
+    Vec3 m_oFocusPoint;
+
     float   m_fPitch;
     float   m_fYaw;
     float   m_fRoll;
-
-    Vec3 m_oFocusPoint;
 
     /**
      * @brief VFOV in radians

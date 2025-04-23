@@ -14,7 +14,7 @@ tiny_obj_loader = run_command(
 )
 
 # Test
-cppcheck = find_program(['cppcheck.exe', 'cppcheck'])
+cppcheck = find_program(['cppcheck.exe', 'cppcheck'], required : false)
 if cppcheck.found()
     compile_commands_json = join_paths(meson.build_root(), 'compile_commands.json')
 

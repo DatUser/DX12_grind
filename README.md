@@ -38,6 +38,7 @@ Currently working on RHI and Dx11 specification of the interface.
 - [ ] \- Handle materials
 - [ ] \- Make Buffer upload logic generic
 - [ ] \- Create Transform structure
+  - [ ] \- Add relative rotation
 - [ ] \- Add RenderState enum to Mesh to track when to upload buffer/render/...
 - [ ] \- Add a submesh abstraction
 - [ ] \- Rework inputs system to use dinput

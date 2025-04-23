@@ -29,9 +29,11 @@ void App::Initialize()
     // Init Renderer
     Renderer::GetInterface()->Initialize();
 
+    m_pMainWindow->UpdateCenterPosition();
+    m_pMainWindow->CreateEvents();
+
     RegisterInputEvent();
     RegisterMouseMoveEvent();
-    m_pMainWindow->UpdateCenterPosition();
 
 }
 

@@ -1,5 +1,7 @@
 #include "Input/controller.h"
 
+#include <iostream>
+
 #include "Core/Core.h"
 #include "Engine/app.h"
 
@@ -10,7 +12,7 @@ namespace dx = DirectX;
 
 Controller::Controller()
 : m_spControlledCam(nullptr)
-, m_fMoveSpeed(0.01f)
+, m_fMoveSpeed(0.1f)
 , m_fRotationSpeed(0.01f)
 {
     m_mapInputActions['D'] = &Controller::MoveRight;
@@ -29,7 +31,7 @@ Controller::Controller()
 
 Controller::Controller(const std::shared_ptr<Camera>& spCamera)
 : m_spControlledCam(spCamera)
-, m_fMoveSpeed(0.01f)
+, m_fMoveSpeed(0.1f)
 , m_fRotationSpeed(0.01f)
 {
     m_mapInputActions['D'] = &Controller::MoveRight;
@@ -59,29 +61,49 @@ void Controller::HandleMovementInput(Window*, unsigned int uKeyCode, EInputType 
 
 void Controller::HandleRotationInput(Window*, int x, int y)
 {
-    const POINT& oWindowCenter = App::GetInstance()->GetMainWindow()->GetAbsoluteCenter();
-    float fDeltaX = x - oWindowCenter.x;
-    float fDeltaY = y - oWindowCenter.y;
-    m_spControlledCam->m_fYaw += fDeltaX * m_fRotationSpeed;
-    m_spControlledCam->m_fPitch = std::clamp(m_spControlledCam->m_fPitch + fDeltaY * m_fRotationSpeed, -1.5f, 1.5f);
+    //const POINT& oWindowCenter = App::GetInstance()->GetMainWindow()->GetCenter();
+    int iLastPosX = App::GetInstance()->GetMainWindow()->GetPrevCursorPosX();
+    int iLastPosY = App::GetInstance()->GetMainWindow()->GetPrevCursorPosY();
 
-    dx::XMVECTOR oCamRot = dx::XMQuaternionRotationRollPitchYaw(m_spControlledCam->m_fPitch, m_spControlledCam->m_fYaw, m_spControlledCam->m_fRoll);
+    if (iLastPosX == x && iLastPosY == y)
+        return;
+
+    float fDeltaX = x - iLastPosX;
+    float fDeltaY = y - iLastPosY;
+    float fYaw = fDeltaX * m_fRotationSpeed;
+    float fPitch = fDeltaY * m_fRotationSpeed;
+    m_spControlledCam->m_fYaw += fYaw;
+    m_spControlledCam->m_fPitch += fPitch;
+    //dx::XMVECTOR oCamRot = dx::XMLoadFloat4(&m_spControlledCam->m_oRotation);
+
+    std::cout << "DeltaX: " << fDeltaX << ", DeltaY: " << fDeltaY << std::endl;
+    std::cout << "YawShift: " << fYaw << "Pitch Shift: " << fPitch << std::endl;
+
+    dx::XMVECTOR oCamRot = dx::XMQuaternionRotationRollPitchYaw(m_spControlledCam->m_fPitch, m_spControlledCam->m_fYaw, 0.f);
+    //dx::XMVECTOR oShiftRot = dx::XMQuaternionRotationRollPitchYaw(fPitch, fYaw, 0.f);
+    //oCamRot = dx::XMQuaternionMultiply(oCamRot, oShiftRot);
+    //oCamRot = dx::XMQuaternionNormalize(oCamRot);
 
     dx::XMVECTOR oCamFw = dx::XMVector3Rotate(dx::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), oCamRot);
     dx::XMVECTOR oCamUp = dx::XMVector3Rotate(dx::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), oCamRot);
+    dx::XMVECTOR oCamRight = dx::XMVector3Rotate(dx::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), oCamRot);
 
     dx::XMStoreFloat4(&m_spControlledCam->m_oRotation, oCamRot);
     dx::XMStoreFloat3(&m_spControlledCam->m_oForward, oCamFw);
     dx::XMStoreFloat3(&m_spControlledCam->m_oUp, oCamUp);
+    dx::XMStoreFloat3(&m_spControlledCam->m_oRight, oCamRight);
+
+    m_spControlledCam->UpdateFocusPoint();
 }
 
 void Controller::MoveForward()
 {
     Vec3* pCamPos = &m_spControlledCam->m_oPos;
     dx::XMVECTOR oCamPos = dx::XMLoadFloat3(pCamPos);
-    dx::XMVECTOR oCamFw = dx::XMLoadFloat3(&m_spControlledCam->m_oForward);
+    dx::XMVECTOR oCamDir = dx::XMLoadFloat3(&m_spControlledCam->m_oForward);
 
-    dx::XMVECTOR oNewPos = dx::XMVectorAdd(oCamPos, oCamFw);
+    oCamDir = dx::XMVectorScale(oCamDir, m_fMoveSpeed);
+    dx::XMVECTOR oNewPos = dx::XMVectorAdd(oCamPos, oCamDir);
 
     dx::XMStoreFloat3(pCamPos, oNewPos);
 }
@@ -90,9 +112,10 @@ void Controller::MoveBackward()
 {
     Vec3* pCamPos = &m_spControlledCam->m_oPos;
     dx::XMVECTOR oCamPos = dx::XMLoadFloat3(pCamPos);
-    dx::XMVECTOR oCamFw = dx::XMLoadFloat3(&m_spControlledCam->m_oForward);
+    dx::XMVECTOR oCamDir = dx::XMLoadFloat3(&m_spControlledCam->m_oForward);
 
-    dx::XMVECTOR oNewPos = dx::XMVectorSubtract(oCamPos, oCamFw);
+    oCamDir = dx::XMVectorScale(oCamDir, m_fMoveSpeed);
+    dx::XMVECTOR oNewPos = dx::XMVectorSubtract(oCamPos, oCamDir);
 
     dx::XMStoreFloat3(pCamPos, oNewPos);
 }
@@ -101,9 +124,10 @@ void Controller::MoveLeft()
 {
     Vec3* pCamPos = &m_spControlledCam->m_oPos;
     dx::XMVECTOR oCamPos = dx::XMLoadFloat3(pCamPos);
-    dx::XMVECTOR oCamFw = dx::XMLoadFloat3(&m_spControlledCam->m_oRight);
+    dx::XMVECTOR oCamDir = dx::XMLoadFloat3(&m_spControlledCam->m_oRight);
 
-    dx::XMVECTOR oNewPos = dx::XMVectorSubtract(oCamPos, oCamFw);
+    oCamDir = dx::XMVectorScale(oCamDir, m_fMoveSpeed);
+    dx::XMVECTOR oNewPos = dx::XMVectorSubtract(oCamPos, oCamDir);
 
     dx::XMStoreFloat3(pCamPos, oNewPos);
 }
@@ -112,9 +136,10 @@ void Controller::MoveRight()
 {
     Vec3* pCamPos = &m_spControlledCam->m_oPos;
     dx::XMVECTOR oCamPos = dx::XMLoadFloat3(pCamPos);
-    dx::XMVECTOR oCamFw = dx::XMLoadFloat3(&m_spControlledCam->m_oRight);
+    dx::XMVECTOR oCamDir = dx::XMLoadFloat3(&m_spControlledCam->m_oRight);
 
-    dx::XMVECTOR oNewPos = dx::XMVectorAdd(oCamPos, oCamFw);
+    oCamDir = dx::XMVectorScale(oCamDir, m_fMoveSpeed);
+    dx::XMVECTOR oNewPos = dx::XMVectorAdd(oCamPos, oCamDir);
 
     dx::XMStoreFloat3(pCamPos, oNewPos);
 }
