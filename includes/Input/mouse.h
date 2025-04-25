@@ -27,6 +27,8 @@ public:
     void OnKeyReleased(Window* pSender, unsigned int uKeyCode);
     void OnMouseMove(Window* pSender, int nX, int nY);
 
+    void Invalidate() { m_bIsValid = false; }
+
     //GETTERS
     inline std::pair<int, int> GetMousePos() const { return { m_nX, m_nY }; }
     inline int GetXPos() const { return m_nX; }
@@ -42,4 +44,5 @@ private:
     int m_nPrevY;
 
     uint8_t m_cState;
+    bool    m_bIsValid;
 };

@@ -91,6 +91,8 @@ Window::Window(LPCSTR pWinName, int nWidth, int nHeight)
 
     if (AdjustWindowRect(&rect, WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU, FALSE) != 0)
     {
+        CreateEvents();
+
 		//const WindowClass& oWinClass{WindowClass::GetInstance()};
         m_hWnd = CreateWindow(WindowClass::GetName(), pWinName,
             WS_CAPTION|WS_MINIMIZEBOX|WS_SYSMENU|WS_OVERLAPPEDWINDOW,
@@ -239,6 +241,13 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
         break;
     case WM_MOUSEMOVE:
         {
+            // Set up tracking
+            TRACKMOUSEEVENT tme;
+            tme.cbSize = sizeof(TRACKMOUSEEVENT);
+            tme.dwFlags = TME_LEAVE;
+            tme.hwndTrack = hWnd;
+            TrackMouseEvent(&tme);
+
             POINTS ptMousePos = MAKEPOINTS(lParam);
 
             //Register pos
@@ -246,17 +255,24 @@ LRESULT CALLBACK Window::HandleMsg(HWND hWnd, UINT uMsg, WPARAM wParam,
 
             //Broadcast event
             m_pMoveEvent->Broadcast(this, ptMousePos.x, ptMousePos.y);
-
-            //LockMousePosition();
+        }
+        break;
+    case WM_MOUSELEAVE:
+        {
+            m_pMouse->Invalidate();
         }
         break;
     case WM_KILLFOCUS:
-        m_pKeyboard->FlushPressedKeys();
+        {
+            m_pKeyboard->FlushPressedKeys();
+            m_pMouse->Invalidate();
+        }
+        break;
 	case WM_SIZE:
 		m_oWindowSize = MAKEPOINTS(lParam);
 
 		// Broadcast event
-		//m_pSizeEvent->Broadcast(this, m_oWindowSize.x, m_oWindowSize.y);
+		m_pSizeEvent->Broadcast(this, m_oWindowSize.x, m_oWindowSize.y);
 		break;
     }
 

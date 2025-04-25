@@ -19,16 +19,19 @@ Currently working on RHI and Dx11 specification of the interface.
 - [X] \- Update MVP in CBO using Camera position
 - [X] \- Handle input for movement
 - [X] \- Add lookAt in camera class
+- [X] \- Handle input for rotation
+- [X] \- Create events before window creation
+- [X] \- Create events after window creation
+- [X] \- Fixed crash because of late window events registration
+- [X] \- Track when mouse leaves the window
 
 ### WIP
 
-- [~] \- Handle input for rotation
 - [~] \- Fix error when minimizing the window
+- [ ] \- Output texture in render target instead of backbuffer
 
 ### Upcoming (ranked by priority)
 
-- [ ] \- Output texture in render target instead of backbuffer
-- [ ] \- Update camera position while button pressed and use delta time
 - [ ] \- Add simple pbr light pass
 - [ ] \- Add delta time
 - [~] \- RHI types and interface types
@@ -45,6 +48,8 @@ Currently working on RHI and Dx11 specification of the interface.
 
 ### Secondary tasks
 
+- [ ] \- Update window center (in screen)
+- [ ] \- Update camera position while button pressed and use delta time
 - [ ] \- Distinguish Window & Frame
 - [ ] \- Handle multiple viewport (1 scene -> 1 viewport)
 - [ ] \- Create forward .h for common STL includes (vector, string, ...)
