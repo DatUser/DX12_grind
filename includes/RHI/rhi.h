@@ -6,9 +6,10 @@
 #include <memory>
 #include <variant>
 
+enum class ETextureFormat : uint8_t;
 enum class ERendererShaders : uint8_t;
-class RHIBuffer;
-class RHIShader;
+
+class RHITexture;
 class RHIViewport;
 
 struct HWND__;
@@ -44,6 +45,12 @@ public:
 		ERHICPUAccessFlags eCPUAccess = ERHICPUAccessFlags::NONE,
 		ERHIBufferUsage eUsage = ERHIBufferUsage::DEFAULT
 	) = 0;
+
+	virtual std::shared_ptr<RHITexture> CreateTexture(
+		void* pData,
+		int iWidth,
+		int iHeight,
+		ETextureFormat eFormat) = 0;
 
 	/**
 	 * @brief Copies pData to pBuffer CPU memory then uploads it to the GPU

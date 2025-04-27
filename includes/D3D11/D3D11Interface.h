@@ -7,6 +7,7 @@
 #include <memory>
 
 class D3D11Buffer;
+class D3D11Texture;
 
 enum class EShaderStage : uint32_t;
 
@@ -49,9 +50,13 @@ public:
      * @param uFlags
      * @return HRESULT
      */
-    HRESULT createBufferInternal(
+	HRESULT createBufferInternal(
 		D3D11Buffer* pRHIBuffer
-    );
+	);
+
+	HRESULT createTextureInternal(
+		D3D11Texture* pTexture
+	);
 
     virtual void PresentFrame() override;
 
@@ -61,6 +66,13 @@ public:
 		ERHIBufferFlags eFlags,
 		ERHICPUAccessFlags eCPUAccess=ERHICPUAccessFlags::NONE,
 		ERHIBufferUsage eUsage=ERHIBufferUsage::DEFAULT
+	) override;
+
+	virtual std::shared_ptr<RHITexture> CreateTexture(
+		void* pData,
+		int iWidth,
+		int iHeight,
+		ETextureFormat eFormat
 	) override;
 
 	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;

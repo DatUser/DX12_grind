@@ -112,6 +112,25 @@ HRESULT D3D11Interface::createBufferInternal(
     return m_spDevice->CreateBuffer(&bufferDesc, (pRHIBuffer->m_pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->pInitResource);
 }
 
+HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+
+	//textureDesc.Width = pTexture->m_iWidth;
+	//textureDesc.Height = pTexture->m_iHeight;
+	//textureDesc.MipLevels = 1;
+	//textureDesc.ArraySize = 1;
+	//textureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	//textureDesc.SampleDesc.Count = 1;
+	//textureDesc.SampleDesc.Quality = 0;
+	//textureDesc.Usage = D3D11Texture::CastToInterfaceUsage(pTexture->m_eUsage);
+	//textureDesc.BindFlags = D3D11Texture::CastToInterfaceFlag(pTexture->m_eFlags);
+	//textureDesc.CPUAccessFlags = D3D11Texture::CastToInterfaceCPUAccess(pTexture->m_eCPUAccess);
+	//textureDesc.MiscFlags = 0;
+	return E_NOTIMPL;
+}
+
 HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
 {
     // Create data layout
@@ -176,6 +195,11 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 {
 	std::shared_ptr<D3D11Buffer> spBuffer = std::make_shared<D3D11Buffer>(pData, uByteWidth, eFlags, eCPUAccess, eUsage);
 	return spBuffer;
+}
+
+std::shared_ptr<RHITexture> D3D11Interface::CreateTexture(void* pData, int iWidth, int iHeight, ETextureFormat eFormat)
+{
+	return nullptr;
 }
 
 void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
