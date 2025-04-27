@@ -14,7 +14,10 @@ class RHIViewport;
 enum class ERendererShaders : uint8_t
 {
 	FORWARD_VS,
+	FORWARD_GS,
 	FORWARD_PS,
+	LIGHT_VS,
+	LIGHT_PS,
 
 	_size
 };

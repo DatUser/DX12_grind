@@ -79,6 +79,7 @@ void Renderer::InitResources()
 void Renderer::InitShaders()
 {
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_VS)
+	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_GS)
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_PS)
 }
 
@@ -152,6 +153,7 @@ void Renderer::Pass_Forward()
 
 		// Bind shader
 		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+		RHI::GetInterface()->SetGeometryShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_GS)].get());
 		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
 
 		// Bind data
@@ -167,7 +169,7 @@ void Renderer::Pass_Forward()
 void Renderer::InitTestScene()
 {
 	std::vector<Mesh*> vMeshes;
-	load_obj("models/teapot.obj", vMeshes);
+	load_obj("models/sphere.obj", vMeshes);
 	Mesh* pMesh = vMeshes[0];
 
 	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});

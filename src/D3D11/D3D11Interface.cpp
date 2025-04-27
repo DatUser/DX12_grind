@@ -78,6 +78,8 @@ HRESULT D3D11Interface::createShaderInstanceInternal(ID3D10Blob* pShaderBuffer, 
     {
     case EShaderStage::VERTEX:
             return m_spDevice->CreateVertexShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11VertexShader**) pShaderInstance);
+    case EShaderStage::GEOMETRY:
+    		return m_spDevice->CreateGeometryShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11GeometryShader**) pShaderInstance);
     case EShaderStage::PIXEL:
             return m_spDevice->CreatePixelShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11PixelShader**) pShaderInstance);
     default:
@@ -112,21 +114,26 @@ HRESULT D3D11Interface::createBufferInternal(
     return m_spDevice->CreateBuffer(&bufferDesc, (pRHIBuffer->m_pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->pInitResource);
 }
 
-HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
+HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, std::vector<InputLayoutFormat> vInputLayout, void** pLayout)
 {
     // Create data layout
-    D3D11_INPUT_ELEMENT_DESC inputDesc;
-    ZeroMemory(&inputDesc, sizeof(D3D11_INPUT_ELEMENT_DESC));
-    inputDesc.AlignedByteOffset = 0;
-    inputDesc.Format = eFormat;//DXGI_FORMAT_R32G32B32_FLOAT;
-    inputDesc.InputSlot = 0;
-    inputDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-    inputDesc.InstanceDataStepRate = 0;
-    inputDesc.SemanticIndex = 0;
-    inputDesc.SemanticName = pName;// "POSITION";
+	std::vector<D3D11_INPUT_ELEMENT_DESC> vInputLayoutDesc;
+	for (int i = 0; i < vInputLayout.size(); ++i)
+	{
+		D3D11_INPUT_ELEMENT_DESC inputDesc;
+		ZeroMemory(&inputDesc, sizeof(D3D11_INPUT_ELEMENT_DESC));
+		inputDesc.AlignedByteOffset = std::get<2>(vInputLayout[i]);
+		inputDesc.Format = std::get<0>(vInputLayout[i]);
+		inputDesc.InputSlot = 0;
+		inputDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		inputDesc.InstanceDataStepRate = 0;
+		inputDesc.SemanticIndex = 0;
+		inputDesc.SemanticName = std::get<1>(vInputLayout[i]);
+		vInputLayoutDesc.push_back(inputDesc);
+	}
 
     ComPtr<ID3D11InputLayout> spVertsLayout;
-    return m_spDevice->CreateInputLayout(&inputDesc, 1, pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), (ID3D11InputLayout**) pLayout);
+    return m_spDevice->CreateInputLayout(vInputLayoutDesc.data(), vInputLayout.size(), pVSBuffer->GetBufferPointer(), pVSBuffer->GetBufferSize(), (ID3D11InputLayout**) pLayout);
     //ATLASSERT(hr == S_OK);
 }
 
@@ -140,7 +147,9 @@ void D3D11Interface::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11B
     m_spContext->IASetInputLayout(spVertsLayout.Get());
 
     // Set triangle topology
-    m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+   // m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
     // Viewport creation
     D3D11_VIEWPORT viewport;
@@ -248,8 +257,8 @@ void D3D11Interface::CreateSwapchain(HWND hWnd)
 	ComPtr<ID3D11RasterizerState> spWireframe{};
 	D3D11_RASTERIZER_DESC oWfDesc{};
 	ZeroMemory(&oWfDesc, sizeof(D3D11_RASTERIZER_DESC));
-	oWfDesc.FillMode = D3D11_FILL_WIREFRAME;
-	oWfDesc.CullMode = D3D11_CULL_NONE;
+	oWfDesc.FillMode = D3D11_FILL_SOLID;
+	oWfDesc.CullMode = D3D11_CULL_BACK;
 	hr = m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe);
 
 	// Set rasterizer state
@@ -333,6 +342,13 @@ void D3D11Interface::SetVertexShader(const RHIShader* pShader)
 	// TODO: Make this generic
 	m_spContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+
+void D3D11Interface::SetGeometryShader(const RHIShader *pShader)
+{
+	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
+	m_spContext->GSSetShader((ID3D11GeometryShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
+}
+
 
 void D3D11Interface::SetPixelShader(const RHIShader* pShader)
 {

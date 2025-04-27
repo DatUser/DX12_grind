@@ -38,12 +38,15 @@ bool D3D11Shader::Compile()
 		m_eStage
 		) == S_OK);
 
+	std::vector<InputLayoutFormat> vInputLayout;
+	vInputLayout.push_back({ DXGI_FORMAT_R32G32B32_FLOAT, "POSITION", 0 });
+	vInputLayout.push_back({ DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL", D3D11_APPEND_ALIGNED_ELEMENT });
+
 	if (m_eStage == EShaderStage::VERTEX)
 		ATLASSERT(
 			D3D11Interface::GetInterface()->createInputLayout(
 				m_spShaderBuffer.Get(),          //Shader text data
-				DXGI_FORMAT_R32G32B32_FLOAT,    //Data format
-				"POSITION",                     //Structure semantic name
+				vInputLayout,                     //Structure semantic name
 				&m_spInputLayout
 			) == S_OK);
 

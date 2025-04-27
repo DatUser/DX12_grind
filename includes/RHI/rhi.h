@@ -61,6 +61,7 @@ public:
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;
+	virtual void SetGeometryShader(const RHIShader * get) = 0;
 	virtual void SetPixelShader(const RHIShader* pShader) = 0;
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
@@ -69,7 +70,8 @@ public:
 
 	virtual void DrawIndexed(uint32_t uIndexCount, uint32_t uIndexOffset, uint32_t uVertexOffset) = 0;
 
-	//inline static auto&& GetInterface()
+
+    //inline static auto&& GetInterface()
 	inline static RHI* GetInterface()
 	{
 		//return m_spGFXInterface;

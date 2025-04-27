@@ -49,6 +49,7 @@ void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
 	//pCurrMesh->m_vVertices = attrib.vertices;
 
 	std::vector<int> vIndices{};
+	std::vector<float> vVertices{};
 	for (auto&& shape : shapes)
 	{
 		for (auto&& index : shape.mesh.indices)
@@ -56,7 +57,21 @@ void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
 		//pCurrMesh->m_vIndices.push_back(index.vertex_index);
 	}
 
-	Mesh* pCurrMesh = new Mesh{ attrib.vertices, vIndices };
+	for (int i = 0; i < attrib.vertices.size(); i += 3)
+	{
+		vVertices.push_back(attrib.vertices[i]);
+		vVertices.push_back(attrib.vertices[i+1]);
+		vVertices.push_back(attrib.vertices[i+2]);
+	}
+
+	for (int i = 0; i < attrib.vertices.size(); i += 3)
+	{
+		vVertices.push_back(attrib.normals[i]);
+		vVertices.push_back(attrib.normals[i+1]);
+		vVertices.push_back(attrib.normals[i+2]);
+	}
+
+	Mesh* pCurrMesh = new Mesh{ vVertices, vIndices };
 	CHECK(pCurrMesh != nullptr)
 	vMeshes.push_back(pCurrMesh);
 

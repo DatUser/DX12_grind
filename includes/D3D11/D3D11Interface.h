@@ -10,6 +10,7 @@ class D3D11Buffer;
 
 enum class EShaderStage : uint32_t;
 
+using InputLayoutFormat = std::tuple<DXGI_FORMAT, LPCSTR, unsigned int>;
 
 /**
  *  Initializes and handles the device, the swapchain and the context
@@ -81,6 +82,7 @@ public:
 	void SetBufferInternal(const RHIBuffer* pBuffer){}
 
 	virtual void SetVertexShader(const RHIShader* pShader) override;
+	virtual void SetGeometryShader(const RHIShader* pShader) override;
 	virtual void SetPixelShader(const RHIShader* pShader) override;
 
 	virtual void DrawIndexed(
@@ -99,7 +101,7 @@ public:
      * @return HRESULT
      */
 	// To remove
-    HRESULT createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout);
+    HRESULT createInputLayout(ID3D10Blob* pVSBuffer, std::vector<InputLayoutFormat> vInputLayout, void** pLayout);
 
     /**
      * @brief Adds buffer as input of given Vertex buffer
