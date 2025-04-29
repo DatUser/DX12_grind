@@ -10,14 +10,14 @@
 #include "Engine/app.h"
 
 #include "D3D11/D3D11Buffer.h"
-#include "D3D11/D3D11Common.h"
 #include "D3D11/D3D11Shader.h"
+#include "D3D11/D3D11Texture.h"
+#include "D3D11/D3D11Utils.h"
 #include "D3D11/D3D11Viewport.h"
 
 #include "RHI/rhi_shader.h"
 
 #include "Engine/Mesh.h"
-#include "IO/objloader.h"
 #include "Shapes/teapot.h"
 
 namespace wrl = Microsoft::WRL;
@@ -95,9 +95,9 @@ HRESULT D3D11Interface::createBufferInternal(
 
     bufferDesc.BindFlags = D3D11Buffer::CastToInterfaceFlag(pRHIBuffer->m_eFlags);
     bufferDesc.ByteWidth = pRHIBuffer->m_uByteWidth;//sizeof(float)  * 3 * 3;
-    bufferDesc.CPUAccessFlags = D3D11Buffer::CastToInterfaceCPUAccess(pRHIBuffer->m_eCPUAccess);
+    bufferDesc.CPUAccessFlags = CastToInterfaceCPUAccess(pRHIBuffer->m_eCPUAccess);
     bufferDesc.MiscFlags = 0;
-    bufferDesc.Usage = D3D11Buffer::CastToInterfaceUsage(pRHIBuffer->m_eUsage);
+    bufferDesc.Usage = CastToInterfaceUsage(pRHIBuffer->m_eUsage);
 
     //float Verts[9] = {  0.f, 0.5f, 0.5f,
     //                    0.5f, -0.5f, 0.5f,
@@ -117,17 +117,17 @@ HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 
-	//textureDesc.Width = pTexture->m_iWidth;
-	//textureDesc.Height = pTexture->m_iHeight;
-	//textureDesc.MipLevels = 1;
-	//textureDesc.ArraySize = 1;
-	//textureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
-	//textureDesc.SampleDesc.Count = 1;
-	//textureDesc.SampleDesc.Quality = 0;
-	//textureDesc.Usage = D3D11Texture::CastToInterfaceUsage(pTexture->m_eUsage);
+	textureDesc.Width = pTexture->m_iWidth;
+	textureDesc.Height = pTexture->m_iHeight;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = CastToInterfaceUsage(pTexture->m_eUsage);
 	//textureDesc.BindFlags = D3D11Texture::CastToInterfaceFlag(pTexture->m_eFlags);
-	//textureDesc.CPUAccessFlags = D3D11Texture::CastToInterfaceCPUAccess(pTexture->m_eCPUAccess);
-	//textureDesc.MiscFlags = 0;
+	textureDesc.CPUAccessFlags = CastToInterfaceCPUAccess(pTexture->m_eCPUAccess);
+	textureDesc.MiscFlags = 0;
 	return E_NOTIMPL;
 }
 
