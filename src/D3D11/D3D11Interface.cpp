@@ -109,26 +109,32 @@ HRESULT D3D11Interface::createBufferInternal(
     bufferData.pSysMem = pRHIBuffer->m_pData;
 
     // Create buffer object
-    return m_spDevice->CreateBuffer(&bufferDesc, (pRHIBuffer->m_pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->pInitResource);
+    return m_spDevice->CreateBuffer(&bufferDesc, (pRHIBuffer->m_pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->m_spInitResource);
 }
 
 HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 {
-	D3D11_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+	D3D11_TEXTURE2D_DESC oTextureDesc;
+	ZeroMemory(&oTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 
-	textureDesc.Width = pTexture->m_iWidth;
-	textureDesc.Height = pTexture->m_iHeight;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = CastToInterfaceUsage(pTexture->m_eUsage);
-	//textureDesc.BindFlags = D3D11Texture::CastToInterfaceFlag(pTexture->m_eFlags);
-	textureDesc.CPUAccessFlags = CastToInterfaceCPUAccess(pTexture->m_eCPUAccess);
-	textureDesc.MiscFlags = 0;
-	return E_NOTIMPL;
+	oTextureDesc.Width = pTexture->m_iWidth;
+	oTextureDesc.Height = pTexture->m_iHeight;
+	oTextureDesc.MipLevels = 1;
+	oTextureDesc.ArraySize = 1;
+	oTextureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	oTextureDesc.SampleDesc.Count = 1;
+	oTextureDesc.SampleDesc.Quality = 0;
+	oTextureDesc.Usage = CastToInterfaceUsage(pTexture->m_eUsage);
+	oTextureDesc.BindFlags = D3D11Texture::CastToInterfaceBindFlags(pTexture->m_uFlags);
+	oTextureDesc.CPUAccessFlags = CastToInterfaceCPUAccess(pTexture->m_eCPUAccess);
+	oTextureDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA oTexData;
+	ZeroMemory(&oTexData, sizeof(D3D11_SUBRESOURCE_DATA));
+
+	oTexData.pSysMem = pTexture->m_pData;
+
+	return m_spDevice->CreateTexture2D(&oTextureDesc, &oTexData, (ID3D11Texture2D**) &pTexture->m_spInitResource);
 }
 
 HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
@@ -197,9 +203,16 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 	return spBuffer;
 }
 
-std::shared_ptr<RHITexture> D3D11Interface::CreateTexture(void* pData, int iWidth, int iHeight, ETextureFormat eFormat)
+std::shared_ptr<RHITexture> D3D11Interface::CreateTexture(
+	void* pData,
+	int iWidth,
+	int iHeight,
+	ETextureFormat eFormat,
+	uint32_t uFlags
+)
 {
-	return nullptr;
+	std::shared_ptr<D3D11Texture> spTexture = std::make_shared<D3D11Texture>(pData, iWidth, iHeight, eFormat, uFlags);
+	return spTexture;
 }
 
 void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
@@ -208,14 +221,14 @@ void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 	D3D11_MAPPED_SUBRESOURCE oMappedSubresource{};
 
 	m_spContext->Map(
-		pD3D11Buffer->pInitResource.Get(),				// Resource
+		pD3D11Buffer->m_spInitResource.Get(),				// Resource
 		0,												// Subresource
 		D3D11_MAP_WRITE_DISCARD,						// Map type
 		0,												// Flags (What CPU does during upload)
 		&oMappedSubresource											// Mapped resource (Data, rowPitch, depthPitch)
 		);
 	memcpy(oMappedSubresource.pData, pData, pBuffer->m_uByteWidth);
-	m_spContext->Unmap(pD3D11Buffer->pInitResource.Get(), 0);
+	m_spContext->Unmap(pD3D11Buffer->m_spInitResource.Get(), 0);
 	//m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
     //ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
 	//return spBuffer->IsValid();
@@ -321,7 +334,7 @@ void D3D11Interface::SetVertexBuffer(const RHIBuffer *pBuffer)
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	uint32_t uStride = sizeof(float) * 3;
 	uint32_t uOffset = 0;
-	m_spContext->IASetVertexBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf(), &uStride, &uOffset);
+	m_spContext->IASetVertexBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf(), &uStride, &uOffset);
 	//m_spContext->IASetVertexBuffers(0, 1, &pD3D11Buffer->pInitResource, &pD3D11Buffer->uStride, &pD3D11Buffer->uOffset);
 }
 
@@ -329,14 +342,14 @@ void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	uint32_t uOffset = 0;
-	m_spContext->IASetIndexBuffer(pD3D11Buffer->pInitResource.Get(), DXGI_FORMAT_R32_UINT, uOffset);
+	m_spContext->IASetIndexBuffer(pD3D11Buffer->m_spInitResource.Get(), DXGI_FORMAT_R32_UINT, uOffset);
 }
 
 template <>
 void D3D11Interface::SetBufferInternal<EShaderStage::VERTEX>(const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->pInitResource.GetAddressOf());
+	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
 void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
@@ -346,6 +359,15 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 		[this, pBuffer](auto eStage)
 		{
 			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
+}
+
+void D3D11Interface::SetRenderTarget(const RHITexture* pTexture)
+{
+	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
+	ATLASSERT(pD3D11Texture &&
+		(pD3D11Texture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);
+
+	//m_spContext->OMSetRenderTargets(1, &pD3D11Texture->m_spInitResource.Get(), nullptr);
 }
 
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)

@@ -27,7 +27,7 @@ public:
 	virtual bool IsValid() override final
 	{
 		// TODO: Check if better checks can be done
-		return pInitResource.Get() != nullptr;
+		return m_spInitResource.Get() != nullptr;
 	}
 
 	//inline void** GetResource()
@@ -48,5 +48,5 @@ public:
 	}
 
 private:
-	ComPtr<ID3D11Buffer> pInitResource;
+	ComPtr<ID3D11Buffer> m_spInitResource;
 };

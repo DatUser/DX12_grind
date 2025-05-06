@@ -72,7 +72,8 @@ public:
 		void* pData,
 		int iWidth,
 		int iHeight,
-		ETextureFormat eFormat
+		ETextureFormat eFormat,
+		uint32_t uFlags = 0
 	) override;
 
 	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;
@@ -84,10 +85,11 @@ public:
 	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) override;
 	virtual void SetViewport(const RHIViewport* pViewport) override;
 
-	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
-	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
-	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) override;
-	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
+	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
+	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
+	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	void SetRenderTarget(const RHITexture *pTexture) override;
 
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer){}

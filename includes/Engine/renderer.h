@@ -20,6 +20,13 @@ enum class ERendererShaders : uint8_t
 	_size
 };
 
+enum class ERendererPassesRT : uint8_t
+{
+	FORWARD,
+
+	_size
+};
+
 class Renderer
 {
 	friend std::unique_ptr<Renderer>::deleter_type;
@@ -63,7 +70,7 @@ private:
 	void UpdateMesh(Mesh* pMesh);
 	void DrawMesh(Mesh* pMesh);
 
-	void Pass_Forward();
+	void Pass_Forward(RHITexture* pOutTex);
 
     /**
      * @brief Inits the default shader program

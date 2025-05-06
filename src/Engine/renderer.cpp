@@ -21,6 +21,10 @@
 	m_mapShaders[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateShader(x);	\
 	m_mapShaders[static_cast<unsigned int>(x)]->Compile();
 
+// Creates render targets for each pass
+#define INIT_RENDERER_RTs(x)\
+	m_mapPassRenderTargets[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateTexture(x);
+
 namespace dx = DirectX;
 
 std::unique_ptr<Renderer> Renderer::m_spInstance{new Renderer{}};
@@ -80,6 +84,9 @@ void Renderer::InitShaders()
 {
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_VS)
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_PS)
+
+	//m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)] =
+	//	RHI::GetInterface()->CreateTexture(x);
 }
 
 void Renderer::Tick()
@@ -94,7 +101,7 @@ void Renderer::GenerateFrame()
 	//Add passes for every drawable instances in scene
 	RHI::GetInterface()->ClearRenderView();
 
-	Pass_Forward();
+	//Pass_Forward();
 
 	// Todo : Add Render target to be filled and displayed
 	//RHI::GetInterface()->Draw();
@@ -143,7 +150,7 @@ void Renderer::DrawMesh(Mesh *pMesh)
 	RHI::GetInterface()->DrawIndexed(pMesh->GetNumIndices(), pMesh->GetIndexOffset(), pMesh->GetVertexOffset());
 }
 
-void Renderer::Pass_Forward()
+void Renderer::Pass_Forward(RHITexture* pOutTex)
 {
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
@@ -153,6 +160,7 @@ void Renderer::Pass_Forward()
 		// Bind shader
 		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
+		RHI::GetInterface()->SetRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
 
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());

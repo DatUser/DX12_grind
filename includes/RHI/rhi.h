@@ -50,7 +50,9 @@ public:
 		void* pData,
 		int iWidth,
 		int iHeight,
-		ETextureFormat eFormat) = 0;
+		ETextureFormat eFormat,
+		uint32_t uFlags = 0
+		) = 0;
 
 	/**
 	 * @brief Copies pData to pBuffer CPU memory then uploads it to the GPU
@@ -73,6 +75,7 @@ public:
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) = 0;
+	virtual void SetRenderTarget(const RHITexture* pTexture) = 0;
 
 	virtual void DrawIndexed(uint32_t uIndexCount, uint32_t uIndexOffset, uint32_t uVertexOffset) = 0;
 

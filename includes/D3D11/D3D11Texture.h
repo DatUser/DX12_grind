@@ -13,7 +13,8 @@ public:
         void* pData,
         int iWidth,
         int iHeight,
-        ETextureFormat eFormat
+        ETextureFormat eFormat,
+        uint32_t uFlags
     );
 
     ~D3D11Texture() override = default;
@@ -29,5 +30,8 @@ public:
         return arrFormats[static_cast<unsigned int>(eFormat)];
     }
 
+    static uint32_t CastToInterfaceBindFlags(uint32_t uFlags);
+
 private:
+    ComPtr<ID3D11Texture2D> m_spInitResource;
 };
