@@ -23,6 +23,7 @@ enum class ERendererShaders : uint8_t
 enum class ERendererPassesRT : uint8_t
 {
 	FORWARD,
+	FINAL,
 
 	_size
 };
@@ -70,7 +71,7 @@ private:
 	void UpdateMesh(Mesh* pMesh);
 	void DrawMesh(Mesh* pMesh);
 
-	void Pass_Forward(RHITexture* pOutTex);
+	void Pass_Forward();
 
     /**
      * @brief Inits the default shader program

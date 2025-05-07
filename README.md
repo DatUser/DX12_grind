@@ -57,6 +57,8 @@ Currently working on RHI and Dx11 specification of the interface.
 
 ### Not a feature
 
+- [ ] \- Add constness to methods when possible
+- [ ] \- Get rid of `friend class` with API Interface in RHI classes
 - [ ] \- Get rid of virtual keyword when override
 - [ ] \- Make code cppcheck compliant
 - [ ] \- Core should be D3D11Core

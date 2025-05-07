@@ -137,6 +137,18 @@ HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 	return m_spDevice->CreateTexture2D(&oTextureDesc, &oTexData, (ID3D11Texture2D**) &pTexture->m_spInitResource);
 }
 
+HRESULT D3D11Interface::createRTVInternal(D3D11Texture *pTexture)
+{
+	ID3D11View** pView = &pTexture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)];
+	ID3D11RenderTargetView** pRTV = reinterpret_cast<ID3D11RenderTargetView**>(pView);
+
+	return m_spDevice->CreateRenderTargetView(
+		pTexture->m_spInitResource.Get(),
+		nullptr,
+		pRTV);
+		//(ID3D11RenderTargetView**) (&pTexture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)]));
+}
+
 HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
 {
     // Create data layout
@@ -361,13 +373,16 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
 }
 
-void D3D11Interface::SetRenderTarget(const RHITexture* pTexture)
+void D3D11Interface::SetContextRenderTarget(const RHITexture* pTexture)
 {
 	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
 	ATLASSERT(pD3D11Texture &&
 		(pD3D11Texture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);
 
-	//m_spContext->OMSetRenderTargets(1, &pD3D11Texture->m_spInitResource.Get(), nullptr);
+	ID3D11View* const* pView = pD3D11Texture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)].GetAddressOf();
+	ID3D11RenderTargetView* const* pRTV = reinterpret_cast<ID3D11RenderTargetView* const*>(pView);
+
+	m_spContext->OMSetRenderTargets(1, pRTV, nullptr);
 }
 
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)
@@ -384,6 +399,25 @@ void D3D11Interface::SetPixelShader(const RHIShader* pShader)
 {
 	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
 	m_spContext->PSSetShader((ID3D11PixelShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
+}
+
+void D3D11Interface::CopyTexture(const RHITexture *pSrc, const RHITexture *pDst) const
+{
+	const D3D11Texture* pD3D11Src = dynamic_cast<const D3D11Texture*>(pSrc);
+	const D3D11Texture* pD3D11Dst = dynamic_cast<const D3D11Texture*>(pDst);
+
+	D3D11_BOX oBox{};
+	ZeroMemory(&oBox, sizeof(D3D11_BOX));
+
+	oBox.top = 0;
+	oBox.left = 0;
+	oBox.bottom = pSrc->m_iHeight - 1;
+	oBox.right = pSrc->m_iWidth - 1;
+
+	m_spContext->CopySubresourceRegion(
+		pD3D11Dst->m_spInitResource.Get(),
+		0, 0, 0, 0,
+		pD3D11Src->m_spInitResource.Get(), 0, &oBox);
 }
 
 void D3D11Interface::DrawIndexed(

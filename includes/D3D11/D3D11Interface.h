@@ -56,6 +56,10 @@ public:
 
 	HRESULT createTextureInternal(
 		D3D11Texture* pTexture
+		);
+
+	HRESULT createRTVInternal(
+		D3D11Texture* pTexture
 	);
 
     virtual void PresentFrame() override;
@@ -89,15 +93,17 @@ public:
 	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
-	void SetRenderTarget(const RHITexture *pTexture) override;
+	void SetContextRenderTarget(const RHITexture *pTexture) override;
 
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer){}
 
-	virtual void SetVertexShader(const RHIShader* pShader) override;
-	virtual void SetPixelShader(const RHIShader* pShader) override;
+	void SetVertexShader(const RHIShader* pShader) override;
+	void SetPixelShader(const RHIShader* pShader) override;
 
-	virtual void DrawIndexed(
+	void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const override;
+
+	void DrawIndexed(
 		uint32_t uIndexCount,
 		uint32_t uIndexOffset,
 		uint32_t uVertexOffset

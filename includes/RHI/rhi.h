@@ -74,8 +74,10 @@ public:
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
-	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) = 0;
-	virtual void SetRenderTarget(const RHITexture* pTexture) = 0;
+	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
+	virtual void SetContextRenderTarget(const RHITexture* pTexture) = 0;
+
+	virtual void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const = 0;
 
 	virtual void DrawIndexed(uint32_t uIndexCount, uint32_t uIndexOffset, uint32_t uVertexOffset) = 0;
 

@@ -12,12 +12,22 @@ public:
 
 	virtual ~D3D11Viewport();
 
-	virtual void SetWidth(uint32_t uWidth) override
+	uint32_t GetWidth() const
+	{
+		return m_oViewport.Width;
+	}
+
+	uint32_t GetHeight() const
+	{
+		return m_oViewport.Height;
+	}
+
+	void SetWidth(uint32_t uWidth) override
 	{
 		m_oViewport.Width = uWidth;
 	}
 
-	virtual void SetHeight(uint32_t uHeight) override
+	void SetHeight(uint32_t uHeight) override
 	{
 		m_oViewport.Height = uHeight;
 	}

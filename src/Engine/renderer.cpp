@@ -12,6 +12,7 @@
 #include "RHI/rhi.h"
 #include "RHI/rhi_buffer.h"
 #include "RHI/rhi_shader.h"
+#include "RHI/rhi_texture.h"
 #include "RHI/rhi_viewport.h"
 
 #define TO_SHADER_TYPE(x) std::integral_constant<EShaderStage, x>{}
@@ -20,10 +21,6 @@
 #define INIT_RENDERER_SHADER(x)\
 	m_mapShaders[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateShader(x);	\
 	m_mapShaders[static_cast<unsigned int>(x)]->Compile();
-
-// Creates render targets for each pass
-#define INIT_RENDERER_RTs(x)\
-	m_mapPassRenderTargets[static_cast<unsigned int>(x)] = RHI::GetInterface()->CreateTexture(x);
 
 namespace dx = DirectX;
 
@@ -85,8 +82,17 @@ void Renderer::InitShaders()
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_VS)
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_PS)
 
-	//m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)] =
-	//	RHI::GetInterface()->CreateTexture(x);
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R8G8B8A8_UNORM);
+
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FINAL)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R8G8B8A8_UNORM);
 }
 
 void Renderer::Tick()
@@ -101,8 +107,12 @@ void Renderer::GenerateFrame()
 	//Add passes for every drawable instances in scene
 	RHI::GetInterface()->ClearRenderView();
 
-	//Pass_Forward();
+	Pass_Forward();
 
+	// Copy to final render target
+	RHI::GetInterface()->CopyTexture(
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FINAL)].get());
 	// Todo : Add Render target to be filled and displayed
 	//RHI::GetInterface()->Draw();
 }
@@ -150,7 +160,7 @@ void Renderer::DrawMesh(Mesh *pMesh)
 	RHI::GetInterface()->DrawIndexed(pMesh->GetNumIndices(), pMesh->GetIndexOffset(), pMesh->GetVertexOffset());
 }
 
-void Renderer::Pass_Forward(RHITexture* pOutTex)
+void Renderer::Pass_Forward()
 {
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
@@ -160,12 +170,14 @@ void Renderer::Pass_Forward(RHITexture* pOutTex)
 		// Bind shader
 		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
-		RHI::GetInterface()->SetRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
 
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+
+		// Bind output
+		RHI::GetInterface()->SetContextRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();

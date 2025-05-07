@@ -33,5 +33,6 @@ public:
     static uint32_t CastToInterfaceBindFlags(uint32_t uFlags);
 
 private:
+    std::array<ComPtr<ID3D11View>, static_cast<unsigned int>(ERHITextureFlags::_size)> m_arrResourceViews;
     ComPtr<ID3D11Texture2D> m_spInitResource;
 };

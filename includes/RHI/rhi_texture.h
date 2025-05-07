@@ -18,11 +18,14 @@ enum class ERHITextureFlags : uint32_t
 {
     SHADER_RESOURCE =   1,
     RENDER_TARGET =     1 << 1,
-    DEPTH_STENCIL =     1 << 2
+    DEPTH_STENCIL =     1 << 2,
+
+    _size = 3
 };
 
 class RHITexture : public RHIResource
 {
+    friend class D3D11Interface;
 public:
     virtual ~RHITexture() = default;
 
@@ -46,3 +49,8 @@ protected:
     uint32_t        m_uFlags;
     ETextureFormat  m_eFormat;
 };
+
+constexpr uint32_t operator&(uint32_t uFlags, ERHITextureFlags eFlags)
+{
+    return uFlags & static_cast<uint32_t>(eFlags);
+}
