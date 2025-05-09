@@ -12,6 +12,7 @@
 #include "RHI/rhi.h"
 #include "RHI/rhi_buffer.h"
 #include "RHI/rhi_shader.h"
+#include "RHI/rhi_swapchain.h"
 #include "RHI/rhi_texture.h"
 #include "RHI/rhi_viewport.h"
 
@@ -45,10 +46,15 @@ void Renderer::Initialize()
 
 void Renderer::InitResources()
 {
-	RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
-	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(600, 600);
-	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
+	// Viewport Stuff
+	m_spCurrentViewport = RHI::GetInterface()->CreateViewport(App::GetInstance()->GetMainWindow()->GetHandle(), 600, 600);
+	//RHI::GetInterface()->CreateSwapchain(App::GetInstance()->GetMainWindow()->GetHandle());
 
+	// Pipeline setup
+	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
+	RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, true);
+
+	// Constant buffers
 	const static Vec3 m_oFocus{0., 0., 0.};
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
@@ -119,7 +125,7 @@ void Renderer::GenerateFrame()
 
 void Renderer::PresentFrame()
 {
-	RHI::GetInterface()->PresentFrame();
+	m_spCurrentViewport->GetSwapchain()->Present();
 }
 
 void Renderer::UpdateConstantBuffers()

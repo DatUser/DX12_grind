@@ -6,6 +6,7 @@
 #include <memory>
 #include <variant>
 
+class RHISwapchain;
 enum class ETextureFormat : uint8_t;
 enum class ERendererShaders : uint8_t;
 
@@ -19,6 +20,15 @@ using ShaderType = std::variant<
 				std::integral_constant<EShaderStage, EShaderStage::VERTEX>,
 				std::integral_constant<EShaderStage, EShaderStage::PIXEL>>;
 
+enum class ECullMode
+{
+	CULL_BACK,
+	CULL_FRONT,
+	NONE,
+
+	_size
+};
+
 /**
  *  This is the rendering interface
  *  Its main purpose is to request frames
@@ -28,12 +38,6 @@ class RHI
 {
 public:
     virtual ~RHI() = default;
-
-
-    /**
-     *  Present frame to user
-    */
-    virtual void PresentFrame() = 0;
 
     virtual void ClearRenderView() = 0;
     //virtual void Draw() = 0;
@@ -63,9 +67,11 @@ public:
 	 */
     virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) = 0;
 
-    virtual void CreateSwapchain(HWND hWnd) = 0;
+    virtual std::shared_ptr<RHISwapchain> CreateSwapchain(HWND hWnd, uint32_t uWidth, uint32_t uHeight) = 0;
 
-	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) = 0;
+	virtual void SetRasterizerState(ECullMode eMode, bool bIsWireframe = false) = 0;
+
+	virtual std::shared_ptr<RHIViewport> CreateViewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight) = 0;
 	virtual void SetViewport(const RHIViewport* pViewport) = 0;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;

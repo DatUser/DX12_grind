@@ -11,6 +11,7 @@
 
 #include "D3D11/D3D11Buffer.h"
 #include "D3D11/D3D11Shader.h"
+#include "D3D11/D3D11Swapchain.h"
 #include "D3D11/D3D11Texture.h"
 #include "D3D11/D3D11Utils.h"
 #include "D3D11/D3D11Viewport.h"
@@ -25,7 +26,6 @@ namespace dx = DirectX;
 
 D3D11Interface::D3D11Interface()
 	: m_spDevice(nullptr),
-	  m_spSwapchain(nullptr),
 	  m_spContext(nullptr)
 {
 	uint32_t uCreationFlags = 0;
@@ -149,6 +149,46 @@ HRESULT D3D11Interface::createRTVInternal(D3D11Texture *pTexture)
 		//(ID3D11RenderTargetView**) (&pTexture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)]));
 }
 
+HRESULT D3D11Interface::createSwapchainInternal(D3D11Swapchain *pSwapchain, HWND hWnd, uint32_t uWidth, uint32_t uHeight)
+{
+	// TODO: Move this to renderer using RHI interface
+    DXGI_SWAP_CHAIN_DESC oSwapDesc;
+    ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+    oSwapDesc.BufferDesc.Width = uWidth;
+    oSwapDesc.BufferDesc.Height = uHeight;
+    oSwapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    oSwapDesc.BufferDesc.RefreshRate.Numerator = 60;
+    oSwapDesc.BufferDesc.RefreshRate.Denominator = 1;
+    oSwapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+    oSwapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+    oSwapDesc.SampleDesc.Count = 1;
+    oSwapDesc.SampleDesc.Quality = 0;
+    oSwapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    oSwapDesc.BufferCount = 1;
+    oSwapDesc.OutputWindow = (HWND) hWnd;
+    oSwapDesc.Windowed = TRUE;
+    oSwapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    oSwapDesc.Flags = 0;
+
+	return m_spFactory->CreateSwapChain(m_spDevice.Get(), &oSwapDesc, &pSwapchain->m_spSwapchain);
+
+	// TODO: Move the stuff down to renderer
+/*
+    // Access to swapchain back buffer resource
+    ComPtr<ID3D11Resource> spBackBuffer{};
+    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
+    ATLASSERT(hr == S_OK);
+
+    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
+    ATLASSERT(hr == S_OK);
+
+    //Set our Render Target
+    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
+*/
+	//ID3D11CommandList* pCommandList = nullptr;
+	//pCommandList->QueryInterface(__uuidof(ID3D11CommandList), (void**)&m_spCommandList);
+}
+
 HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, DXGI_FORMAT eFormat, LPCSTR pName, void** pLayout)
 {
     // Create data layout
@@ -188,19 +228,6 @@ void D3D11Interface::AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11B
     viewport.Width = 600;
 
     m_spContext->RSSetViewports(1, &viewport);
-}
-
-void D3D11Interface::PresentFrame()
-{
-    HRESULT hr = m_spSwapchain->Present(0, 0);
-    if (hr != S_OK)
-    {
-    	LOG_ERROR(hr);
-        LOG_LAST_ERROR();
-        LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
-    }
-
-    ATLASSERT(hr == S_OK);
 }
 
 std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
@@ -246,77 +273,34 @@ void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 	//return spBuffer->IsValid();
 }
 
-void D3D11Interface::CreateSwapchain(HWND hWnd)
+std::shared_ptr<RHISwapchain> D3D11Interface::CreateSwapchain(
+	HWND hWnd,
+	uint32_t uWidth,
+	uint32_t uHeight
+)
 {
-	// TODO: Move this to renderer using RHI interface
-    DXGI_SWAP_CHAIN_DESC oSwapDesc;
-    ZeroMemory(&oSwapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-    oSwapDesc.BufferDesc.Width = App::GetInstance()->GetMainWindow()->GetWidth();
-    oSwapDesc.BufferDesc.Height = App::GetInstance()->GetMainWindow()->GetHeight();
-    oSwapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    oSwapDesc.BufferDesc.RefreshRate.Numerator = 60;
-    oSwapDesc.BufferDesc.RefreshRate.Denominator = 1;
-    oSwapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-    oSwapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-    oSwapDesc.SampleDesc.Count = 1;
-    oSwapDesc.SampleDesc.Quality = 0;
-    oSwapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    oSwapDesc.BufferCount = 1;
-    oSwapDesc.OutputWindow = (HWND) hWnd;
-    oSwapDesc.Windowed = TRUE;
-    oSwapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    oSwapDesc.Flags = 0;
+	std::shared_ptr<RHISwapchain> spSwapchain = std::make_shared<D3D11Swapchain>(hWnd, uWidth, uHeight);
+	return spSwapchain;
+}
 
-    //HRESULT hr = D3D11CreateDeviceAndSwapChain(
-    //    nullptr,
-    //    D3D_DRIVER_TYPE_HARDWARE,
-    //    nullptr,
-    //    0,
-    //    nullptr,
-    //    0,
-    //    D3D11_SDK_VERSION,
-    //    //Here pointer is released then we access its address
-    //    &oSwapDesc,
-    //    &m_spSwapchain,
-    //    &m_spDevice,
-    //    nullptr,
-    //    &m_spContext
-    //);
-	HRESULT hr = m_spFactory->CreateSwapChain(m_spDevice.Get(), &oSwapDesc, &m_spSwapchain);
-    ATLASSERT(hr == S_OK);
-
-	// TODO: Move the stuff down to renderer
-
-    // Access to swapchain back buffer resource
-    ComPtr<ID3D11Resource> spBackBuffer{};
-    //hr = m_spSwapchain->GetBuffer(0, /**__uuidof(ID3D11Resource)**/__uuidof(ID3D11Texture2D), &spBackBuffer);
-    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
-    ATLASSERT(hr == S_OK);
-
+void D3D11Interface::SetRasterizerState(ECullMode eMode, bool bIsWireframe)
+{
 	// Create wireframe rasterizer state
 	ComPtr<ID3D11RasterizerState> spWireframe{};
 	D3D11_RASTERIZER_DESC oWfDesc{};
 	ZeroMemory(&oWfDesc, sizeof(D3D11_RASTERIZER_DESC));
-	oWfDesc.FillMode = D3D11_FILL_WIREFRAME;
-	oWfDesc.CullMode = D3D11_CULL_NONE;
-	hr = m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe);
+	oWfDesc.FillMode = bIsWireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID;
+	oWfDesc.CullMode = CastToInterfaceCullMode(eMode);
+	ATLASSERT(m_spDevice->CreateRasterizerState(&oWfDesc, &spWireframe) == S_OK);
 
 	// Set rasterizer state
 	m_spContext->RSSetState(spWireframe.Get());
 
-    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
-    ATLASSERT(hr == S_OK);
-
-    //Set our Render Target
-    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
-
-	//ID3D11CommandList* pCommandList = nullptr;
-	//pCommandList->QueryInterface(__uuidof(ID3D11CommandList), (void**)&m_spCommandList);
 }
 
-std::shared_ptr<RHIViewport> D3D11Interface::CreateViewport(uint32_t uWidth, uint32_t uHeight)
+std::shared_ptr<RHIViewport> D3D11Interface::CreateViewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 {
-	return std::make_shared<D3D11Viewport>(uWidth, uHeight, 0, 0);
+	return std::make_shared<D3D11Viewport>(hWnd, uWidth, uHeight);
 }
 
 void D3D11Interface::SetViewport(const RHIViewport *pViewport) {

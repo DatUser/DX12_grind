@@ -7,10 +7,9 @@ class D3D11Viewport : public RHIViewport
 {
 	friend class D3D11Interface;
 public:
-	D3D11Viewport();
-	D3D11Viewport(uint32_t uWidth, uint32_t uHeight, uint32_t uTopLeftX, uint32_t uTopLeftY);
+	D3D11Viewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight);
 
-	virtual ~D3D11Viewport();
+	~D3D11Viewport() override;
 
 	uint32_t GetWidth() const
 	{
@@ -22,6 +21,7 @@ public:
 		return m_oViewport.Height;
 	}
 
+	// TODO: Implement functional stuff
 	void SetWidth(uint32_t uWidth) override
 	{
 		m_oViewport.Width = uWidth;

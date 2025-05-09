@@ -57,6 +57,8 @@ Currently working on RHI and Dx11 specification of the interface.
 
 ### Not a feature
 
+- [ ] \- Make indentation homogenous (only tabs)
+- [ ] \- Move HWND to RHIViewport
 - [ ] \- Add constness to methods when possible
 - [ ] \- Get rid of `friend class` with API Interface in RHI classes
 - [ ] \- Get rid of virtual keyword when override
