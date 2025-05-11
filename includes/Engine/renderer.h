@@ -23,7 +23,6 @@ enum class ERendererShaders : uint8_t
 enum class ERendererPassesRT : uint8_t
 {
 	FORWARD,
-	FINAL,
 
 	_size
 };

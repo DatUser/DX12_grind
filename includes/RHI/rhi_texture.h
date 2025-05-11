@@ -29,7 +29,9 @@ class RHITexture : public RHIResource
 public:
     virtual ~RHITexture() = default;
 
+    RHITexture() = default;
 protected:
+
     RHITexture(
         void* pData,
         int iWidth,
@@ -40,8 +42,8 @@ protected:
     : RHIResource(pData, ERHICPUAccessFlags::NONE, ERHIBufferUsage::DEFAULT)
     , m_iWidth(iWidth)
     , m_iHeight(iHeight)
-    , m_eFormat(eFormat)
     , m_uFlags(uFlags)
+    , m_eFormat(eFormat)
     {}
 
     int             m_iWidth;
@@ -53,4 +55,14 @@ protected:
 constexpr uint32_t operator&(uint32_t uFlags, ERHITextureFlags eFlags)
 {
     return uFlags & static_cast<uint32_t>(eFlags);
+}
+
+constexpr uint32_t operator|=(uint32_t& uFlags, ERHITextureFlags eFlag)
+{
+    return uFlags |= static_cast<uint32_t>(eFlag);
+}
+
+constexpr uint32_t operator|(ERHITextureFlags eFlagA, ERHITextureFlags eFlagB)
+{
+    return static_cast<uint32_t>(eFlagA) | static_cast<uint32_t>(eFlagB);
 }

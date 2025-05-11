@@ -22,7 +22,8 @@ enum class ERHIBufferUsage : uint8_t
 class RHIResource
 {
 protected:
-    RHIResource() = delete;
+    RHIResource() = default;
+
     RHIResource(
         void* pData,
         ERHICPUAccessFlags eCPUAccess,

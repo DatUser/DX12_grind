@@ -1,6 +1,8 @@
 #pragma once
 
-#include "RHI/rhi_texture.h"
+#include <memory>
+
+class RHITexture;
 
 class RHISwapchain
 {
@@ -16,5 +18,6 @@ public:
     }
 
 protected:
+    // Texture is empty and only holds a View to backbuffer
     std::shared_ptr<RHITexture> m_spBackBufferRTV;
 };

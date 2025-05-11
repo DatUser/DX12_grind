@@ -32,7 +32,7 @@ public:
 	}
 
     D3D11Interface();
-    virtual ~D3D11Interface();
+    ~D3D11Interface() override;
 
     /**
      * @brief Create a Shader Instance object
@@ -89,8 +89,7 @@ public:
 
 	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;
 
-    virtual void ClearRenderView() override;
-    void ClearRenderView(float r, float g, float b, float a = 1.f);
+    void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) override;
 
     std::shared_ptr<RHISwapchain> CreateSwapchain(
     	HWND hWnd,
@@ -173,7 +172,6 @@ private:
 
 
 	ComPtr<IDXGIFactory>	m_spFactory;
-    ComPtr<ID3D11RenderTargetView> m_spTarget;
 
     std::vector<ComPtr<ID3D11Buffer>> m_vBuffers;
 };

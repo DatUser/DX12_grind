@@ -4,7 +4,7 @@
 #include "Engine/renderer.h"
 #include "Engine/scene.h"
 
-#include "RHI/rhi_swapchain.h"
+#include "RHI/rhi.h"
 
 RHIViewport::RHIViewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 : m_spMainCamera(std::make_shared<Camera>())

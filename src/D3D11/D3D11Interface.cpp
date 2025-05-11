@@ -5,7 +5,7 @@
 #pragma comment(lib, "dxgi.lib")
 
 #include "Engine/camera.h"
-#include "Core/asserts.h"
+#include "Core/operations.h"
 
 #include "Engine/app.h"
 
@@ -119,7 +119,7 @@ HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 
 	oTextureDesc.Width = pTexture->m_iWidth;
 	oTextureDesc.Height = pTexture->m_iHeight;
-	oTextureDesc.MipLevels = 1;
+	oTextureDesc.MipLevels = 0;
 	oTextureDesc.ArraySize = 1;
 	oTextureDesc.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
 	oTextureDesc.SampleDesc.Count = 1;
@@ -134,19 +134,19 @@ HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 
 	oTexData.pSysMem = pTexture->m_pData;
 
-	return m_spDevice->CreateTexture2D(&oTextureDesc, &oTexData, (ID3D11Texture2D**) &pTexture->m_spInitResource);
+	return m_spDevice->CreateTexture2D(&oTextureDesc, pTexture->m_pData ? &oTexData : nullptr, &pTexture->m_spInitResource);
 }
 
 HRESULT D3D11Interface::createRTVInternal(D3D11Texture *pTexture)
 {
-	ID3D11View** pView = &pTexture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)];
+	ID3D11View** pView = &pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))];
 	ID3D11RenderTargetView** pRTV = reinterpret_cast<ID3D11RenderTargetView**>(pView);
 
 	return m_spDevice->CreateRenderTargetView(
 		pTexture->m_spInitResource.Get(),
 		nullptr,
 		pRTV);
-		//(ID3D11RenderTargetView**) (&pTexture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)]));
+		//(ID3D11RenderTargetView**) (&pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))]));
 }
 
 HRESULT D3D11Interface::createSwapchainInternal(D3D11Swapchain *pSwapchain, HWND hWnd, uint32_t uWidth, uint32_t uHeight)
@@ -308,15 +308,13 @@ void D3D11Interface::SetViewport(const RHIViewport *pViewport) {
 	m_spContext->RSSetViewports(1, &pD3D11Viewport->m_oViewport);
 }
 
-void D3D11Interface::ClearRenderView()
+void D3D11Interface::ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA)
 {
-    ClearRenderView(1.f, 0.f, 0.f);
-}
-
-void D3D11Interface::ClearRenderView(float r, float g, float b, float a)
-{
-    float pColor[] = {r, g, b, a};
-    m_spContext->ClearRenderTargetView(m_spTarget.Get(), pColor);
+    float pColor[] = {fR, fG, fB, fA};
+	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
+	ID3D11View* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].Get();
+	ID3D11RenderTargetView* pRTV = (ID3D11RenderTargetView*) pView /*pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].Get()*/;
+    m_spContext->ClearRenderTargetView(pRTV, pColor);
 }
 
 std::shared_ptr<RHIShader> D3D11Interface::CreateShader(ERendererShaders eShader)
@@ -363,7 +361,7 @@ void D3D11Interface::SetContextRenderTarget(const RHITexture* pTexture)
 	ATLASSERT(pD3D11Texture &&
 		(pD3D11Texture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);
 
-	ID3D11View* const* pView = pD3D11Texture->m_arrResourceViews[static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)].GetAddressOf();
+	ID3D11View* const* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].GetAddressOf();
 	ID3D11RenderTargetView* const* pRTV = reinterpret_cast<ID3D11RenderTargetView* const*>(pView);
 
 	m_spContext->OMSetRenderTargets(1, pRTV, nullptr);
@@ -390,18 +388,21 @@ void D3D11Interface::CopyTexture(const RHITexture *pSrc, const RHITexture *pDst)
 	const D3D11Texture* pD3D11Src = dynamic_cast<const D3D11Texture*>(pSrc);
 	const D3D11Texture* pD3D11Dst = dynamic_cast<const D3D11Texture*>(pDst);
 
-	D3D11_BOX oBox{};
-	ZeroMemory(&oBox, sizeof(D3D11_BOX));
+	// TODO : Ready
+	//D3D11_BOX oBox{};
+	//ZeroMemory(&oBox, sizeof(D3D11_BOX));
 
-	oBox.top = 0;
-	oBox.left = 0;
-	oBox.bottom = pSrc->m_iHeight - 1;
-	oBox.right = pSrc->m_iWidth - 1;
+	//oBox.top = 0;
+	//oBox.left = 0;
+	//oBox.bottom = pSrc->m_iHeight - 1;
+	//oBox.right = pSrc->m_iWidth - 1;
+	//oBox.front = 0;
+	//oBox.back = 1;
 
 	m_spContext->CopySubresourceRegion(
 		pD3D11Dst->m_spInitResource.Get(),
 		0, 0, 0, 0,
-		pD3D11Src->m_spInitResource.Get(), 0, &oBox);
+		pD3D11Src->m_spInitResource.Get(), 0, /*&oBox*/nullptr);
 }
 
 void D3D11Interface::DrawIndexed(

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "Core/fwdtypes.h"
 
 #include "RHI/rhi_swapchain.h"
 

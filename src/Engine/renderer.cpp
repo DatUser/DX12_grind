@@ -92,13 +92,9 @@ void Renderer::InitShaders()
 		RHI::GetInterface()->CreateTexture(nullptr,
 			m_spCurrentViewport->GetWidth(),
 			m_spCurrentViewport->GetHeight(),
-			ETextureFormat::R8G8B8A8_UNORM);
-
-	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FINAL)] =
-		RHI::GetInterface()->CreateTexture(nullptr,
-			m_spCurrentViewport->GetWidth(),
-			m_spCurrentViewport->GetHeight(),
-			ETextureFormat::R8G8B8A8_UNORM);
+			ETextureFormat::R8G8B8A8_UNORM,
+			//static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET));
+			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
 }
 
 void Renderer::Tick()
@@ -111,15 +107,17 @@ void Renderer::Tick()
 void Renderer::GenerateFrame()
 {
 	//Add passes for every drawable instances in scene
-	RHI::GetInterface()->ClearRenderView();
+	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
 	Pass_Forward();
 
 	// Copy to final render target
 	RHI::GetInterface()->CopyTexture(
 		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
-		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FINAL)].get());
+		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
+
 	// Todo : Add Render target to be filled and displayed
+	RHI::GetInterface()->SetContextRenderTarget(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
 	//RHI::GetInterface()->Draw();
 }
 
@@ -168,6 +166,8 @@ void Renderer::DrawMesh(Mesh *pMesh)
 
 void Renderer::Pass_Forward()
 {
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(), 1.f, 0.f, 0.f, 1.f);
+
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
 		// Wrong place to do this

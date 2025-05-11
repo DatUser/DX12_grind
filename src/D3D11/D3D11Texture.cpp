@@ -1,5 +1,7 @@
 #include "D3D11/D3D11Texture.h"
 
+#include "Core/asserts.h"
+
 D3D11Texture::D3D11Texture(
     void* pData,
     int iWidth,

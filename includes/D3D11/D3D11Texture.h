@@ -8,7 +8,10 @@
 class D3D11Texture : public RHITexture
 {
     friend class D3D11Interface;
+    friend class D3D11Swapchain;
 public:
+    D3D11Texture() = default;
+
     D3D11Texture(
         void* pData,
         int iWidth,
