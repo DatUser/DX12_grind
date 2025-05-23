@@ -8,11 +8,11 @@
 
 enum class EShaderStage : uint32_t
 {
-    VERTEX,
+	VERTEX,
 	HULL,
 	DOMAIN,
 	GEOMETRY,
-    PIXEL,
+	PIXEL,
 
 	AMPLIFICATION,
 	MESH,

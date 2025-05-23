@@ -4,8 +4,11 @@
 #include "Engine/renderer.h"
 #include "Engine/scene.h"
 
-RHIViewport::RHIViewport()
+#include "RHI/rhi.h"
+
+RHIViewport::RHIViewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 : m_spMainCamera(std::make_shared<Camera>())
+, m_spSwapchain(RHI::GetInterface()->CreateSwapchain(hWnd, uWidth, uHeight))
 {
     Renderer::GetInterface()->GetScene()->AddCamera(std::move(m_spMainCamera));
     if (!Renderer::GetInterface()->GetScene()->GetController()->HasCamera())

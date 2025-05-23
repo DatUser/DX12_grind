@@ -9,6 +9,7 @@ class Scene;
 
 class RHIBuffer;
 class RHIShader;
+class RHITexture;
 class RHIViewport;
 
 enum class ERendererShaders : uint8_t
@@ -18,6 +19,13 @@ enum class ERendererShaders : uint8_t
 	FORWARD_PS,
 	LIGHT_VS,
 	LIGHT_PS,
+
+	_size
+};
+
+enum class ERendererPassesRT : uint8_t
+{
+	FORWARD,
 
 	_size
 };
@@ -74,7 +82,9 @@ private:
 
 	static std::unique_ptr<Renderer> m_spInstance;
 
-	std::array<std::shared_ptr<RHIShader>, static_cast<unsigned int>(ERendererShaders::_size)> m_mapShaders;	// TODO: Move to submesh ERendererShaders::_size> m_mapShaders;
+	std::array<std::shared_ptr<RHIShader>, static_cast<unsigned int>(ERendererShaders::_size)>	m_mapShaders;
+	std::array<std::shared_ptr<RHITexture>, static_cast<unsigned int>(ERendererShaders::_size)>	m_mapPassRenderTargets;
+
 	std::unique_ptr<Scene> 				m_spScene;
 	std::shared_ptr<RHIViewport> 		m_spCurrentViewport;
 	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;			// CPU data of constant buffer (MVP matrix)

@@ -4,9 +4,12 @@
 #include "Core/fwdtypes.h"
 #include "RHI/rhi.h"
 
+#include <array>
 #include <memory>
 
+class D3D11Swapchain;
 class D3D11Buffer;
+class D3D11Texture;
 
 enum class EShaderStage : uint32_t;
 
@@ -30,7 +33,7 @@ public:
 	}
 
     D3D11Interface();
-    virtual ~D3D11Interface();
+    ~D3D11Interface() override;
 
     /**
      * @brief Create a Shader Instance object
@@ -54,7 +57,20 @@ public:
 		D3D11Buffer* pRHIBuffer
     );
 
-    virtual void PresentFrame() override;
+	HRESULT createTextureInternal(
+		D3D11Texture* pTexture
+		);
+
+	HRESULT createRTVInternal(
+		D3D11Texture* pTexture
+	);
+
+	HRESULT createSwapchainInternal(
+		D3D11Swapchain* pSwapchain,
+		HWND hWnd,
+		uint32_t uWidth,
+		uint32_t uHeight
+	);
 
     virtual std::shared_ptr<RHIBuffer> CreateBuffer(
 		void* pData,
@@ -64,19 +80,41 @@ public:
 		ERHIBufferUsage eUsage=ERHIBufferUsage::DEFAULT
 	) override;
 
+	virtual std::shared_ptr<RHITexture> CreateTexture(
+		void* pData,
+		int iWidth,
+		int iHeight,
+		ETextureFormat eFormat,
+		uint32_t uFlags = 0
+	) override;
+
 	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;
 
-    virtual void ClearRenderView() override;
-    void ClearRenderView(float r, float g, float b, float a = 1.f);
+    void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) override;
 
-    virtual void CreateSwapchain(HWND hWnd) override;
-	virtual std::shared_ptr<RHIViewport> CreateViewport(uint32_t uWidth, uint32_t uHeight) override;
-	virtual void SetViewport(const RHIViewport* pViewport) override;
+    std::shared_ptr<RHISwapchain> CreateSwapchain(
+    	HWND hWnd,
+    	uint32_t uWidth,
+    	uint32_t uHeight
+    ) override;
 
-	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
-	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) override;
-	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) override;
-	virtual void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	std::shared_ptr<RHIViewport> CreateViewport(
+		HWND hWnd,
+		uint32_t uWidth,
+		uint32_t uHeight
+	) override;
+	void SetViewport(const RHIViewport* pViewport) override;
+
+	void SetRasterizerState(
+		ECullMode eMode,
+		bool bIsWireframe = false
+	) override;
+
+	std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
+	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
+	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
+	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	void SetContextRenderTarget(const RHITexture *pTexture) override;
 
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer){}
@@ -85,7 +123,9 @@ public:
 	virtual void SetGeometryShader(const RHIShader* pShader) override;
 	virtual void SetPixelShader(const RHIShader* pShader) override;
 
-	virtual void DrawIndexed(
+	void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const override;
+
+	void DrawIndexed(
 		uint32_t uIndexCount,
 		uint32_t uIndexOffset,
 		uint32_t uVertexOffset
@@ -115,6 +155,17 @@ public:
     void AddBuffers(std::vector<ID3D11Buffer*> vVertBuffers, ID3D11Buffer* pIdxBuffer, Microsoft::WRL::ComPtr<ID3D11InputLayout> spVertsLayout, UINT uStride, UINT uOffset);
 
     //void Draw();
+
+	constexpr static D3D11_CULL_MODE CastToInterfaceCullMode(ECullMode eMode) {
+		constexpr std::array<D3D11_CULL_MODE, static_cast<uint32_t>(ECullMode::_size)> arrCullModes = {
+			D3D11_CULL_BACK,
+			D3D11_CULL_FRONT,
+			D3D11_CULL_NONE
+		};
+
+		return arrCullModes[static_cast<uint32_t>(eMode)];
+	}
+
 private:
     // Handles memory stuff
     ComPtr<ID3D11Device> m_spDevice;
@@ -123,8 +174,6 @@ private:
 
 
 	ComPtr<IDXGIFactory>	m_spFactory;
-    ComPtr<IDXGISwapChain> 	m_spSwapchain;
-    ComPtr<ID3D11RenderTargetView> m_spTarget;
 
     std::vector<ComPtr<ID3D11Buffer>> m_vBuffers;
 };

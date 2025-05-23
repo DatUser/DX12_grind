@@ -3,7 +3,7 @@ import glob
 source_files = []
 source_files += glob.glob("src/RHI/*.cpp", recursive=False)
 source_files += glob.glob("src/IO/*.cpp", recursive=False)
-source_files += glob.glob("src/D3D11/*.cpp", recursive=False)
+source_files += glob.glob("src/D3D11/*.cpp", recursive=False)[::-1]
 source_files += glob.glob("src/*.cpp", recursive=False)
 source_files += glob.glob("src/Engine/*.cpp", recursive=False)
 source_files += glob.glob("src/Input/*.cpp", recursive=False)
