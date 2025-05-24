@@ -355,6 +355,13 @@ void D3D11Interface::SetBufferInternal<EShaderStage::VERTEX>(const RHIBuffer* pB
 	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
+template <>
+void D3D11Interface::SetBufferInternal<EShaderStage::GEOMETRY>(const RHIBuffer* pBuffer)
+{
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	m_spContext->GSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
+}
+
 void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
 {
 	std::visit(

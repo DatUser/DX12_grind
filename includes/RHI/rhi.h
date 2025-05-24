@@ -18,6 +18,7 @@ typedef struct HWND__ *HWND;
 
 using ShaderType = std::variant<
 				std::integral_constant<EShaderStage, EShaderStage::VERTEX>,
+				std::integral_constant<EShaderStage, EShaderStage::GEOMETRY>,
 				std::integral_constant<EShaderStage, EShaderStage::PIXEL>>;
 
 enum class ECullMode

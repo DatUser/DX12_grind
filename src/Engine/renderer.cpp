@@ -52,7 +52,8 @@ void Renderer::InitResources()
 
 	// Pipeline setup
 	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
-	RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, true);
+	//RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, true);
+	RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, false);
 
 	// Constant buffers
 	const static Vec3 m_oFocus{0., 0., 0.};
@@ -183,6 +184,7 @@ void Renderer::Pass_Forward()
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
 		RHI::GetInterface()->SetContextRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
