@@ -77,13 +77,15 @@ public:
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;
-	virtual void SetGeometryShader(const RHIShader * get) = 0;
+	virtual void SetGeometryShader(const RHIShader* pShader) = 0;
 	virtual void SetPixelShader(const RHIShader* pShader) = 0;
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
+
 	virtual void SetContextRenderTarget(const RHITexture* pTexture) = 0;
+	virtual void SetBlendState() = 0;
 
 	virtual void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const = 0;
 

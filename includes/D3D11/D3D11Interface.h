@@ -114,14 +114,16 @@ public:
 	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+
 	void SetContextRenderTarget(const RHITexture *pTexture) override;
+	void SetBlendState() override;
 
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer){}
 
-	virtual void SetVertexShader(const RHIShader* pShader) override;
-	virtual void SetGeometryShader(const RHIShader* pShader) override;
-	virtual void SetPixelShader(const RHIShader* pShader) override;
+	void SetVertexShader(const RHIShader* pShader) override;
+	void SetGeometryShader(const RHIShader* pShader) override;
+	void SetPixelShader(const RHIShader* pShader) override;
 
 	void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const override;
 

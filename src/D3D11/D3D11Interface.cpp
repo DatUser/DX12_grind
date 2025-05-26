@@ -383,6 +383,22 @@ void D3D11Interface::SetContextRenderTarget(const RHITexture* pTexture)
 	m_spContext->OMSetRenderTargets(1, pRTV, nullptr);
 }
 
+void D3D11Interface::SetBlendState()
+{
+	ComPtr<ID3D11BlendState> spBlendState{};
+	D3D11_BLEND_DESC oBlendStateDesc{};
+	ZeroMemory(&oBlendStateDesc, sizeof(oBlendStateDesc));
+	oBlendStateDesc.AlphaToCoverageEnable = false;
+	oBlendStateDesc.IndependentBlendEnable = false;
+
+	//D3D11_RENDER_TARGET_BLEND_DESC oRTBlendDesc{};
+	//oRTBlendDesc.
+//	oBlendStateDesc.RenderTarget[0] =
+
+	m_spDevice->CreateBlendState(&oBlendStateDesc, spBlendState.GetAddressOf());
+	m_spContext->OMSetBlendState(spBlendState.Get(), nullptr, 0xffffffff);
+}
+
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)
 {
 	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
@@ -396,7 +412,9 @@ void D3D11Interface::SetVertexShader(const RHIShader* pShader)
 void D3D11Interface::SetGeometryShader(const RHIShader *pShader)
 {
 	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
-	m_spContext->GSSetShader((ID3D11GeometryShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
+	m_spContext->GSSetShader(
+		pD3D11Shader ? (ID3D11GeometryShader*) pD3D11Shader->m_spShader.Get() : nullptr,
+		nullptr, 0);
 }
 
 void D3D11Interface::SetPixelShader(const RHIShader* pShader)

@@ -53,7 +53,7 @@ void Renderer::InitResources()
 	// Pipeline setup
 	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
 	//RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, true);
-	RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, false);
+	RHI::GetInterface()->SetRasterizerState(ECullMode::CULL_BACK, true);
 
 	// Constant buffers
 	const static Vec3 m_oFocus{0., 0., 0.};
@@ -112,6 +112,7 @@ void Renderer::GenerateFrame()
 	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
 	Pass_Forward();
+	Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 
 	// Copy to final render target
 	RHI::GetInterface()->CopyTexture(
@@ -177,6 +178,32 @@ void Renderer::Pass_Forward()
 
 		// Bind shader
 		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+		RHI::GetInterface()->SetGeometryShader(/*m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_GS)].get()*/nullptr);
+		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
+
+		// Bind data
+		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
+		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
+		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+		//RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
+
+		// Bind output
+		RHI::GetInterface()->SetContextRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
+
+		DrawMesh(pMesh.get());
+		//RHI::GetInterface()->Draw();
+	}
+}
+
+void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
+{
+	for (auto&& pMesh : m_spScene->GetMeshes())
+	{
+		// Wrong place to do this
+		//UpdateMesh(pMesh.get());
+
+		// Bind shader
+		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 		RHI::GetInterface()->SetGeometryShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_GS)].get());
 		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
 
@@ -187,7 +214,7 @@ void Renderer::Pass_Forward()
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
-		RHI::GetInterface()->SetContextRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
+		RHI::GetInterface()->SetContextRenderTarget(pTarget);
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();

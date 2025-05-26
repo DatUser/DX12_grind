@@ -74,6 +74,7 @@ private:
 	void DrawMesh(Mesh* pMesh);
 
 	void Pass_Forward();
+	void Pass_DebugNormals(const RHITexture* pTarget);
 
     /**
      * @brief Inits the default shader program

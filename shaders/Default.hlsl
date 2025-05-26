@@ -73,16 +73,16 @@ void GS_Main(triangle /*GS_IN*/VertexOutput input[3], inout LineStream<GS_OUT> o
         output.worldPos = input[i].worldPos; // Adjust as needed
         output.position = input[i].position; // Adjust as needed
         output.normal = input[i].normal;
-        output.color = input[i].color;
+        output.color = float3(0.f, 1.f, 0.f);
         outputStream.Append(output);
 
         // End point
-        output.worldPos = input[i].worldPos + input[i].normal * 2.0;
-        output.worldPos = 1.f;
+        output.worldPos = input[i].worldPos - normalize(input[i].normal) / 2.f;
+        //output.worldPos = 1.f;
 
         output.position = WorldToScreenSpace(output.worldPos);
         output.normal = input[i].normal;
-        output.color = input[i].color;
+        //output.color = input[i].color;
         outputStream.Append(output);
 
         outputStream.RestartStrip();
@@ -92,6 +92,7 @@ void GS_Main(triangle /*GS_IN*/VertexOutput input[3], inout LineStream<GS_OUT> o
 
 float4 PSDefaultMain(PSInput input) : SV_TARGET
 {
-    return input.normal;//input.color;
+    //return input.normal;//input.color;
+    return float4(input.color, 1.);
     //return float4(1.0,1.0,1.0,1.0);
 }
