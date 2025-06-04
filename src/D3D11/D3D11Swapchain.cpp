@@ -23,6 +23,24 @@ D3D11Swapchain::D3D11Swapchain(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 
 	// Release unused texture
 	pBackBufferRTV->m_spInitResource->Release();
+
+	// Create depth stencil state
+	ATLASSERT(D3D11Interface::GetInterface()->createDSSInternal(&m_spDepthStencilState) == S_OK);
+
+	// Create depth stencil texture
+	m_spDepthStencilView =
+		RHI::GetInterface()->CreateTexture(
+				nullptr,
+				uWidth,
+				uHeight,
+				ETextureFormat::D24_UNORM_S8_UINT,
+				static_cast<uint32_t>(ERHITextureFlags::DEPTH_STENCIL));
+
+	D3D11Texture* pDepthStencilView = dynamic_cast<D3D11Texture*>(m_spDepthStencilView.get());
+	
+	// Creating view for depth stencil
+	ATLASSERT(D3D11Interface::GetInterface()->createDSVInternal(pDepthStencilView) == S_OK);
+
 }
 
 void D3D11Swapchain::Present()

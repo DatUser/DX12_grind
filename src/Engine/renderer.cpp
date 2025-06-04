@@ -114,13 +114,15 @@ void Renderer::GenerateFrame()
 	Pass_Forward();
 	Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 
-	// Copy to final render target
-	RHI::GetInterface()->CopyTexture(
-		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
-		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
+	// // Copy to final render target
+	// RHI::GetInterface()->CopyTexture(
+	// 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
+	// 	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
+	//
+	// // Todo : Add Render target to be filled and displayed
+	// RHI::GetInterface()->SetContextRenderTarget(
+	// 	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
-	// Todo : Add Render target to be filled and displayed
-	RHI::GetInterface()->SetContextRenderTarget(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
 	//RHI::GetInterface()->Draw();
 }
 
@@ -188,7 +190,10 @@ void Renderer::Pass_Forward()
 		//RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
-		RHI::GetInterface()->SetContextRenderTarget(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get());
+		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
+		RHI::GetInterface()->SetContextRenderTarget(
+			m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
+			m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();
@@ -214,7 +219,10 @@ void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
-		RHI::GetInterface()->SetContextRenderTarget(pTarget);
+		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
+		RHI::GetInterface()->SetContextRenderTarget(
+			pTarget,
+			m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();

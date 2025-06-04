@@ -65,6 +65,16 @@ public:
 		D3D11Texture* pTexture
 	);
 
+	HRESULT createDSVInternal(
+		D3D11Texture* pTexture
+	);
+
+	// Depth Stencil State
+	HRESULT createDSSInternal(
+		ID3D11DepthStencilState ** pDSState,
+		bool enableStencilTest = false
+	);
+
 	HRESULT createSwapchainInternal(
 		D3D11Swapchain* pSwapchain,
 		HWND hWnd,
@@ -115,7 +125,8 @@ public:
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
 
-	void SetContextRenderTarget(const RHITexture *pTexture) override;
+	void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) override;
+	void SetDepthStencilState(const RHISwapchain *pSwapchain) override;
 	void SetBlendState() override;
 
 	template <EShaderStage eShaderStage>

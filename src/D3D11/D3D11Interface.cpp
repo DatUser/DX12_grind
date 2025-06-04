@@ -151,6 +151,37 @@ HRESULT D3D11Interface::createRTVInternal(D3D11Texture *pTexture)
 		//(ID3D11RenderTargetView**) (&pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))]));
 }
 
+HRESULT D3D11Interface::createDSVInternal(D3D11Texture *pTexture)
+{
+	ID3D11View** pView = &pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::DEPTH_STENCIL))];
+	ID3D11DepthStencilView** pDSV = reinterpret_cast<ID3D11DepthStencilView**>(pView);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	descDSV.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDSV.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view
+
+	return m_spDevice->CreateDepthStencilView( pTexture->m_spInitResource.Get(), // Depth stencil texture
+												 &descDSV, // Depth stencil desc
+												 pDSV );  // [out] Depth stencil view
+}
+
+HRESULT D3D11Interface::createDSSInternal(ID3D11DepthStencilState ** pDSState, bool enableStencilTest)
+{
+	D3D11_DEPTH_STENCIL_DESC oDsDesc{};
+	ZeroMemory(&oDsDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	// Depth test parameters
+	oDsDesc.DepthEnable = true;
+	oDsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	oDsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Create depth stencil state
+	return m_spDevice->CreateDepthStencilState(&oDsDesc, pDSState);
+}
+
 HRESULT D3D11Interface::createSwapchainInternal(D3D11Swapchain *pSwapchain, HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 {
 	// TODO: Move this to renderer using RHI interface
@@ -371,16 +402,36 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
 }
 
-void D3D11Interface::SetContextRenderTarget(const RHITexture* pTexture)
+void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)
 {
-	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
-	ATLASSERT(pD3D11Texture &&
-		(pD3D11Texture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);
+	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pTarget);
+	ATLASSERT(pD3D11TargetTexture &&
+		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);
 
-	ID3D11View* const* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].GetAddressOf();
+	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].GetAddressOf();
 	ID3D11RenderTargetView* const* pRTV = reinterpret_cast<ID3D11RenderTargetView* const*>(pView);
 
-	m_spContext->OMSetRenderTargets(1, pRTV, nullptr);
+	if (pDepth) {
+		const D3D11Texture* pD3D11DepthTexture = dynamic_cast<const D3D11Texture*>(pDepth);
+		ATLASSERT(pD3D11DepthTexture &&
+		(pD3D11DepthTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::DEPTH_STENCIL)) != 0);
+
+		ID3D11View* pDepthStencilView = pD3D11DepthTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::DEPTH_STENCIL))].Get();
+		ID3D11DepthStencilView* pDSV = reinterpret_cast<ID3D11DepthStencilView*>(pDepthStencilView);
+
+		m_spContext->OMSetRenderTargets(1, pRTV, pDSV);
+	}
+	else {
+		m_spContext->OMSetRenderTargets(1, pRTV, nullptr);
+	}
+
+}
+
+void D3D11Interface::SetDepthStencilState(const RHISwapchain *pSwapchain)
+{
+	const D3D11Swapchain* pD3D11Swapchain = dynamic_cast<const D3D11Swapchain*>(pSwapchain);
+
+	m_spContext->OMSetDepthStencilState(pD3D11Swapchain->m_spDepthStencilState.Get(), 1);
 }
 
 void D3D11Interface::SetBlendState()

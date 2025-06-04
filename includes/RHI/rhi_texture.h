@@ -10,6 +10,7 @@ enum class ETextureFormat : uint8_t
     R8G8B8A8_UNORM,
     R32G32B32_FLOAT,
     R8_UNORM,
+    D24_UNORM_S8_UINT,
 
     _size
 };

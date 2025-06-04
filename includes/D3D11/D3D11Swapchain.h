@@ -17,4 +17,5 @@ public:
 
 private:
 	ComPtr<IDXGISwapChain>	m_spSwapchain;
+	ComPtr<ID3D11DepthStencilState> m_spDepthStencilState;
 };
