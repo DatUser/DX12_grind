@@ -9,6 +9,8 @@ D3D11Viewport::D3D11Viewport(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 	m_oViewport.TopLeftY = 0;
 	m_oViewport.Width = uWidth;
 	m_oViewport.Height = uHeight;
+	m_oViewport.MinDepth = 0.0f;
+	m_oViewport.MaxDepth = 1.0f;
 }
 
 D3D11Viewport::~D3D11Viewport()

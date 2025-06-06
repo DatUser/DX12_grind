@@ -53,7 +53,7 @@ void Renderer::InitResources()
 	// Pipeline setup
 	RHI::GetInterface()->SetViewport(m_spCurrentViewport.get());
 	//RHI::GetInterface()->SetRasterizerState(ECullMode::NONE, true);
-	RHI::GetInterface()->SetRasterizerState(ECullMode::CULL_BACK, true);
+	RHI::GetInterface()->SetRasterizerState(ECullMode::CULL_BACK, false);
 
 	// Constant buffers
 	const static Vec3 m_oFocus{0., 0., 0.};
@@ -109,19 +109,20 @@ void Renderer::Tick()
 void Renderer::GenerateFrame()
 {
 	//Add passes for every drawable instances in scene
+	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
 	Pass_Forward();
 	Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
 
-	// // Copy to final render target
-	// RHI::GetInterface()->CopyTexture(
-	// 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
-	// 	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
-	//
-	// // Todo : Add Render target to be filled and displayed
-	// RHI::GetInterface()->SetContextRenderTarget(
-	// 	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+	// Copy to final render target
+	RHI::GetInterface()->CopyTexture(
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
+		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
+
+	// Todo : Add Render target to be filled and displayed
+	RHI::GetInterface()->SetContextRenderTarget(
+	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
 	//RHI::GetInterface()->Draw();
 }
@@ -171,6 +172,7 @@ void Renderer::DrawMesh(Mesh *pMesh)
 
 void Renderer::Pass_Forward()
 {
+	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(), 1.f, 0.f, 0.f, 1.f);
 
 	for (auto&& pMesh : m_spScene->GetMeshes())

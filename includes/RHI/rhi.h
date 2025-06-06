@@ -41,6 +41,7 @@ public:
     virtual ~RHI() = default;
 
     virtual void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) = 0;
+    virtual void ClearDepthStencilView(const RHITexture* pTexture) = 0;
     //virtual void Draw() = 0;
 
     virtual std::shared_ptr<RHIBuffer> CreateBuffer(

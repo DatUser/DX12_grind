@@ -101,6 +101,7 @@ public:
 	virtual void SetBufferData(const RHIBuffer* pBuffer, const void* pData) override;
 
     void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) override;
+	void ClearDepthStencilView(const RHITexture* pTexture) override;
 
     std::shared_ptr<RHISwapchain> CreateSwapchain(
     	HWND hWnd,

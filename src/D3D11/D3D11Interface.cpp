@@ -353,8 +353,16 @@ void D3D11Interface::ClearRenderView(const RHITexture* pTexture, float fR, float
     float pColor[] = {fR, fG, fB, fA};
 	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
 	ID3D11View* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].Get();
-	ID3D11RenderTargetView* pRTV = (ID3D11RenderTargetView*) pView /*pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET))].Get()*/;
+	ID3D11RenderTargetView* pRTV = (ID3D11RenderTargetView*) pView;
     m_spContext->ClearRenderTargetView(pRTV, pColor);
+}
+
+void D3D11Interface::ClearDepthStencilView(const RHITexture *pTexture)
+{
+	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
+	ID3D11View* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::DEPTH_STENCIL))].Get();
+	ID3D11DepthStencilView* pDSV = (ID3D11DepthStencilView*) pView;
+	m_spContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 }
 
 std::shared_ptr<RHIShader> D3D11Interface::CreateShader(ERendererShaders eShader)

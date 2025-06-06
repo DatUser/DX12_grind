@@ -7,8 +7,8 @@ struct VertexInput
 struct VertexOutput
 {
     float4 worldPos : POSITION;
-    float4 normal : NORMAL;
     float4 position : SV_POSITION;
+    float4 normal : NORMAL;
     float3 color    : COLOR;
 };
 
