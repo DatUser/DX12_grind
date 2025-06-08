@@ -42,13 +42,11 @@ D3D11Swapchain::D3D11Swapchain(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 
 void D3D11Swapchain::Present()
 {
-	HRESULT hr = m_spSwapchain->Present(0, 0);
-	if (hr != S_OK)
+	HRESULT hr = S_OK;
+	if (FAILED(hr = m_spSwapchain->Present(0, 0)))
 	{
 		LOG_ERROR(hr);
 		LOG_LAST_ERROR();
 		//LOG_ERROR(m_spDevice->GetDeviceRemovedReason());
 	}
-
-	ATLASSERT(hr == S_OK);
 }
