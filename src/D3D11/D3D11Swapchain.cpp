@@ -21,9 +21,6 @@ D3D11Swapchain::D3D11Swapchain(HWND hWnd, uint32_t uWidth, uint32_t uHeight)
 	// Creating view for back buffer
 	ATLASSERT(D3D11Interface::GetInterface()->createRTVInternal(pBackBufferRTV) == S_OK);
 
-	// Release unused texture
-	pBackBufferRTV->m_spInitResource->Release();
-
 	// Create depth stencil state
 	ATLASSERT(D3D11Interface::GetInterface()->createDSSInternal(&m_spDepthStencilState) == S_OK);
 
