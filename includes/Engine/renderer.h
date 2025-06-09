@@ -17,6 +17,10 @@ enum class ERendererShaders : uint8_t
 	FORWARD_VS,
 	FORWARD_GS,
 	FORWARD_PS,
+
+	GEOMETRY_VS,
+	GEOMETRY_PS,
+
 	LIGHT_VS,
 	LIGHT_PS,
 
@@ -26,6 +30,10 @@ enum class ERendererShaders : uint8_t
 enum class ERendererPassesRT : uint8_t
 {
 	FORWARD,
+
+	GBUFFER_POS,
+	GBUFFER_NORMAL,
+	GBUFFER_ALBEDO,
 
 	_size
 };
@@ -75,6 +83,8 @@ private:
 
 	void Pass_Forward();
 	void Pass_DebugNormals(const RHITexture* pTarget);
+
+	void Pass_Geometry();
 
     /**
      * @brief Inits the default shader program

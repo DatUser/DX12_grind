@@ -85,7 +85,8 @@ public:
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
 
-	virtual void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) = 0;
+	virtual void SetContextRenderTarget(const RHITexture* pTargets, const RHITexture* pDepth) = 0;
+	virtual void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) = 0;
 	virtual void SetDepthStencilState(const RHISwapchain* pSwapchain) = 0;
 	virtual void SetBlendState() = 0;
 

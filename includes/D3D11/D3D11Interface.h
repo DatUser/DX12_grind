@@ -127,6 +127,7 @@ public:
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
 
 	void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) override;
+	void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) override;
 	void SetDepthStencilState(const RHISwapchain *pSwapchain) override;
 	void SetBlendState() override;
 

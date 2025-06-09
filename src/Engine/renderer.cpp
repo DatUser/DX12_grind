@@ -90,12 +90,35 @@ void Renderer::InitShaders()
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_GS)
 	INIT_RENDERER_SHADER(ERendererShaders::FORWARD_PS)
 
+	INIT_RENDERER_SHADER(ERendererShaders::GEOMETRY_VS)
+	INIT_RENDERER_SHADER(ERendererShaders::GEOMETRY_PS)
+
 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)] =
 		RHI::GetInterface()->CreateTexture(nullptr,
 			m_spCurrentViewport->GetWidth(),
 			m_spCurrentViewport->GetHeight(),
 			ETextureFormat::R8G8B8A8_UNORM,
-			//static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET));
+			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
+
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R8G8B8A8_UNORM,
+			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
+
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R32G32B32_FLOAT,
+			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
+
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R32G32B32_FLOAT,
 			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
 }
 
@@ -122,7 +145,8 @@ void Renderer::GenerateFrame()
 
 	// Todo : Add Render target to be filled and displayed
 	RHI::GetInterface()->SetContextRenderTarget(
-	m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(),
+		m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
 	//RHI::GetInterface()->Draw();
 }
@@ -224,6 +248,45 @@ void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
 		RHI::GetInterface()->SetContextRenderTarget(
 			pTarget,
+			m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+
+		DrawMesh(pMesh.get());
+		//RHI::GetInterface()->Draw();
+	}
+}
+
+void Renderer::Pass_Geometry()
+{
+	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(), 1.f, 0.f, 0.f, 1.f);
+
+
+	for (auto&& pMesh : m_spScene->GetMeshes())
+	{
+		// Wrong place to do this
+		//UpdateMesh(pMesh.get());
+
+		// Bind shader
+		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+		RHI::GetInterface()->SetGeometryShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_GS)].get());
+		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
+
+		// Bind data
+		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
+		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
+		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
+
+		// Bind output
+		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
+		RHITexture* pRTVs[3] = {
+			m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(),
+			m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(),
+			m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get()
+		};
+		RHI::GetInterface()->SetContextRenderTargets(
+			pRTVs,
+			3,
 			m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 
 		DrawMesh(pMesh.get());

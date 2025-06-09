@@ -56,5 +56,7 @@ using ShaderData = std::tuple<std::wstring_view, std::string_view, EShaderStage>
 constexpr std::array<ShaderData, static_cast<unsigned int>(ERendererShaders::_size)> mapD3D11ShadersPaths{
 	ShaderData{L"shaders/Default.hlsl", "VSDefaultMain", EShaderStage::VERTEX},
 	ShaderData{L"shaders/Default.hlsl", "GS_Main", EShaderStage::GEOMETRY},
-	ShaderData{L"shaders/Default.hlsl", "PSDefaultMain", EShaderStage::PIXEL}
+	ShaderData{L"shaders/Default.hlsl", "PSDefaultMain", EShaderStage::PIXEL},
+	ShaderData{L"shaders/geometry.hlsl", "VSMain", EShaderStage::VERTEX},
+	ShaderData{L"shaders/geometry.hlsl", "PSMain", EShaderStage::PIXEL}
 };
