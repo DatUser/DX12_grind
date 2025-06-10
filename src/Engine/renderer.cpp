@@ -135,12 +135,14 @@ void Renderer::GenerateFrame()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
-	Pass_Forward();
-	Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+	//Pass_Forward();
+	//Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
+
+	Pass_Geometry();
 
 	// Copy to final render target
 	RHI::GetInterface()->CopyTexture(
-		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(),
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(),
 		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
 
 	// Todo : Add Render target to be filled and displayed
@@ -258,7 +260,9 @@ void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 void Renderer::Pass_Geometry()
 {
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
-	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(), 1.f, 0.f, 0.f, 1.f);
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(), 1.f, 0.f, 0.f, 1.f);
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(), 1.f, 0.f, 0.f, 1.f);
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(), 1.f, 0.f, 0.f, 1.f);
 
 
 	for (auto&& pMesh : m_spScene->GetMeshes())
@@ -267,15 +271,13 @@ void Renderer::Pass_Geometry()
 		//UpdateMesh(pMesh.get());
 
 		// Bind shader
-		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
-		RHI::GetInterface()->SetGeometryShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_GS)].get());
-		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::FORWARD_PS)].get());
+		RHI::GetInterface()->SetVertexShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::GEOMETRY_VS)].get());
+		RHI::GetInterface()->SetPixelShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::GEOMETRY_PS)].get());
 
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
-		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
 		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());

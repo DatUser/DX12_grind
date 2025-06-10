@@ -6,6 +6,7 @@ struct VertexInput
 
 struct VertexOutput
 {
+    float4 position : SV_POSITION;
     float3 worldPos : POSITION;
     float3 normal : NORMAL;
     float3 albedo    : COLOR;
@@ -13,6 +14,7 @@ struct VertexOutput
 
 struct PSInput
 {
+    float4 position : SV_POSITION;
     float3 worldPos : POSITION;
     float3 normal : NORMAL;
     float3 albedo : COLOR;
@@ -20,21 +22,34 @@ struct PSInput
 
 struct gbuffer
 {
-    float3 worldPos : POSITION;
-    float3 normal : NORMAL;
-    float4 albedo : COLOR;
+    float3 worldPos : SV_TARGET0;
+    float3 normal : SV_TARGET1;
+    float4 albedo : SV_TARGET2;
 };
+
+cbuffer FrameBuffer : register(b0)
+{
+    matrix mView;
+    matrix mProj;
+    matrix mViewProj;
+};
+
+float4 WorldToScreenSpace(float4 pos)
+{
+    return mul(pos, mViewProj);
+}
 
 VertexOutput VSMain(VertexInput input)
 {
     VertexOutput output;
     output.worldPos = input.position;
+    output.position = WorldToScreenSpace(float4(output.worldPos, 1.f));
     output.normal = normalize(input.normal);
     output.albedo = float3(1.f, 1.f, 1.f);
     return output;
 }
 
-gbuffer PSMain(PSInput input) : SV_TARGET
+gbuffer PSMain(PSInput input)
 {
     gbuffer oGbuffer;
     oGbuffer.worldPos = input.worldPos;
