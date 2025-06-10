@@ -24,15 +24,15 @@ Currently working on RHI and Dx11 specification of the interface.
 - [X] \- Create events after window creation
 - [X] \- Fixed crash because of late window events registration
 - [X] \- Track when mouse leaves the window
+- [X] \- Fix error when minimizing the window
+- [X] \- Output texture in render target instead of backbuffer
 
 ### WIP
 
-- [~] \- Fix error when minimizing the window
-- [ ] \- Output texture in render target instead of backbuffer
+- [~] \- Add simple pbr light pass
 
 ### Upcoming (ranked by priority)
 
-- [ ] \- Add simple pbr light pass
 - [ ] \- Add delta time
 - [~] \- RHI types and interface types
 	- [ ] \- Create an InputLayout class to handle `stride` and `offset`

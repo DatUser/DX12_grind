@@ -4,6 +4,7 @@
 #include "Engine/camera.h"
 
 #include "Core/Core.h"
+#include "Engine/light.h"
 
 #include "Engine/Mesh.h"
 #include "Engine/render_buffers.h"
@@ -303,4 +304,10 @@ void Renderer::InitTestScene()
 	Mesh* pMesh = vMeshes[0];
 
 	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});
+
+	m_spScene->AddLight(std::make_shared<Light>(Light{
+		{0.0f, 5.0f, -2.0f},
+		{1.f, 1.f, 1.f},
+		1.f
+	}));
 }

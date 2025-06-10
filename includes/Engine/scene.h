@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 
-class Controller;
-class Mesh;
 class Camera;
+class Controller;
+class Light;
+class Mesh;
 
 class Scene
 {
@@ -31,6 +32,11 @@ public:
 		m_vMeshes.push_back(spMesh);
 	}
 
+	inline void AddLight(std::shared_ptr<Light>&& spLight)
+	{
+		m_vLights.push_back(spLight);
+	}
+
 	inline void AddCamera(std::shared_ptr<Camera>&& spCamera)
 	{
 		m_vCameras.push_back(spCamera);
@@ -38,6 +44,7 @@ public:
 
 private:
 	std::vector<std::shared_ptr<Mesh>>		m_vMeshes;
+	std::vector<std::shared_ptr<Light>>		m_vLights;
 	std::vector<std::shared_ptr<Camera>>	m_vCameras;
 
 	std::unique_ptr<Controller>				m_spController;
