@@ -137,6 +137,7 @@ public:
 	void SetVertexShader(const RHIShader* pShader) override;
 	void SetGeometryShader(const RHIShader* pShader) override;
 	void SetPixelShader(const RHIShader* pShader) override;
+	void SetComputeShader(const RHIShader* pShader) override;
 
 	void CopyTexture(const RHITexture* pSrc, const RHITexture* pDst) const override;
 

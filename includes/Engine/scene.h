@@ -20,6 +20,11 @@ public:
 		return m_vMeshes;
 	}
 
+	inline const std::vector<std::shared_ptr<Light>>& GetLights() const
+	{
+		return m_vLights;
+	}
+
 	inline const std::vector<std::shared_ptr<Camera>>& GetCameras() const
 	{
 		return m_vCameras;

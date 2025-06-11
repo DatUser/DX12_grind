@@ -80,6 +80,7 @@ public:
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;
 	virtual void SetGeometryShader(const RHIShader* pShader) = 0;
 	virtual void SetPixelShader(const RHIShader* pShader) = 0;
+	virtual void SetComputeShader(const RHIShader* pShader) = 0;
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;

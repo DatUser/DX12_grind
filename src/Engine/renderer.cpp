@@ -136,10 +136,8 @@ void Renderer::GenerateFrame()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
-	//Pass_Forward();
-	//Pass_DebugNormals(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererShaders::FORWARD_VS)].get());
-
 	Pass_Geometry();
+	Pass_Lights();
 
 	// Copy to final render target
 	RHI::GetInterface()->CopyTexture(
@@ -294,6 +292,25 @@ void Renderer::Pass_Geometry()
 
 		DrawMesh(pMesh.get());
 		//RHI::GetInterface()->Draw();
+	}
+}
+
+void Renderer::Pass_Lights()
+{
+	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(), 1.f, 0.f, 0.f, 1.f);
+
+	for (auto&& pMesh : m_spScene->GetLights())
+	{
+		// TODO: Set compute shader
+
+		// Bind data
+		// TODO: Set light data
+
+		// Bind output
+		// TODO: Set output text
+
+		// TODO: Compute light
 	}
 }
 

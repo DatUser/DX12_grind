@@ -516,6 +516,12 @@ void D3D11Interface::SetPixelShader(const RHIShader* pShader)
 	m_spContext->PSSetShader((ID3D11PixelShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
 }
 
+void D3D11Interface::SetComputeShader(const RHIShader* pShader)
+{
+	const D3D11Shader* pD3D11Shader = dynamic_cast<const D3D11Shader*>(pShader);
+	m_spContext->CSSetShader((ID3D11ComputeShader*) pD3D11Shader->m_spShader.Get(), nullptr, 0);
+}
+
 void D3D11Interface::CopyTexture(const RHITexture *pSrc, const RHITexture *pDst) const
 {
 	const D3D11Texture* pD3D11Src = dynamic_cast<const D3D11Texture*>(pSrc);
