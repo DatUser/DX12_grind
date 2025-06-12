@@ -58,5 +58,6 @@ constexpr std::array<ShaderData, static_cast<unsigned int>(ERendererShaders::_si
 	ShaderData{L"shaders/Default.hlsl", "GS_Main", EShaderStage::GEOMETRY},
 	ShaderData{L"shaders/Default.hlsl", "PSDefaultMain", EShaderStage::PIXEL},
 	ShaderData{L"shaders/geometry.hlsl", "VSMain", EShaderStage::VERTEX},
-	ShaderData{L"shaders/geometry.hlsl", "PSMain", EShaderStage::PIXEL}
+	ShaderData{L"shaders/geometry.hlsl", "PSMain", EShaderStage::PIXEL},
+	ShaderData{L"shaders/lights.hlsl", "CSMain", EShaderStage::COMPUTE}
 };

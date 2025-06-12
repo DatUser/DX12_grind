@@ -73,6 +73,7 @@ void Renderer::InitResources()
 		pCam->GetFarClipping()
 	);
 
+	// View Projection data
 	m_spConstantBuffer->oView = (oView);
 	m_spConstantBuffer->oProj = (oProj);
 	m_spConstantBuffer->oViewProj = dx::XMMatrixTranspose(oView * oProj);
@@ -80,6 +81,14 @@ void Renderer::InitResources()
 	m_spConstantBufferResource = RHI::GetInterface()->CreateBuffer(
 		m_spConstantBuffer.get(),
 		sizeof(ConstantBuffers),
+		ERHIBufferFlags::CONSTANT,
+		ERHICPUAccessFlags::WRITE,
+		ERHIBufferUsage::DYNAMIC);
+
+	// Light data
+	m_spLightBufferResource = RHI::GetInterface()->CreateBuffer(
+		nullptr,
+		sizeof(Light),
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
 		ERHIBufferUsage::DYNAMIC);
@@ -93,6 +102,8 @@ void Renderer::InitShaders()
 
 	INIT_RENDERER_SHADER(ERendererShaders::GEOMETRY_VS)
 	INIT_RENDERER_SHADER(ERendererShaders::GEOMETRY_PS)
+
+	INIT_RENDERER_SHADER(ERendererShaders::LIGHT_CS)
 
 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)] =
 		RHI::GetInterface()->CreateTexture(nullptr,
@@ -121,6 +132,13 @@ void Renderer::InitShaders()
 			m_spCurrentViewport->GetHeight(),
 			ETextureFormat::R32G32B32_FLOAT,
 			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
+
+	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)] =
+		RHI::GetInterface()->CreateTexture(nullptr,
+			m_spCurrentViewport->GetWidth(),
+			m_spCurrentViewport->GetHeight(),
+			ETextureFormat::R8G8B8A8_UNORM,
+			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::UNORDERED_ACCESS);
 }
 
 void Renderer::Tick()
@@ -200,6 +218,8 @@ void Renderer::Pass_Forward()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::FORWARD)].get(), 1.f, 0.f, 0.f, 1.f);
 
+	RHI::GetInterface()->ClearShaders();
+
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
 		// Wrong place to do this
@@ -229,6 +249,7 @@ void Renderer::Pass_Forward()
 
 void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 {
+	RHI::GetInterface()->ClearShaders();
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
 		// Wrong place to do this
@@ -263,6 +284,7 @@ void Renderer::Pass_Geometry()
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(), 1.f, 0.f, 0.f, 1.f);
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(), 1.f, 0.f, 0.f, 1.f);
 
+	RHI::GetInterface()->ClearShaders();
 
 	for (auto&& pMesh : m_spScene->GetMeshes())
 	{
@@ -300,15 +322,19 @@ void Renderer::Pass_Lights()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(), 1.f, 0.f, 0.f, 1.f);
 
-	for (auto&& pMesh : m_spScene->GetLights())
+	RHI::GetInterface()->ClearShaders();
+
+	for (auto&& pLight : m_spScene->GetLights())
 	{
 		// TODO: Set compute shader
+		RHI::GetInterface()->SetComputeShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::LIGHT_CS)].get());
 
 		// Bind data
 		// TODO: Set light data
+		RHI::GetInterface()->SetBufferData(m_spLightBufferResource.get(), pLight.get());
 
 		// Bind output
-		// TODO: Set output text
+		// TODO: Set output tex
 
 		// TODO: Compute light
 	}

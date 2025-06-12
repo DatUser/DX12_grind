@@ -67,6 +67,14 @@ public:
 
 	HRESULT createDSVInternal(
 		D3D11Texture* pTexture
+		);
+
+	HRESULT createSRVInternal(
+		D3D11Texture* pTexture
+	);
+
+	HRESULT createUAVInternal(
+		D3D11Texture* pTexture
 	);
 
 	// Depth Stencil State
@@ -125,6 +133,7 @@ public:
 	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	void SetTexture(const RHIBuffer* pBuffer, ShaderType eShaderStage, bool bIsUAV=false) override;
 
 	void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) override;
 	void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) override;
@@ -134,6 +143,7 @@ public:
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer){}
 
+	void ClearShaders() override;
 	void SetVertexShader(const RHIShader* pShader) override;
 	void SetGeometryShader(const RHIShader* pShader) override;
 	void SetPixelShader(const RHIShader* pShader) override;

@@ -17,10 +17,11 @@ D3D11Texture::D3D11Texture(
 }
 
 uint32_t D3D11Texture::CastToInterfaceBindFlags(uint32_t uFlags) {
-    constexpr static std::array<uint32_t, 3> arrBindFlags{
+    constexpr static std::array<uint32_t, 4> arrBindFlags{
         D3D11_BIND_SHADER_RESOURCE,
         D3D11_BIND_RENDER_TARGET,
-        D3D11_BIND_DEPTH_STENCIL
+        D3D11_BIND_DEPTH_STENCIL,
+        D3D11_BIND_UNORDERED_ACCESS
     };
 
     uint32_t uBindFlags = 0;

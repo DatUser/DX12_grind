@@ -77,6 +77,7 @@ public:
 	virtual void SetViewport(const RHIViewport* pViewport) = 0;
 
 	virtual std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) = 0;
+	virtual void ClearShaders() = 0;
 	virtual void SetVertexShader(const RHIShader* pShader) = 0;
 	virtual void SetGeometryShader(const RHIShader* pShader) = 0;
 	virtual void SetPixelShader(const RHIShader* pShader) = 0;
@@ -85,6 +86,7 @@ public:
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
+	virtual void SetTexture(const RHIBuffer* pBuffer, ShaderType eShaderStage, bool bIsUAV=false) = 0;
 
 	virtual void SetContextRenderTarget(const RHITexture* pTargets, const RHITexture* pDepth) = 0;
 	virtual void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) = 0;

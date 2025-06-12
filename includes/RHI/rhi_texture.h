@@ -20,8 +20,7 @@ enum class ERHITextureFlags : uint32_t
     SHADER_RESOURCE =   1,
     RENDER_TARGET =     1 << 1,
     DEPTH_STENCIL =     1 << 2,
-
-    _size = 3
+    UNORDERED_ACCESS =  1 << 3,
 };
 
 class RHITexture : public RHIResource

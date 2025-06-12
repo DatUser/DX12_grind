@@ -102,4 +102,5 @@ private:
 	std::shared_ptr<RHIViewport> 		m_spCurrentViewport;
 	std::shared_ptr<ConstantBuffers> 	m_spConstantBuffer;			// CPU data of constant buffer (MVP matrix)
 	std::shared_ptr<RHIBuffer> 			m_spConstantBufferResource;
+	std::shared_ptr<RHIBuffer> 			m_spLightBufferResource;
 };

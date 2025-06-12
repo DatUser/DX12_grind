@@ -168,6 +168,39 @@ HRESULT D3D11Interface::createDSVInternal(D3D11Texture *pTexture)
 												 pDSV );  // [out] Depth stencil view
 }
 
+HRESULT D3D11Interface::createSRVInternal(D3D11Texture *pTexture)
+{
+	ID3D11View** pView = &pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::SHADER_RESOURCE))];
+	ID3D11ShaderResourceView** pSRV = reinterpret_cast<ID3D11ShaderResourceView**>(pView);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
+	descSRV.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	descSRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	descSRV.Texture2D.MipLevels = 0;
+	descSRV.Texture2D.MostDetailedMip = 0;
+
+	// Create the Shader resource view
+	return m_spDevice->CreateShaderResourceView( pTexture->m_spInitResource.Get(), // Texture
+												 &descSRV, // View desc
+												 pSRV );  // [out] Shader resource view
+}
+
+HRESULT D3D11Interface::createUAVInternal(D3D11Texture *pTexture)
+{
+	ID3D11View** pView = &pTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))];
+	ID3D11UnorderedAccessView** pUAV = reinterpret_cast<ID3D11UnorderedAccessView**>(pView);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
+	descUAV.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
+	descUAV.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	descUAV.Texture2D.MipSlice = 0;
+
+	// Create the Shader resource view
+	return m_spDevice->CreateUnorderedAccessView( pTexture->m_spInitResource.Get(), // Texture
+												 &descUAV, // View desc
+												 pUAV );  // [out] Unordered access view
+}
+
 HRESULT D3D11Interface::createDSSInternal(ID3D11DepthStencilState ** pDSState, bool enableStencilTest)
 {
 	D3D11_DEPTH_STENCIL_DESC oDsDesc{};
@@ -204,7 +237,7 @@ HRESULT D3D11Interface::createSwapchainInternal(D3D11Swapchain *pSwapchain, HWND
     oSwapDesc.Flags = 0;
 
 	return m_spFactory->CreateSwapChain(m_spDevice.Get(), &oSwapDesc, &pSwapchain->m_spSwapchain);
-
+m_spContext->
 	// TODO: Move the stuff down to renderer
 /*
     // Access to swapchain back buffer resource
@@ -410,6 +443,9 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
 }
 
+void D3D11Interface::SetTexture(const RHIBuffer *pBuffer, ShaderType eShaderStage, bool bIsUAV) {
+}
+
 void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)
 {
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pTarget);
@@ -490,6 +526,17 @@ void D3D11Interface::SetBlendState()
 
 	m_spDevice->CreateBlendState(&oBlendStateDesc, spBlendState.GetAddressOf());
 	m_spContext->OMSetBlendState(spBlendState.Get(), nullptr, 0xffffffff);
+}
+
+void D3D11Interface::ClearShaders()
+{
+	m_spContext->VSSetShader(nullptr, nullptr,  0);
+	m_spContext->GSSetShader(nullptr, nullptr,  0);
+	m_spContext->PSSetShader(nullptr, nullptr,  0);
+	m_spContext->CSSetShader(nullptr, nullptr,  0);
+
+	m_spDevice->CreateUnorderedAccessView()
+	//m_spContext->CSSetUnorderedAccessViews()
 }
 
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)

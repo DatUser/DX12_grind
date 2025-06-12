@@ -1,16 +1,15 @@
-struct gbuffer
-{
-    float3 worldPos : SV_TARGET0;
-    float3 normal : SV_TARGET1;
-    float4 albedo : SV_TARGET2;
-};
+Texture2D<float4>	texAlbedo;
+Texture2D<float3>	texNormals;
+Texture2D<float3>	texPos;
 
-struct LightData
+RWTexture2D<float4>		texLights;
+
+cbuffer LightData : register(b1)
 {
 }
 
 
 [numthreads(8, 8, 1)]
-void main_cs(uint3 threadID : SV_DispatchThreadID)
+void CSMain(uint3 threadID : SV_DispatchThreadID)
 {
 }
