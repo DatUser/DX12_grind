@@ -237,22 +237,6 @@ HRESULT D3D11Interface::createSwapchainInternal(D3D11Swapchain *pSwapchain, HWND
     oSwapDesc.Flags = 0;
 
 	return m_spFactory->CreateSwapChain(m_spDevice.Get(), &oSwapDesc, &pSwapchain->m_spSwapchain);
-m_spContext->
-	// TODO: Move the stuff down to renderer
-/*
-    // Access to swapchain back buffer resource
-    ComPtr<ID3D11Resource> spBackBuffer{};
-    hr = m_spSwapchain->GetBuffer(0, IID_PPV_ARGS(&spBackBuffer));
-    ATLASSERT(hr == S_OK);
-
-    hr = m_spDevice->CreateRenderTargetView(spBackBuffer.Get(), nullptr, &m_spTarget);
-    ATLASSERT(hr == S_OK);
-
-    //Set our Render Target
-    m_spContext->OMSetRenderTargets( 1, m_spTarget.GetAddressOf(), NULL );
-*/
-	//ID3D11CommandList* pCommandList = nullptr;
-	//pCommandList->QueryInterface(__uuidof(ID3D11CommandList), (void**)&m_spCommandList);
 }
 
 HRESULT D3D11Interface::createInputLayout(ID3D10Blob* pVSBuffer, std::vector<InputLayoutFormat> vInputLayout, void** pLayout)
@@ -443,7 +427,16 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
 }
 
-void D3D11Interface::SetTexture(const RHIBuffer *pBuffer, ShaderType eShaderStage, bool bIsUAV) {
+void D3D11Interface::SetTexture(const RHITexture *pTexture, ShaderType eShaderStage, bool bIsUAV)
+{
+	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pTexture);
+	ATLASSERT(pD3D11TargetTexture &&
+		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS)) != 0);
+
+	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))].GetAddressOf();
+	ID3D11UnorderedAccessView* const* pUAV = reinterpret_cast<ID3D11UnorderedAccessView* const*>(pView);
+
+	m_spContext->CSSetUnorderedAccessViews(0, 1, pUAV, nullptr);
 }
 
 void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)
@@ -534,9 +527,6 @@ void D3D11Interface::ClearShaders()
 	m_spContext->GSSetShader(nullptr, nullptr,  0);
 	m_spContext->PSSetShader(nullptr, nullptr,  0);
 	m_spContext->CSSetShader(nullptr, nullptr,  0);
-
-	m_spDevice->CreateUnorderedAccessView()
-	//m_spContext->CSSetUnorderedAccessViews()
 }
 
 void D3D11Interface::SetVertexShader(const RHIShader* pShader)

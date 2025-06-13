@@ -19,7 +19,9 @@ typedef struct HWND__ *HWND;
 using ShaderType = std::variant<
 				std::integral_constant<EShaderStage, EShaderStage::VERTEX>,
 				std::integral_constant<EShaderStage, EShaderStage::GEOMETRY>,
-				std::integral_constant<EShaderStage, EShaderStage::PIXEL>>;
+				std::integral_constant<EShaderStage, EShaderStage::PIXEL>,
+				std::integral_constant<EShaderStage, EShaderStage::COMPUTE>
+			>;
 
 enum class ECullMode
 {
@@ -86,7 +88,7 @@ public:
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
-	virtual void SetTexture(const RHIBuffer* pBuffer, ShaderType eShaderStage, bool bIsUAV=false) = 0;
+	virtual void SetTexture(const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) = 0;
 
 	virtual void SetContextRenderTarget(const RHITexture* pTargets, const RHITexture* pDepth) = 0;
 	virtual void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) = 0;

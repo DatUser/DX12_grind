@@ -6,7 +6,10 @@ RWTexture2D<float4>		texLights;
 
 cbuffer LightData : register(b1)
 {
-}
+    float3	worldpos;
+    float3	albedo;
+    float	fLuminance;
+};
 
 
 [numthreads(8, 8, 1)]

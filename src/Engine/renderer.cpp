@@ -335,6 +335,11 @@ void Renderer::Pass_Lights()
 
 		// Bind output
 		// TODO: Set output tex
+		RHI::GetInterface()->SetTexture(
+				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
+				TO_SHADER_TYPE(EShaderStage::COMPUTE),
+				true
+			);
 
 		// TODO: Compute light
 	}
