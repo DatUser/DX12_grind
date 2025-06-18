@@ -84,14 +84,6 @@ void Renderer::InitResources()
 		ERHIBufferFlags::CONSTANT,
 		ERHICPUAccessFlags::WRITE,
 		ERHIBufferUsage::DYNAMIC);
-
-	// Light data
-	m_spLightBufferResource = RHI::GetInterface()->CreateBuffer(
-		nullptr,
-		sizeof(Light),
-		ERHIBufferFlags::CONSTANT,
-		ERHICPUAccessFlags::WRITE,
-		ERHIBufferUsage::DYNAMIC);
 }
 
 void Renderer::InitShaders()
@@ -159,7 +151,8 @@ void Renderer::GenerateFrame()
 
 	// Copy to final render target
 	RHI::GetInterface()->CopyTexture(
-		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(),
+		//m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(),
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
 		m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV());
 
 	// Todo : Add Render target to be filled and displayed
@@ -320,7 +313,9 @@ void Renderer::Pass_Geometry()
 void Renderer::Pass_Lights()
 {
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
-	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(), 1.f, 0.f, 0.f, 1.f);
+	RHI::GetInterface()->ClearUnorderedAccessView(
+		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
+		1.f, 0.f, 0.f, 1.f);
 
 	RHI::GetInterface()->ClearShaders();
 
@@ -330,8 +325,22 @@ void Renderer::Pass_Lights()
 		RHI::GetInterface()->SetComputeShader(m_mapShaders[static_cast<unsigned int>(ERendererShaders::LIGHT_CS)].get());
 
 		// Bind data
-		// TODO: Set light data
+		// Set light data
 		RHI::GetInterface()->SetBufferData(m_spLightBufferResource.get(), pLight.get());
+		// Set data from Gbuffer
+		//RHI::GetInterface()->SetTexture(
+		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
+		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
+		//		);
+		//RHI::GetInterface()->SetTexture(
+		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
+		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
+		//	);
+
+		//RHI::GetInterface()->SetTexture(
+		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
+		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
+		//	);
 
 		// Bind output
 		// TODO: Set output tex
@@ -342,6 +351,7 @@ void Renderer::Pass_Lights()
 			);
 
 		// TODO: Compute light
+		RHI::GetInterface()->Dispatch(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get());
 	}
 }
 
@@ -356,6 +366,15 @@ void Renderer::InitTestScene()
 	m_spScene->AddLight(std::make_shared<Light>(Light{
 		{0.0f, 5.0f, -2.0f},
 		{1.f, 1.f, 1.f},
-		1.f
+		1.f,
+		0.f
 	}));
+
+	// Light data
+	m_spLightBufferResource = RHI::GetInterface()->CreateBuffer(
+		m_spScene->GetLights()[0].get(),
+		sizeof(Light),
+		ERHIBufferFlags::CONSTANT,
+		ERHICPUAccessFlags::WRITE,
+		ERHIBufferUsage::DYNAMIC);
 }

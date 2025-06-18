@@ -82,6 +82,8 @@ HRESULT D3D11Interface::createShaderInstanceInternal(ID3D10Blob* pShaderBuffer, 
     		return m_spDevice->CreateGeometryShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11GeometryShader**) pShaderInstance);
     case EShaderStage::PIXEL:
             return m_spDevice->CreatePixelShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11PixelShader**) pShaderInstance);
+	case EShaderStage::COMPUTE:
+    		return m_spDevice->CreateComputeShader(pShaderBuffer->GetBufferPointer(), pShaderBuffer->GetBufferSize(), nullptr, (ID3D11ComputeShader**) pShaderInstance);
     default:
         return E_INVALIDARG;
     }
@@ -382,6 +384,16 @@ void D3D11Interface::ClearDepthStencilView(const RHITexture *pTexture)
 	m_spContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 }
 
+void D3D11Interface::ClearUnorderedAccessView(const RHITexture *pTexture, float fR, float fG, float fB, float fA)
+{
+    float pColor[] = {fR, fG, fB, fA};
+	const D3D11Texture* pD3D11Texture = dynamic_cast<const D3D11Texture*>(pTexture);
+	ID3D11View* pView = pD3D11Texture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))].Get();
+	ID3D11UnorderedAccessView* pUAV = (ID3D11UnorderedAccessView*) pView;
+
+	m_spContext->ClearUnorderedAccessViewFloat(pUAV, pColor);
+}
+
 std::shared_ptr<RHIShader> D3D11Interface::CreateShader(ERendererShaders eShader)
 {
 	const ShaderData& oShaderData = mapD3D11ShadersPaths[static_cast<unsigned int>(eShader)];
@@ -418,13 +430,25 @@ void D3D11Interface::SetBufferInternal<EShaderStage::GEOMETRY>(const RHIBuffer* 
 	m_spContext->GSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
+// TODO : Add UAV alternative
+template <>
+void D3D11Interface::SetBufferInternal<EShaderStage::COMPUTE>(const RHIBuffer* pBuffer)
+{
+	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
+	m_spContext->CSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
+}
+
+// helper type for the visitor #4
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+
 void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
 {
 	std::visit(
 		// Here eStage is replaced at compile time which allows it to be used as a template parameter
 		[this, pBuffer](auto eStage)
-		{
-			this->SetBufferInternal<eStage>(pBuffer); }, eShaderStage);
+		{SetBufferInternal<eStage>(pBuffer);},
+		eShaderStage);
 }
 
 void D3D11Interface::SetTexture(const RHITexture *pTexture, ShaderType eShaderStage, bool bIsUAV)
@@ -594,6 +618,20 @@ void D3D11Interface::DrawIndexed(
 
 	//m_spContext->DrawIndexed(18960, 0, 0);
 	m_spContext->DrawIndexed(uIndexCount, uIndexOffset, uVertexOffset);
+}
+
+void D3D11Interface::Dispatch(uint32_t uGroupCountX, uint32_t uGroupCountY, uint32_t uGroupCountZ)
+{
+	m_spContext->Dispatch(uGroupCountX, uGroupCountY, uGroupCountZ);
+}
+
+void D3D11Interface::Dispatch(const RHITexture *pTex)
+{
+	uint32_t uX = (pTex->m_iWidth + m_uGroupSizeX - 1) / m_uGroupSizeX;
+	uint32_t uY = (pTex->m_iHeight + m_uGroupSizeY - 1) / m_uGroupSizeX;
+	uint32_t uZ = 1;
+
+	Dispatch(uX, uY, uZ);
 }
 
 //void D3D11Interface::InitTestScene()

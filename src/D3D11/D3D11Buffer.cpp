@@ -1,5 +1,6 @@
 #include "D3D11/D3D11Buffer.h"
 
+#include "Core/asserts.h"
 #include "Engine/app.h"
 #include "D3D11/D3D11Interface.h"
 
@@ -23,7 +24,9 @@ D3D11Buffer::D3D11Buffer(
 	//pInterface->CreateBuffer(pData, uByteWidth, this);
 	//D3D11Interface::GetInterface()->createBufferInternal(this);
 
-	ATLASSERT(D3D11Interface::GetInterface()->createBufferInternal(this) == S_OK);
+	HRESULT hr = D3D11Interface::GetInterface()->createBufferInternal(this);
+	if (FAILED(hr))
+		LOG_ERROR(hr)
 }
 
 D3D11Buffer::~D3D11Buffer()

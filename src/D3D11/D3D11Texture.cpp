@@ -14,6 +14,8 @@ D3D11Texture::D3D11Texture(
     ATLASSERT(D3D11Interface::GetInterface()->createTextureInternal(this) == S_OK);
     if (m_uFlags & ERHITextureFlags::RENDER_TARGET)
         ATLASSERT(D3D11Interface::GetInterface()->createRTVInternal(this) == S_OK);
+    if (m_uFlags & ERHITextureFlags::UNORDERED_ACCESS)
+        ATLASSERT(D3D11Interface::GetInterface()->createUAVInternal(this) == S_OK);
 }
 
 uint32_t D3D11Texture::CastToInterfaceBindFlags(uint32_t uFlags) {

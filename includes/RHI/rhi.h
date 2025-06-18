@@ -19,8 +19,9 @@ typedef struct HWND__ *HWND;
 using ShaderType = std::variant<
 				std::integral_constant<EShaderStage, EShaderStage::VERTEX>,
 				std::integral_constant<EShaderStage, EShaderStage::GEOMETRY>,
-				std::integral_constant<EShaderStage, EShaderStage::PIXEL>,
 				std::integral_constant<EShaderStage, EShaderStage::COMPUTE>
+				//std::integral_constant<EShaderStage, EShaderStage::PIXEL>,
+				//std::integral_constant<EShaderStage, EShaderStage::COMPUTE>
 			>;
 
 enum class ECullMode
@@ -44,6 +45,7 @@ public:
 
     virtual void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) = 0;
     virtual void ClearDepthStencilView(const RHITexture* pTexture) = 0;
+    virtual void ClearUnorderedAccessView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) = 0;
     //virtual void Draw() = 0;
 
     virtual std::shared_ptr<RHIBuffer> CreateBuffer(
@@ -99,6 +101,9 @@ public:
 
 	virtual void DrawIndexed(uint32_t uIndexCount, uint32_t uIndexOffset, uint32_t uVertexOffset) = 0;
 
+	virtual void Dispatch(uint32_t uGroupCountX, uint32_t uGroupCountY, uint32_t uGroupCountZ) = 0;
+	virtual void Dispatch(const RHITexture* pTex) = 0;
+
 
     //inline static auto&& GetInterface()
 	inline static RHI* GetInterface()
@@ -108,4 +113,7 @@ public:
 	}
 protected:
 	static std::unique_ptr<RHI>	m_spGFXInterface;
+	static constexpr uint32_t m_uGroupSizeX = 8;
+	static constexpr uint32_t m_uGroupSizeY = 8;
+	static constexpr uint32_t m_uGroupSizeZ = 1;
 };

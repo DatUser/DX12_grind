@@ -110,6 +110,7 @@ public:
 
     void ClearRenderView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) override;
 	void ClearDepthStencilView(const RHITexture* pTexture) override;
+	void ClearUnorderedAccessView(const RHITexture* pTexture, float fR, float fG, float fB, float fA=1.f) override;
 
     std::shared_ptr<RHISwapchain> CreateSwapchain(
     	HWND hWnd,
@@ -142,7 +143,7 @@ public:
 	void SetBlendState() override;
 
 	template <EShaderStage eShaderStage>
-	void SetBufferInternal(const RHIBuffer* pBuffer) {}
+	void SetBufferInternal(const RHIBuffer* pBuffer);// {}
 
 	void ClearShaders() override;
 	void SetVertexShader(const RHIShader* pShader) override;
@@ -156,6 +157,16 @@ public:
 		uint32_t uIndexCount,
 		uint32_t uIndexOffset,
 		uint32_t uVertexOffset
+	) override;
+
+	void Dispatch(
+		uint32_t uGroupCountX,
+		uint32_t uGroupCountY,
+		uint32_t uGroupCountZ
+	) override;
+
+	void Dispatch(
+		const RHITexture *pTex
 	) override;
 
     /**

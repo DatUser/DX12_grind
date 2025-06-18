@@ -5,6 +5,8 @@
 #include <map>
 #include "D3D11Shader.h"
 
+#include "Core/asserts.h"
+
 D3D11Shader::D3D11Shader(
 		const std::wstring& wsFilepath,
 		const std::string&	sEntryPoint,
@@ -32,11 +34,13 @@ bool D3D11Shader::Compile()
 								nullptr /*TODO: add defines*/
 								);
 
-	ATLASSERT(D3D11Interface::GetInterface()->createShaderInstanceInternal(
+	HRESULT hr = D3D11Interface::GetInterface()->createShaderInstanceInternal(
 		m_spShaderBuffer.Get(),
 		&m_spShader,
 		m_eStage
-		) == S_OK);
+		);
+	if (FAILED(hr))
+		LOG_ERROR(hr)
 
 	std::vector<InputLayoutFormat> vInputLayout;
 	vInputLayout.push_back({ DXGI_FORMAT_R32G32B32_FLOAT, "POSITION", 0 });
