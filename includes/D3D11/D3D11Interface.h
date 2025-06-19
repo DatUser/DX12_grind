@@ -134,7 +134,7 @@ public:
 	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
 	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
-	void SetTexture(const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) override;
+	void SetTexture(const RHITexture* pTexture, ShaderType eShaderStage, ConstBool bIsUAV=std::bool_constant<false>{}) override;
 	//void SetT
 
 	void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) override;
@@ -144,6 +144,12 @@ public:
 
 	template <EShaderStage eShaderStage>
 	void SetBufferInternal(const RHIBuffer* pBuffer);// {}
+
+	template <EShaderStage eShaderStage>
+	void SetTextureInternal(const RHITexture* pTexture);// {}
+
+	template <EShaderStage eShaderStage>
+	void SetUAVInternal(const RHIResource* pResource);// {}
 
 	void ClearShaders() override;
 	void SetVertexShader(const RHIShader* pShader) override;

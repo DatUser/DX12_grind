@@ -438,9 +438,30 @@ void D3D11Interface::SetBufferInternal<EShaderStage::COMPUTE>(const RHIBuffer* p
 	m_spContext->CSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
-// helper type for the visitor #4
-template<class... Ts>
-struct overloaded : Ts... { using Ts::operator()...; };
+template <>
+void D3D11Interface::SetUAVInternal<EShaderStage::VERTEX>(const RHIResource *pResource)
+{
+
+}
+
+template <>
+void D3D11Interface::SetUAVInternal<EShaderStage::GEOMETRY>(const RHIResource *pResource)
+{
+}
+
+template <>
+void D3D11Interface::SetUAVInternal<EShaderStage::COMPUTE>(const RHIResource *pResource)
+{
+	// TODO: Make this generic
+	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
+	ATLASSERT(pD3D11TargetTexture &&
+		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS)) != 0);
+
+	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))].GetAddressOf();
+	ID3D11UnorderedAccessView* const* pUAV = reinterpret_cast<ID3D11UnorderedAccessView* const*>(pView);
+
+	m_spContext->CSSetUnorderedAccessViews(0, 1, pUAV, nullptr);
+}
 
 void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
 {
@@ -451,16 +472,47 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 		eShaderStage);
 }
 
-void D3D11Interface::SetTexture(const RHITexture *pTexture, ShaderType eShaderStage, bool bIsUAV)
+template <>
+void D3D11Interface::SetTextureInternal<EShaderStage::VERTEX>(const RHITexture* pTexture)
 {
-	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pTexture);
+
+}
+
+template <>
+void D3D11Interface::SetTextureInternal<EShaderStage::GEOMETRY>(const RHITexture* pTexture)
+{
+}
+
+template <>
+void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(const RHITexture* pResource)
+{
+	// TODO: Make this generic
+	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
 	ATLASSERT(pD3D11TargetTexture &&
-		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS)) != 0);
+		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::SHADER_RESOURCE)) != 0);
 
-	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))].GetAddressOf();
-	ID3D11UnorderedAccessView* const* pUAV = reinterpret_cast<ID3D11UnorderedAccessView* const*>(pView);
+	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::SHADER_RESOURCE))].GetAddressOf();
+	ID3D11ShaderResourceView* const* pSRV = reinterpret_cast<ID3D11ShaderResourceView* const*>(pView);
 
-	m_spContext->CSSetUnorderedAccessViews(0, 1, pUAV, nullptr);
+	m_spContext->CSSetShaderResources(0, 1, pSRV);
+}
+
+void D3D11Interface::SetTexture(const RHITexture *pTexture, ShaderType eShaderStage, ConstBool bIsUAV)
+{
+	if constexpr (std::holds_alternative<std::bool_constant<true>>(bIsUAV))
+		std::visit(
+		// Here eStage is replaced at compile time which allows it to be used as a template parameter
+		[this, pTexture](auto eStage) {
+			SetUAVInternal<eStage>(pTexture);
+		},
+		eShaderStage);
+	else
+		std::visit(
+		// Here eStage is replaced at compile time which allows it to be used as a template parameter
+		[this, pTexture](auto eStage) {
+			SetTextureInternal<eStage>(pTexture);
+		},
+		eShaderStage);
 }
 
 void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)

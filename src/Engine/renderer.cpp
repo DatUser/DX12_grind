@@ -275,7 +275,7 @@ void Renderer::Pass_Geometry()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(), 1.f, 0.f, 0.f, 1.f);
 	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(), 1.f, 0.f, 0.f, 1.f);
-	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(), 1.f, 0.f, 0.f, 1.f);
+	RHI::GetInterface()->ClearRenderView(m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(), 1.f, 0.f, 0.f, 0.f);
 
 	RHI::GetInterface()->ClearShaders();
 
@@ -347,7 +347,7 @@ void Renderer::Pass_Lights()
 		RHI::GetInterface()->SetTexture(
 				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
 				TO_SHADER_TYPE(EShaderStage::COMPUTE),
-				true
+				std::bool_constant<true>{}
 			);
 
 		// TODO: Compute light

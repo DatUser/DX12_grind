@@ -24,6 +24,11 @@ using ShaderType = std::variant<
 				//std::integral_constant<EShaderStage, EShaderStage::COMPUTE>
 			>;
 
+using ConstBool = std::variant<
+		std::bool_constant<true>,
+		std::bool_constant<false>
+	>;
+
 enum class ECullMode
 {
 	CULL_BACK,
@@ -90,7 +95,7 @@ public:
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
-	virtual void SetTexture(const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) = 0;
+	virtual void SetTexture(const RHITexture* pTexture, ShaderType eShaderStage, ConstBool bIsUAV=std::bool_constant<false>{}) = 0;
 
 	virtual void SetContextRenderTarget(const RHITexture* pTargets, const RHITexture* pDepth) = 0;
 	virtual void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) = 0;
