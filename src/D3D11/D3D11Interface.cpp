@@ -439,18 +439,18 @@ void D3D11Interface::SetBufferInternal<EShaderStage::COMPUTE>(const RHIBuffer* p
 }
 
 template <>
-void D3D11Interface::SetUAVInternal<EShaderStage::VERTEX>(const RHIResource *pResource)
+void D3D11Interface::SetUAVInternal<EShaderStage::VERTEX>(uint32_t uSlot, const RHIResource *pResource)
 {
 
 }
 
 template <>
-void D3D11Interface::SetUAVInternal<EShaderStage::GEOMETRY>(const RHIResource *pResource)
+void D3D11Interface::SetUAVInternal<EShaderStage::GEOMETRY>(uint32_t uSlot, const RHIResource *pResource)
 {
 }
 
 template <>
-void D3D11Interface::SetUAVInternal<EShaderStage::COMPUTE>(const RHIResource *pResource)
+void D3D11Interface::SetUAVInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const RHIResource *pResource)
 {
 	// TODO: Make this generic
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
@@ -473,18 +473,18 @@ void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage
 }
 
 template <>
-void D3D11Interface::SetTextureInternal<EShaderStage::VERTEX>(const RHITexture* pTexture)
+void D3D11Interface::SetTextureInternal<EShaderStage::VERTEX>(uint32_t uSlot, const RHITexture* pTexture)
 {
 
 }
 
 template <>
-void D3D11Interface::SetTextureInternal<EShaderStage::GEOMETRY>(const RHITexture* pTexture)
+void D3D11Interface::SetTextureInternal<EShaderStage::GEOMETRY>(uint32_t uSlot, const RHITexture* pTexture)
 {
 }
 
 template <>
-void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(const RHITexture* pResource)
+void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const RHITexture* pResource)
 {
 	// TODO: Make this generic
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
@@ -497,20 +497,21 @@ void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(const RHITexture*
 	m_spContext->CSSetShaderResources(0, 1, pSRV);
 }
 
-void D3D11Interface::SetTexture(const RHITexture *pTexture, ShaderType eShaderStage, ConstBool bIsUAV)
+void D3D11Interface::SetTexture(uint32_t uSlot, const RHITexture *pTexture, ShaderType eShaderStage, bool bIsUAV)
 {
-	if constexpr (std::holds_alternative<std::bool_constant<true>>(bIsUAV))
+	// TODO: Rework this -> use std array of partial specialized templated Set... methods
+	if (bIsUAV)
 		std::visit(
 		// Here eStage is replaced at compile time which allows it to be used as a template parameter
-		[this, pTexture](auto eStage) {
-			SetUAVInternal<eStage>(pTexture);
+		[this, uSlot, pTexture](auto eStage) {
+			SetUAVInternal<eStage>(uSlot, pTexture);
 		},
 		eShaderStage);
 	else
 		std::visit(
 		// Here eStage is replaced at compile time which allows it to be used as a template parameter
-		[this, pTexture](auto eStage) {
-			SetTextureInternal<eStage>(pTexture);
+		[this, uSlot, pTexture](auto eStage) {
+			SetTextureInternal<eStage>(uSlot, pTexture);
 		},
 		eShaderStage);
 }

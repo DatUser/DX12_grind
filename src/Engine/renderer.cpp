@@ -7,6 +7,7 @@
 #include "Engine/light.h"
 
 #include "Engine/Mesh.h"
+#include "Engine/renderer_ressources.h"
 #include "Engine/render_buffers.h"
 #include "Engine/scene.h"
 
@@ -328,26 +329,29 @@ void Renderer::Pass_Lights()
 		// Set light data
 		RHI::GetInterface()->SetBufferData(m_spLightBufferResource.get(), pLight.get());
 		// Set data from Gbuffer
-		//RHI::GetInterface()->SetTexture(
-		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
-		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
-		//		);
-		//RHI::GetInterface()->SetTexture(
-		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
-		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
-		//	);
-
-		//RHI::GetInterface()->SetTexture(
-		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
-		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
-		//	);
+		RHI::GetInterface()->SetTexture(
+				RendererRessources::uGBufferAlbedoSRV,
+				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(),
+				TO_SHADER_TYPE(EShaderStage::COMPUTE)
+				);
+		RHI::GetInterface()->SetTexture(
+				RendererRessources::uGBufferNormalsSRV,
+				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(),
+				TO_SHADER_TYPE(EShaderStage::COMPUTE)
+			);
+		RHI::GetInterface()->SetTexture(
+				RendererRessources::uGBufferPosSRV,
+				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(),
+				TO_SHADER_TYPE(EShaderStage::COMPUTE)
+			);
 
 		// Bind output
 		// TODO: Set output tex
 		RHI::GetInterface()->SetTexture(
+				RendererRessources::uLightsUAV,
 				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
 				TO_SHADER_TYPE(EShaderStage::COMPUTE),
-				std::bool_constant<true>{}
+				true
 			);
 
 		// TODO: Compute light
