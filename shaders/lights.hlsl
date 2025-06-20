@@ -1,8 +1,8 @@
 Texture2D<float4>	texAlbedo		: register(t0);
-Texture2D<float3>	texNormals		: register(t0);
-Texture2D<float3>	texPos		: register(t0);
+Texture2D<float3>	texNormals		: register(t1);
+Texture2D<float3>	texPos		: register(t2);
 
-RWTexture2D<float4>		texLights;
+RWTexture2D<float4>		texLights : register(u0);
 
 cbuffer LightData : register(b1)
 {

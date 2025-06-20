@@ -178,7 +178,7 @@ HRESULT D3D11Interface::createSRVInternal(D3D11Texture *pTexture)
 	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
 	descSRV.Format = D3D11Texture::CastToInterfaceFormat(pTexture->m_eFormat);
 	descSRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	descSRV.Texture2D.MipLevels = 0;
+	descSRV.Texture2D.MipLevels = 1;
 	descSRV.Texture2D.MostDetailedMip = 0;
 
 	// Create the Shader resource view
@@ -514,6 +514,11 @@ void D3D11Interface::SetTexture(uint32_t uSlot, const RHITexture *pTexture, Shad
 			SetTextureInternal<eStage>(uSlot, pTexture);
 		},
 		eShaderStage);
+}
+
+void D3D11Interface::ClearContextRenderTarget()
+{
+	m_spContext->OMSetRenderTargets(0, nullptr, nullptr);
 }
 
 void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)

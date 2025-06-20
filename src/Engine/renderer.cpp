@@ -260,6 +260,10 @@ void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
 		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
+		RHI::GetInterface()->SetContextRenderTarget(
+			pTarget,
+			m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
+
 		// Bind output
 		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
 		RHI::GetInterface()->SetContextRenderTarget(
@@ -313,6 +317,7 @@ void Renderer::Pass_Geometry()
 
 void Renderer::Pass_Lights()
 {
+	RHI::GetInterface()->ClearContextRenderTarget();
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearUnorderedAccessView(
 		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
@@ -334,16 +339,16 @@ void Renderer::Pass_Lights()
 				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_ALBEDO)].get(),
 				TO_SHADER_TYPE(EShaderStage::COMPUTE)
 				);
-		RHI::GetInterface()->SetTexture(
-				RendererRessources::uGBufferNormalsSRV,
-				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(),
-				TO_SHADER_TYPE(EShaderStage::COMPUTE)
-			);
-		RHI::GetInterface()->SetTexture(
-				RendererRessources::uGBufferPosSRV,
-				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(),
-				TO_SHADER_TYPE(EShaderStage::COMPUTE)
-			);
+		//RHI::GetInterface()->SetTexture(
+		//		RendererRessources::uGBufferNormalsSRV,
+		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(),
+		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
+		//	);
+		//RHI::GetInterface()->SetTexture(
+		//		RendererRessources::uGBufferPosSRV,
+		//		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(),
+		//		TO_SHADER_TYPE(EShaderStage::COMPUTE)
+		//	);
 
 		// Bind output
 		// TODO: Set output tex
