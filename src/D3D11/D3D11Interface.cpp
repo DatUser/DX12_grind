@@ -516,13 +516,15 @@ void D3D11Interface::SetTexture(uint32_t uSlot, const RHITexture *pTexture, Shad
 		eShaderStage);
 }
 
-void D3D11Interface::ClearContextRenderTarget()
-{
-	m_spContext->OMSetRenderTargets(0, nullptr, nullptr);
-}
-
 void D3D11Interface::SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth)
 {
+	// Unset render view
+	if (pTarget == nullptr)
+	{
+		m_spContext->OMSetRenderTargets(0, nullptr, nullptr);
+		return;
+	}
+
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pTarget);
 	ATLASSERT(pD3D11TargetTexture &&
 		(pD3D11TargetTexture->m_uFlags & static_cast<uint32_t>(ERHITextureFlags::RENDER_TARGET)) != 0);

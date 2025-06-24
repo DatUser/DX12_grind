@@ -137,7 +137,6 @@ public:
 	void SetTexture(uint32_t uSlot, const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) override;
 	//void SetT
 
-	void ClearContextRenderTarget() override;
 	void SetContextRenderTarget(const RHITexture* pTarget, const RHITexture* pDepth) override;
 	void SetContextRenderTargets(RHITexture* const* pTargets, uint32_t uNumTargets, const RHITexture* pDepth) override;
 	void SetDepthStencilState(const RHISwapchain *pSwapchain) override;

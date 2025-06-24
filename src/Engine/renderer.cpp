@@ -147,7 +147,13 @@ void Renderer::GenerateFrame()
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearRenderView(m_spCurrentViewport->GetSwapchain()->GetBackBufferRTV(), 1.f, 0.f, 0.f, 1.f);
 
+	// Graphic passes
 	Pass_Geometry();
+
+	// Unset render target
+	RHI::GetInterface()->SetContextRenderTarget(nullptr, nullptr);
+
+	// Compute Passes
 	Pass_Lights();
 
 	// Copy to final render target
@@ -317,7 +323,6 @@ void Renderer::Pass_Geometry()
 
 void Renderer::Pass_Lights()
 {
-	RHI::GetInterface()->ClearContextRenderTarget();
 	RHI::GetInterface()->ClearDepthStencilView(m_spCurrentViewport->GetSwapchain()->GetDepthStencilView());
 	RHI::GetInterface()->ClearUnorderedAccessView(
 		m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)].get(),
