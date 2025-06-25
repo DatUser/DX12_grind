@@ -452,6 +452,13 @@ void D3D11Interface::SetUAVInternal<EShaderStage::GEOMETRY>(uint32_t uSlot, cons
 template <>
 void D3D11Interface::SetUAVInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const RHIResource *pResource)
 {
+	if (pResource == nullptr)
+	{
+		ID3D11UnorderedAccessView* pUAV = nullptr;
+		m_spContext->CSSetUnorderedAccessViews(uSlot, 1, &pUAV, nullptr);
+		return;
+	}
+
 	// TODO: Make this generic
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
 	ATLASSERT(pD3D11TargetTexture &&
@@ -486,6 +493,13 @@ void D3D11Interface::SetTextureInternal<EShaderStage::GEOMETRY>(uint32_t uSlot, 
 template <>
 void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const RHITexture* pResource)
 {
+	if (pResource == nullptr)
+	{
+		ID3D11ShaderResourceView* pSRV = nullptr;
+		m_spContext->CSSetShaderResources(uSlot, 1, &pSRV);
+		return;
+	}
+
 	// TODO: Make this generic
 	const D3D11Texture* pD3D11TargetTexture = dynamic_cast<const D3D11Texture*>(pResource);
 	ATLASSERT(pD3D11TargetTexture &&
@@ -494,7 +508,7 @@ void D3D11Interface::SetTextureInternal<EShaderStage::COMPUTE>(uint32_t uSlot, c
 	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::SHADER_RESOURCE))].GetAddressOf();
 	ID3D11ShaderResourceView* const* pSRV = reinterpret_cast<ID3D11ShaderResourceView* const*>(pView);
 
-	m_spContext->CSSetShaderResources(0, 1, pSRV);
+	m_spContext->CSSetShaderResources(uSlot, 1, pSRV);
 }
 
 void D3D11Interface::SetTexture(uint32_t uSlot, const RHITexture *pTexture, ShaderType eShaderStage, bool bIsUAV)

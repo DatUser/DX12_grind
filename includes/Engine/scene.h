@@ -5,7 +5,7 @@
 
 class Camera;
 class Controller;
-class Light;
+struct  Light;
 class Mesh;
 
 class Scene
