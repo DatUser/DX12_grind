@@ -94,7 +94,7 @@ public:
 
 	virtual void SetVertexBuffer(const RHIBuffer* pBuffer) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* pBuffer) = 0;
-	virtual void SetBuffer(const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
+	virtual void SetBuffer(uint32_t uSlot, const RHIBuffer* pBuffer, ShaderType eShaderStage) = 0;
 	virtual void SetTexture(uint32_t uSlot, const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) = 0;
 
 	virtual void SetContextRenderTarget(const RHITexture* pTargets, const RHITexture* pDepth) = 0;

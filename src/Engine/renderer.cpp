@@ -116,14 +116,14 @@ void Renderer::InitShaders()
 		RHI::GetInterface()->CreateTexture(nullptr,
 			m_spCurrentViewport->GetWidth(),
 			m_spCurrentViewport->GetHeight(),
-			ETextureFormat::R32G32B32_FLOAT,
+			ETextureFormat::R32G32B32A32_FLOAT,
 			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
 
 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)] =
 		RHI::GetInterface()->CreateTexture(nullptr,
 			m_spCurrentViewport->GetWidth(),
 			m_spCurrentViewport->GetHeight(),
-			ETextureFormat::R32G32B32_FLOAT,
+			ETextureFormat::R32G32B32A32_FLOAT,
 			ERHITextureFlags::SHADER_RESOURCE | ERHITextureFlags::RENDER_TARGET);
 
 	m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::LIGHTS)] =
@@ -233,7 +233,11 @@ void Renderer::Pass_Forward()
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
-		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+		RHI::GetInterface()->SetBuffer(
+			RendererRessources::uViewProjCB,
+			m_spConstantBufferResource.get(),
+			TO_SHADER_TYPE(EShaderStage::VERTEX)
+			);
 		//RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
 
 		// Bind output
@@ -263,8 +267,16 @@ void Renderer::Pass_DebugNormals(const RHITexture* pTarget)
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
-		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
-		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::GEOMETRY));
+		RHI::GetInterface()->SetBuffer(
+			RendererRessources::uViewProjCB,
+			m_spConstantBufferResource.get(),
+			TO_SHADER_TYPE(EShaderStage::VERTEX)
+			);
+		RHI::GetInterface()->SetBuffer(
+			RendererRessources::uViewProjCB,
+			m_spConstantBufferResource.get(),
+			TO_SHADER_TYPE(EShaderStage::GEOMETRY)
+			);
 
 		RHI::GetInterface()->SetContextRenderTarget(
 			pTarget,
@@ -302,7 +314,11 @@ void Renderer::Pass_Geometry()
 		// Bind data
 		RHI::GetInterface()->SetVertexBuffer(pMesh->GetVertexBuffer());
 		RHI::GetInterface()->SetIndexBuffer(pMesh->GetIndexBuffer());
-		RHI::GetInterface()->SetBuffer(m_spConstantBufferResource.get(), TO_SHADER_TYPE(EShaderStage::VERTEX));
+		RHI::GetInterface()->SetBuffer(
+			RendererRessources::uViewProjCB,
+			m_spConstantBufferResource.get(),
+			TO_SHADER_TYPE(EShaderStage::VERTEX)
+			);
 
 		// Bind output
 		RHI::GetInterface()->SetDepthStencilState(m_spCurrentViewport->GetSwapchain());
@@ -338,6 +354,12 @@ void Renderer::Pass_Lights()
 		// Bind data
 		// Set light data
 		RHI::GetInterface()->SetBufferData(m_spLightBufferResource.get(), pLight.get());
+		RHI::GetInterface()->SetBuffer(
+				RendererRessources::uLightCB,
+				m_spLightBufferResource.get(),
+				TO_SHADER_TYPE(EShaderStage::COMPUTE)
+			);
+
 		// Set data from Gbuffer
 		RHI::GetInterface()->SetTexture(
 				RendererRessources::uGBufferAlbedoSRV,
@@ -348,7 +370,7 @@ void Renderer::Pass_Lights()
 				RendererRessources::uGBufferNormalsSRV,
 				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_NORMAL)].get(),
 				TO_SHADER_TYPE(EShaderStage::COMPUTE)
-			);
+		);
 		RHI::GetInterface()->SetTexture(
 				RendererRessources::uGBufferPosSRV,
 				m_mapPassRenderTargets[static_cast<unsigned int>(ERendererPassesRT::GBUFFER_POS)].get(),
@@ -401,10 +423,10 @@ void Renderer::InitTestScene()
 	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});
 
 	m_spScene->AddLight(std::make_shared<Light>(Light{
-		{0.0f, 5.0f, -2.0f},
-		{1.f, 1.f, 1.f},
-		1.f,
-		0.f
+		{0.0f, 5.0f, -2.0f, 1.f},
+		{1.f, 1.f, 1.f, 1.}
+		//1.f,
+		//0.f
 	}));
 
 	// Light data

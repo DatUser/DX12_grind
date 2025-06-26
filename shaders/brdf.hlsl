@@ -66,12 +66,12 @@ float3 cook_torrance_brdf(float3 wo, float3 wi, float3 n, float3 albedo)
 
   //Computing diffuse Lambert
   float3 kd = float3(1.0, 1.0, 1.0);
-  kd = (kd - nFresnel) * (1.0 - metalness);
+  //kd = (kd - nFresnel) * (1.0 - metalness);
   float3 diffuse = kd * albedo / PI;
 
   float3 color = (diffuse + specular) * dotNL;
   color = color / (color + float3(1.0, 1.0, 1.0));
   color = pow(color, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
 
-  return color;
+  return h;
 }

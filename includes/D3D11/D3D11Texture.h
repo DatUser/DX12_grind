@@ -26,7 +26,8 @@ public:
     {
         constexpr std::array<DXGI_FORMAT, static_cast<unsigned int>(ETextureFormat::_size)> arrFormats{
             DXGI_FORMAT_R8G8B8A8_UNORM,
-            DXGI_FORMAT_R32G32_FLOAT,
+            DXGI_FORMAT_R32G32B32_FLOAT,
+            DXGI_FORMAT_R32G32B32A32_FLOAT,
             DXGI_FORMAT_R8_UNORM,
             DXGI_FORMAT_D24_UNORM_S8_UINT
         };

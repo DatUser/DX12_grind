@@ -133,7 +133,7 @@ public:
 	std::shared_ptr<RHIShader> CreateShader(ERendererShaders eShader) override;
 	void SetVertexBuffer(const RHIBuffer* pBuffer) override;
 	void SetIndexBuffer(const RHIBuffer* pBuffer) override;
-	void SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
+	void SetBuffer(uint32_t uSlot, const RHIBuffer *pBuffer, ShaderType eShaderStage) override;
 	void SetTexture(uint32_t uSlot, const RHITexture* pTexture, ShaderType eShaderStage, bool bIsUAV=false) override;
 	//void SetT
 
@@ -143,7 +143,7 @@ public:
 	void SetBlendState() override;
 
 	template <EShaderStage eShaderStage>
-	void SetBufferInternal(/* TODO : Add Slot*/const RHIBuffer* pBuffer);// {}
+	void SetBufferInternal(uint32_t uSlot, const RHIBuffer* pBuffer);// {}
 
 	template <EShaderStage eShaderStage>
 	void SetTextureInternal(uint32_t uSlot, const RHITexture* pTexture);// {}

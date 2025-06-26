@@ -10,4 +10,9 @@ namespace RendererRessources
 
 	// UAV Slots
 	constexpr uint32_t uLightsUAV = 0;
+
+
+	// CBuffer Slots
+	constexpr uint32_t uViewProjCB = 0;
+	constexpr uint32_t uLightCB = 1;
 }

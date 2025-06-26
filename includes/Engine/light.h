@@ -4,8 +4,8 @@
 
 struct Light
 {
-	Vec3	m_oPos;
-	Vec3	m_oColor;
-	float	m_fLuminance;
-	float	m_fHereForAlignment;
+	Vec4	m_oPos;
+	Vec4	m_oColor;
+	//float	m_fLuminance;
+	//float	m_fHereForAlignment;
 };

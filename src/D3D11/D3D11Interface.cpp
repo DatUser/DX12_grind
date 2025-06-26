@@ -4,6 +4,7 @@
 #pragma comment(lib, "d3dcompiler")
 #pragma comment(lib, "dxgi.lib")
 
+#include "Core/asserts.h"
 #include "Engine/camera.h"
 #include "Core/operations.h"
 
@@ -318,7 +319,7 @@ void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
 	D3D11_MAPPED_SUBRESOURCE oMappedSubresource{};
 
-	m_spContext->Map(
+	HRESULT hr = m_spContext->Map(
 		pD3D11Buffer->m_spInitResource.Get(),				// Resource
 		0,												// Subresource
 		D3D11_MAP_WRITE_DISCARD,						// Map type
@@ -327,6 +328,8 @@ void D3D11Interface::SetBufferData(const RHIBuffer* pBuffer, const void* pData)
 		);
 	memcpy(oMappedSubresource.pData, pData, pBuffer->m_uByteWidth);
 	m_spContext->Unmap(pD3D11Buffer->m_spInitResource.Get(), 0);
+	 if (FAILED(hr))
+	 	LOG_ERROR(hr)
 	//m_spContext->UpdateSubresource(pD3D11Buffer->pInitResource.Get(), 0, nullptr, pBuffer->m_pData, 0, 0);
     //ATLASSERT(createBufferInternal((D3D11Buffer*) spBuffer.get()) == S_OK);
 	//return spBuffer->IsValid();
@@ -417,25 +420,25 @@ void D3D11Interface::SetIndexBuffer(const RHIBuffer* pBuffer)
 }
 
 template <>
-void D3D11Interface::SetBufferInternal<EShaderStage::VERTEX>(const RHIBuffer* pBuffer)
+void D3D11Interface::SetBufferInternal<EShaderStage::VERTEX>(uint32_t uSlot, const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	m_spContext->VSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
+	m_spContext->VSSetConstantBuffers(uSlot, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
 template <>
-void D3D11Interface::SetBufferInternal<EShaderStage::GEOMETRY>(const RHIBuffer* pBuffer)
+void D3D11Interface::SetBufferInternal<EShaderStage::GEOMETRY>(uint32_t uSlot, const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	m_spContext->GSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
+	m_spContext->GSSetConstantBuffers(uSlot, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
 // TODO : Add UAV alternative
 template <>
-void D3D11Interface::SetBufferInternal<EShaderStage::COMPUTE>(const RHIBuffer* pBuffer)
+void D3D11Interface::SetBufferInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const RHIBuffer* pBuffer)
 {
 	const D3D11Buffer* pD3D11Buffer = dynamic_cast<const D3D11Buffer*>(pBuffer);
-	m_spContext->CSSetConstantBuffers(0, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
+	m_spContext->CSSetConstantBuffers(uSlot, 1, pD3D11Buffer->m_spInitResource.GetAddressOf());
 }
 
 template <>
@@ -467,15 +470,15 @@ void D3D11Interface::SetUAVInternal<EShaderStage::COMPUTE>(uint32_t uSlot, const
 	ID3D11View* const* pView = pD3D11TargetTexture->m_arrResourceViews[GetFirstBitSet(static_cast<uint32_t>(ERHITextureFlags::UNORDERED_ACCESS))].GetAddressOf();
 	ID3D11UnorderedAccessView* const* pUAV = reinterpret_cast<ID3D11UnorderedAccessView* const*>(pView);
 
-	m_spContext->CSSetUnorderedAccessViews(0, 1, pUAV, nullptr);
+	m_spContext->CSSetUnorderedAccessViews(uSlot, 1, pUAV, nullptr);
 }
 
-void D3D11Interface::SetBuffer(const RHIBuffer *pBuffer, ShaderType eShaderStage)
+void D3D11Interface::SetBuffer(uint32_t uSlot, const RHIBuffer *pBuffer, ShaderType eShaderStage)
 {
 	std::visit(
 		// Here eStage is replaced at compile time which allows it to be used as a template parameter
-		[this, pBuffer](auto eStage)
-		{SetBufferInternal<eStage>(pBuffer);},
+		[this, uSlot, pBuffer](auto eStage)
+		{SetBufferInternal<eStage>(uSlot, pBuffer);},
 		eShaderStage);
 }
 

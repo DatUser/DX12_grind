@@ -12,7 +12,9 @@ D3D11Texture::D3D11Texture(
 : RHITexture(pData, iWidth, iHeight, eFormat, uFlags)
 {
     HRESULT hr = S_OK;
-    ATLASSERT(D3D11Interface::GetInterface()->createTextureInternal(this) == S_OK);
+    //ATLASSERT(D3D11Interface::GetInterface()->createTextureInternal(this) == S_OK);
+    if ((hr = D3D11Interface::GetInterface()->createTextureInternal(this)) != S_OK)
+            LOG_ERROR(hr)
     if (m_uFlags & ERHITextureFlags::SHADER_RESOURCE)
         if ((hr = D3D11Interface::GetInterface()->createSRVInternal(this)) != S_OK)
             LOG_ERROR(hr)

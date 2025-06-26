@@ -22,8 +22,8 @@ struct PSInput
 
 struct gbuffer
 {
-    float3 worldPos : SV_TARGET0;
-    float3 normal : SV_TARGET1;
+    float4 worldPos : SV_TARGET0;
+    float4 normal : SV_TARGET1;
     float4 albedo : SV_TARGET2;
 };
 
@@ -52,8 +52,8 @@ VertexOutput VSMain(VertexInput input)
 gbuffer PSMain(PSInput input)
 {
     gbuffer oGbuffer;
-    oGbuffer.worldPos = input.worldPos;
-    oGbuffer.normal = input.normal;
+    oGbuffer.worldPos = float4(input.worldPos, 1.);
+    oGbuffer.normal = float4(input.normal, -1.);
     oGbuffer.albedo = float4(input.albedo, 1.f);
     return oGbuffer;
 }
