@@ -423,10 +423,9 @@ void Renderer::InitTestScene()
 	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});
 
 	m_spScene->AddLight(std::make_shared<Light>(Light{
-		{0.0f, 5.0f, -2.0f, 1.f},
-		{1.f, 1.f, 1.f, 1.}
-		//1.f,
-		//0.f
+		{0.0f, 5.0f, -6.0f},
+		1.f,
+		{0.1f, 0.7f, 0.2f, 1.}
 	}));
 
 	// Light data
