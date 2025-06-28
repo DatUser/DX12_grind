@@ -4,7 +4,7 @@
 #include <memory>
 
 struct ConstantBuffers;
-class Mesh;
+class mesh;
 class Scene;
 
 class RHIBuffer;
@@ -79,8 +79,8 @@ private:
 	/**
 	 * @brief Update positions buffer(and maybe other stuff)
 	 */
-	void UpdateMesh(Mesh* pMesh);
-	void DrawMesh(Mesh* pMesh);
+	void UpdateMesh(mesh* pMesh);
+	void DrawMesh(mesh* pMesh);
 
 	void Pass_Forward();
 	void Pass_DebugNormals(const RHITexture* pTarget);

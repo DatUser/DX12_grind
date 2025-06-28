@@ -68,6 +68,7 @@ float3 cook_torrance_brdf(float3 wo, float3 wi, float3 n, float3 albedo)
     //Computing diffuse Lambert
     float3 kd = float3(1.0, 1.0, 1.0);
     kd = (kd - nFresnel) * (1.0 - metalness);
+	// only non metal have diffuse
     float3 diffuse = kd * albedo / PI;
 
     float3 color = (diffuse + specular) * dotNL * /*lightColor.rgb*/float3(0.1, 0.7, 0.2);

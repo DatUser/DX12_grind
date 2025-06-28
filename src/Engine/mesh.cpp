@@ -1,4 +1,4 @@
-#include "Engine/Mesh.h"
+#include "Engine/mesh.h"
 
 #include "Core/Core.h"
 
@@ -7,13 +7,13 @@
 
 namespace dx = DirectX;
 
-Mesh::Mesh()
+mesh::mesh()
 : m_vVertices()
 , m_vIndices()
 {
 }
 
-Mesh::Mesh(
+mesh::mesh(
 	const std::vector<float>& vVertices,
 	const std::vector<int>& vIndices,
 	uint32_t uVertexOffset /* = 0 */,
@@ -39,11 +39,11 @@ Mesh::Mesh(
 		);
 }
 
-Mesh::~Mesh()
+mesh::~mesh()
 {
 }
 
-void Mesh::UpdateModelMatrix()
+void mesh::UpdateModelMatrix()
 {
 	memcpy(&m_oModelMatrix.r[3], &m_oPos, sizeof(Vec3));
 }

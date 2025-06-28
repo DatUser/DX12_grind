@@ -6,7 +6,7 @@
 class Camera;
 class Controller;
 struct  Light;
-class Mesh;
+class mesh;
 
 class Scene
 {
@@ -15,7 +15,7 @@ public:
 	Scene();
 	~Scene();
 
-	inline const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const
+	inline const std::vector<std::shared_ptr<mesh>>& GetMeshes() const
 	{
 		return m_vMeshes;
 	}
@@ -32,7 +32,7 @@ public:
 
 	inline Controller* GetController() const { return m_spController.get(); }
 
-	inline void AddMesh(std::shared_ptr<Mesh>&& spMesh)
+	inline void AddMesh(std::shared_ptr<mesh>&& spMesh)
 	{
 		m_vMeshes.push_back(spMesh);
 	}
@@ -48,7 +48,7 @@ public:
 	}
 
 private:
-	std::vector<std::shared_ptr<Mesh>>		m_vMeshes;
+	std::vector<std::shared_ptr<mesh>>		m_vMeshes;
 	std::vector<std::shared_ptr<Light>>		m_vLights;
 	std::vector<std::shared_ptr<Camera>>	m_vCameras;
 

@@ -19,7 +19,7 @@
 
 #include "RHI/rhi_shader.h"
 
-#include "Engine/Mesh.h"
+#include "Engine/mesh.h"
 #include "Shapes/teapot.h"
 
 namespace wrl = Microsoft::WRL;

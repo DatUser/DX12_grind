@@ -4,20 +4,21 @@
 #include <string>
 #include <memory>
 
+#include "transform.h"
 #include "Core/Core.h"
 
 // TODO: Create enunm for rendering state managemenent
 
 class RHIBuffer;
 
-class Mesh
+class mesh
 {
-	friend void load_obj(const std::string& path, std::vector<Mesh*>& arrMeshes);
+	friend void load_obj(const std::string& path, std::vector<mesh*>& arrMeshes);
 
 public:
-	~Mesh();
+	~mesh();
 
-	Mesh(
+	mesh(
 		const std::vector<float>& vVertices,
 		const std::vector<int>& vIndices,
 		/* TODO: Move to submesh */
@@ -52,7 +53,9 @@ public:
 
 private:
 	// Avoids to have Mesh with unitilized rendering resources
-	Mesh(/* args */);
+	mesh(/* args */);
+
+	Transform			m_oTransform;
 
 	Vec3 				m_oPos;
 	Mat4x4				m_oModelMatrix;

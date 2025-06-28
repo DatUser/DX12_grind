@@ -5,9 +5,9 @@
 
 #include <iostream>
 #include "Core/asserts.h"
-#include "Engine/Mesh.h"
+#include "Engine/mesh.h"
 
-void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
+void load_obj(const std::string& path, std::vector<mesh*>& vMeshes)
 {
 	/*
 	tinyobj::ObjReader reader;
@@ -71,7 +71,7 @@ void load_obj(const std::string& path, std::vector<Mesh*>& vMeshes)
 		vVertices.push_back(attrib.normals[i+2]);
 	}
 
-	Mesh* pCurrMesh = new Mesh{ vVertices, vIndices };
+	mesh* pCurrMesh = new mesh{ vVertices, vIndices };
 	CHECK(pCurrMesh != nullptr)
 	vMeshes.push_back(pCurrMesh);
 

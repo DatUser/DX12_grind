@@ -4,6 +4,6 @@
 #include <vector>
 #include <string>
 
-class Mesh;
+class mesh;
 
-void load_obj(const std::string& path, std::vector<Mesh*>& arrMeshes);
+void load_obj(const std::string& path, std::vector<mesh*>& arrMeshes);

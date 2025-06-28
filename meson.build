@@ -1,46 +1,30 @@
 project('engine', 'cpp',
-    default_options : ['cpp_std=c++20'])
-
-# Files
-python = find_program(['python.exe', 'python'])
-glob = run_command('python', 'file_glob.py', check : true)
-src_files = files(glob.stdout().split(' '))
+        default_options: [
+            'cpp_std=c++20',
+            'b_vscrt=static_from_buildtype',
+            'default_library=static'  # If using static libs
+        ]
+)
 
 # Download tiny_obj_loader.h
 tiny_obj_loader = run_command(
-	'cmd' , '/C', 'mkdir', 'includes\\external\\', '&&',
+    'cmd' , '/C', 'mkdir', 'includes\\external\\', '&&',
     'curl', '-L', '-o', 'includes/external/tiny_obj_loader.h',
     'https://github.com/tinyobjloader/tinyobjloader/releases/download/v1.0.6/tiny_obj_loader.h'
 )
 
-# Test
-cppcheck = find_program(['cppcheck.exe', 'cppcheck'], required : false)
-if cppcheck.found()
-    compile_commands_json = join_paths(meson.build_root(), 'compile_commands.json')
+# Include directories
+includes_dir = include_directories('includes')
 
-    cppcheck_args = [
-        '--project=' + compile_commands_json,
-        '--suppress-xml=' + join_paths(meson.source_root(), 'cppcheck-suppressions.xml'),
-        '--error-exitcode=2',
-        '--quiet']
+# Include source subdirectories
+subdir('src')
 
-        #'--platform=win64',
-        #'--std=c++20',
-        #'--enable=all',
-        #'-I',
-        #'../includes',
-        #'--template="{file}:{line}: {severity}: {message}"',
-        #'../src']
-    run_target('cppcheck', command : [cppcheck] + cppcheck_args)
-
-    #test('cppcheck', cppcheck, args: cppcheck_args, suite: 'code_review')
-endif
-
-inc_dirs = include_directories('includes')
-
+# Main executable
 executable('window',
-    sources : src_files,
-    include_directories : inc_dirs,
-	#dependencies: [tiny_obj_loader_dep],
-    gui_app : true,
+           'src/main.cpp',  # If you have a main.cpp
+           link_with: [rhi_lib, io_lib, d3d11_lib, engine_lib, input_lib],
+           include_directories: includes_dir,
+           #dependencies: [external_deps],
+           install: true,
+           gui_app: true
 )
