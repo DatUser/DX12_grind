@@ -15,7 +15,7 @@
 
 
 using Vec3 = DirectX::XMFLOAT3;
-using Rot = DirectX::XMFLOAT3;
+using Rot = DirectX::XMFLOAT3; // Rotation Pitch, Yaw, Roll
 using Quat = DirectX::XMFLOAT4;
 using Vec4 = DirectX::XMFLOAT4;
 using Mat4x4 = DirectX::XMMATRIX;

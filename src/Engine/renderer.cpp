@@ -62,17 +62,8 @@ void Renderer::InitResources()
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
 	//CPU update CBO
-	Mat4x4 oView = dx::XMMatrixLookAtLH(
-	dx::XMLoadFloat3(&pCam->GetPosition()),
-	dx::XMLoadFloat3(&m_oFocus),
-	dx::XMLoadFloat3(&pCam->GetUpVector())
-	);
-	Mat4x4 oProj = dx::XMMatrixPerspectiveFovLH(
-		pCam->GetFOV(),
-		pCam->GetAspectRatio(),
-		pCam->GetNearClipping(),
-		pCam->GetFarClipping()
-	);
+	Mat4x4 oView = pCam->ComputeViewMatrix();
+	Mat4x4 oProj = pCam->ComputeProjectionMatrix();
 
 	// View Projection data
 	m_spConstantBuffer->oView = (oView);
@@ -180,17 +171,9 @@ void Renderer::UpdateConstantBuffers()
 	Camera* pCam = m_spCurrentViewport->GetCamera();
 
 	//CPU update CBO
-	Mat4x4 oView = dx::XMMatrixLookAtLH(
-		dx::XMLoadFloat3(&pCam->GetPosition()),
-		dx::XMLoadFloat3(&pCam->GetFocusPoint()),
-		dx::XMLoadFloat3(&pCam->GetUpVector())
-		);
-	Mat4x4 oProj = dx::XMMatrixPerspectiveFovLH(
-		pCam->GetFOV(),
-		pCam->GetAspectRatio(),
-		pCam->GetNearClipping(),
-		pCam->GetFarClipping()
-	);
+	//const Mat4x4& oView = pCam->GetTransform().GetMatrix();
+	Mat4x4 oView = pCam->ComputeViewMatrix();
+	Mat4x4 oProj = pCam->ComputeProjectionMatrix();
 
 	m_spConstantBuffer->oView = (oView);
 	m_spConstantBuffer->oProj = (oProj);
