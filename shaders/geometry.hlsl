@@ -7,9 +7,11 @@ struct VertexInput
 struct VertexOutput
 {
     float4 position : SV_POSITION;
+    //float4 material : COLOR;
     float3 worldPos : POSITION;
     float3 normal : NORMAL;
     float3 albedo    : COLOR;
+    //float2 uv : TEXCOORD;
 };
 
 struct PSInput

@@ -184,14 +184,14 @@ void Renderer::UpdateConstantBuffers()
 	RHI::GetInterface()->SetBufferData(m_spConstantBufferResource.get(), m_spConstantBuffer.get());
 }
 
-void Renderer::UpdateMesh(mesh *pMesh)
+void Renderer::UpdateMesh(Mesh *pMesh)
 {
 	// Check if mesh render state is dirty and update buffers if so
 
 	// Update Model view if needed
 }
 
-void Renderer::DrawMesh(mesh *pMesh)
+void Renderer::DrawMesh(Mesh *pMesh)
 {
 	RHI::GetInterface()->DrawIndexed(pMesh->GetNumIndices(), pMesh->GetIndexOffset(), pMesh->GetVertexOffset());
 }
@@ -399,11 +399,11 @@ void Renderer::Pass_Lights()
 
 void Renderer::InitTestScene()
 {
-	std::vector<mesh*> vMeshes;
-	load_obj("models/sphere.obj", vMeshes);
-	mesh* pMesh = vMeshes[0];
+	std::vector<Mesh*> vMeshes;
+	load_obj("sphere.obj", vMeshes);
+	Mesh* pMesh = vMeshes[0];
 
-	m_spScene->AddMesh(std::shared_ptr<mesh>{pMesh});
+	m_spScene->AddMesh(std::shared_ptr<Mesh>{pMesh});
 
 	m_spScene->AddLight(std::make_shared<Light>(Light{
 		{0.0f, 5.0f, -6.0f},

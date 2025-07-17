@@ -11,14 +11,14 @@
 
 class RHIBuffer;
 
-class mesh
+class Mesh
 {
-	friend void load_obj(const std::string& path, std::vector<mesh*>& arrMeshes);
+	friend void load_obj(const std::string& path, std::vector<Mesh*>& arrMeshes);
 
 public:
-	~mesh();
+	~Mesh();
 
-	mesh(
+	Mesh(
 		const std::vector<float>& vVertices,
 		const std::vector<int>& vIndices,
 		/* TODO: Move to submesh */
@@ -53,7 +53,7 @@ public:
 
 private:
 	// Avoids to have Mesh with unitilized rendering resources
-	mesh(/* args */);
+	Mesh(/* args */);
 
 	Transform			m_oTransform;
 

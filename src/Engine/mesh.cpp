@@ -7,13 +7,13 @@
 
 namespace dx = DirectX;
 
-mesh::mesh()
+Mesh::Mesh()
 : m_vVertices()
 , m_vIndices()
 {
 }
 
-mesh::mesh(
+Mesh::Mesh(
 	const std::vector<float>& vVertices,
 	const std::vector<int>& vIndices,
 	uint32_t uVertexOffset /* = 0 */,
@@ -39,11 +39,11 @@ mesh::mesh(
 		);
 }
 
-mesh::~mesh()
+Mesh::~Mesh()
 {
 }
 
-void mesh::UpdateModelMatrix()
+void Mesh::UpdateModelMatrix()
 {
 	memcpy(&m_oModelMatrix.r[3], &m_oPos, sizeof(Vec3));
 }
