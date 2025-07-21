@@ -6,11 +6,24 @@ project('engine', 'cpp',
         ]
 )
 
+# Ensure external includes folder
+fs = import('fs')
+if not fs.exists('includes\\external\\')
+    run_command('cmd' , '/C', 'mkdir','includes\\external\\', check : true)
+endif
+
 # Download tiny_obj_loader.h
 tiny_obj_loader = run_command(
-    'cmd' , '/C', 'mkdir', 'includes\\external\\', '&&',
     'curl', '-L', '-o', 'includes/external/tiny_obj_loader.h',
-    'https://github.com/tinyobjloader/tinyobjloader/releases/download/v1.0.6/tiny_obj_loader.h'
+    'https://github.com/tinyobjloader/tinyobjloader/releases/download/v1.0.6/tiny_obj_loader.h',
+    check : true
+)
+
+# Download stb_image.h
+stb_image = run_command(
+    'curl', '-L', '-o', 'includes/external/stb_image.h',
+    'https://raw.githubusercontent.com/nothings/stb/master/stb_image.h',
+    check : true
 )
 
 # Include directories

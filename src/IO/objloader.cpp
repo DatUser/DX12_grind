@@ -82,8 +82,10 @@ void extract_materials(
 	std::vector<tinyobj::material_t>& materials
 )
 {
-	for (auto mat : materials)
+	for (auto& mat : materials)
 	{
+		//mat.diffuse_texname = TEXTURES_PATH + mat.diffuse_texname;
+		//mat.bump_texname
 	}
 }
 

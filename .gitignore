@@ -6,3 +6,4 @@ build/*
 .idea/*
 .vscode/settings.json
 .qodo
+includes/external/*
