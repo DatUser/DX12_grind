@@ -9,6 +9,7 @@
 
 // TODO: Create enunm for rendering state managemenent
 
+class Material;
 class RHIBuffer;
 
 class Mesh
@@ -33,6 +34,11 @@ public:
 	{
 		m_oPos = oPos;
 		UpdateModelMatrix();
+	}
+
+	void SetMaterials(const std::vector<std::shared_ptr<Material>>& arrMaterials)
+	{
+		m_arrMaterials = arrMaterials;
 	}
 
 	const Vec3& GetPosition() const { return m_oPos; }
@@ -62,6 +68,8 @@ private:
 
 	std::vector<float>	m_vVertices;
 	std::vector<int>	m_vIndices;
+
+	std::vector<std::shared_ptr<Material>>	m_arrMaterials;
 
 	// Rendering resources
 	std::shared_ptr<RHIBuffer>	m_spVertexBuffer;

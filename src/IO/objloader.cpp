@@ -1,13 +1,16 @@
 #include "IO/objloader.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <filesystem>
-
 #include "external/tiny_obj_loader.h"
 
+#include <filesystem>
 #include <iostream>
+
 #include "Core/asserts.h"
+#include "Engine/material.h"
 #include "Engine/mesh.h"
+#include "RHI/rhi.h"
+#include "RHI/rhi_texture.h"
 
 #define MESHES_PATH			"models\\meshes\\"
 #define MATERIALS_PATH		"models\\materials\\"
@@ -79,13 +82,37 @@ void extract_indices(
 }
 
 void extract_materials(
-	std::vector<tinyobj::material_t>& materials
+	std::vector<tinyobj::material_t>& arrMatsSrc,
+	std::vector<std::shared_ptr<Material>>& arrLoadedMats
 )
 {
-	for (auto& mat : materials)
+	for (auto& mat : arrMatsSrc)
 	{
-		//mat.diffuse_texname = TEXTURES_PATH + mat.diffuse_texname;
-		//mat.bump_texname
+		std::shared_ptr<Material> pCurrMat = std::make_shared<Material>();
+		pCurrMat->SetTexture(
+			EMaterialTexType::DIFFUSE,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.diffuse_texname, ETextureFormat::R8G8B8A8_UNORM)
+			);
+		pCurrMat->SetTexture(
+			EMaterialTexType::NORMAL,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.normal_texname, ETextureFormat::R32G32B32_FLOAT)
+		);
+		pCurrMat->SetTexture(
+			EMaterialTexType::ROUGHNESS,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.roughness_texname, ETextureFormat::R32_FLOAT)
+			);
+		pCurrMat->SetTexture(
+			EMaterialTexType::METALLIC,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.metallic_texname, ETextureFormat::R32_FLOAT)
+			);
+		pCurrMat->SetTexture(
+			EMaterialTexType::AMBIENT,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.ambient_texname, ETextureFormat::R32_FLOAT)
+		);
+		pCurrMat->SetTexture(
+			EMaterialTexType::HEIGHT,
+			RHI::GetInterface()->CreateTexture(TEXTURES_PATH + mat.bump_texname, ETextureFormat::R32_FLOAT)
+		);
 	}
 }
 
@@ -106,10 +133,17 @@ void load_obj(const std::string& sMeshFilename, std::vector<Mesh*>& vMeshes)
 	std::vector<float> vVertices{};
 	extract_vertices(attrib, vVertices);
 
+	// Extract mtl data
+	std::vector<std::shared_ptr<Material>> arrMaterials{};
+	arrMaterials.reserve(materials.size());
+	extract_materials(materials, arrMaterials);
+
 	// Fills vector with read meshes
 	Mesh* pCurrMesh = new Mesh{ vVertices, vIndices };
 	CHECK(pCurrMesh != nullptr)
 	vMeshes.push_back(pCurrMesh);
+	for (auto& pMesh : vMeshes)
+		pMesh->SetMaterials(arrMaterials);
 
 	std::cout << "Shape size: " << shapes.size() << std::endl;
 	std::cout << "Face size: " << shapes[0].mesh.num_face_vertices.size() << std::endl;

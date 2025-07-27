@@ -10,7 +10,7 @@ RHIBuffer::RHIBuffer(
 	ERHICPUAccessFlags eCPUAccess,
 	ERHIBufferUsage eUsage
 )
-: RHIResource(pData, eCPUAccess, eUsage)
+: RHIResource(pData, uByteWidth,eCPUAccess, eUsage)
 , m_uByteWidth(uByteWidth)
 , m_eFlags(eFlags)
 {

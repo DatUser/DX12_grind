@@ -99,6 +99,11 @@ public:
 	) override;
 
 	virtual std::shared_ptr<RHITexture> CreateTexture(
+		const std::string& sFilePath,
+		ETextureFormat eFormat
+	) override;
+
+	 std::shared_ptr<RHITexture> CreateTexture(
 		void* pData,
 		int iWidth,
 		int iHeight,

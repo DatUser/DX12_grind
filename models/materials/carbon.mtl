@@ -4,11 +4,11 @@ Kd 1.000 1.000 1.000
 Ks 0.000 0.000 0.000
 d 1.0
 illum 2
-# map_Kd carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_albedo.png
-# map_Bump carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_normal-ogl.png
+map_Kd carbon-fiber-bl/carbon-fiber_albedo.png
+norm carbon-fiber-bl/carbon-fiber_normal-ogl.png
 
 # Additional PBR maps (for reference in other engines)
-# map_AO carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_ao.png
-# map_Roughness carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_roughness.png
-# map_Metallic carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_metallic.png
-# map_Height carbon_fiber_textures/carbon-fiber-bl/carbon-fiber_height.png
+map_Ka carbon-fiber-bl/carbon-fiber_ao.png
+map_Pr carbon-fiber-bl/carbon-fiber_roughness.png
+map_Pm carbon-fiber-bl/carbon-fiber_metallic.png
+map_bump carbon-fiber-bl/carbon-fiber_height.png

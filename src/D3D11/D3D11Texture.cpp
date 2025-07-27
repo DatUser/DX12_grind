@@ -1,6 +1,22 @@
 #include "D3D11/D3D11Texture.h"
 
 #include "Core/asserts.h"
+#include "Engine/mesh.h"
+#include "IO/imgloader.h"
+
+D3D11Texture::D3D11Texture(
+	const std::string& sFilePath,
+	ETextureFormat eFormat
+)
+: RHITexture(nullptr, 0, 0, eFormat, static_cast<uint32_t>(ERHITextureFlags::SHADER_RESOURCE))
+{
+	load_texture(sFilePath, this);
+
+	HRESULT hr = S_OK;
+	if ((hr = D3D11Interface::GetInterface()->createTextureInternal(this)) != S_OK)
+		LOG_ERROR(hr)
+	ATLASSERT(D3D11Interface::GetInterface()->createSRVInternal(this) == S_OK);
+}
 
 D3D11Texture::D3D11Texture(
     void* pData,

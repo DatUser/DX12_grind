@@ -1,42 +1,55 @@
 #pragma once
 
+#include <vector>
 
 enum class ERHICPUAccessFlags : uint8_t
 {
-    NONE,
-    READ,
-    WRITE,
-    READ_WRITE,
+	NONE,
+	READ,
+	WRITE,
+	READ_WRITE,
 
-    _size
+	_size
 };
 
 enum class ERHIBufferUsage : uint8_t
 {
-    DEFAULT,
-    DYNAMIC,
+	DEFAULT,
+	DYNAMIC,
 
-    _size
+	_size
 };
 
 class RHIResource
 {
+public:
+	std::vector<std::byte>& GetData()
+	{
+		return m_pData;
+	}
+
 protected:
-    RHIResource() = default;
+	RHIResource() = default;
 
-    RHIResource(
-        void* pData,
-        ERHICPUAccessFlags eCPUAccess,
-        ERHIBufferUsage eUsage
-    )
-    : m_pData(pData)
-    , m_eCPUAccess(eCPUAccess)
-    , m_eUsage(eUsage)
-    {}
+	RHIResource(
+		void* pData,
+		uint32_t uByteWidth,
+		ERHICPUAccessFlags eCPUAccess,
+		ERHIBufferUsage eUsage
+	)
+	: m_eCPUAccess(eCPUAccess)
+	, m_eUsage(eUsage)
+	{
+		if (pData == nullptr || uByteWidth == 0)
+			return;
 
-    virtual ~RHIResource() = default;
+		m_pData.resize(uByteWidth);
+		std::memcpy(m_pData.data(), pData, uByteWidth);
+	}
 
-    void*				m_pData;
-    ERHICPUAccessFlags	m_eCPUAccess;
-    ERHIBufferUsage		m_eUsage;
+	virtual ~RHIResource() = default;
+
+	std::vector<std::byte>		m_pData;
+	ERHICPUAccessFlags			m_eCPUAccess;
+	ERHIBufferUsage				m_eUsage;
 };

@@ -1,4 +1,5 @@
 io_src = [
+    'imgloader.cpp',
     'objloader.cpp'
 ]
 

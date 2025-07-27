@@ -59,7 +59,12 @@ public:
 		ERHIBufferFlags eFlags,
 		ERHICPUAccessFlags eCPUAccess = ERHICPUAccessFlags::NONE,
 		ERHIBufferUsage eUsage = ERHIBufferUsage::DEFAULT
-	) = 0;
+		) = 0;
+
+	virtual std::shared_ptr<RHITexture> CreateTexture(
+		const std::string& sFilePath,
+		ETextureFormat eFormat
+		) = 0;
 
 	virtual std::shared_ptr<RHITexture> CreateTexture(
 		void* pData,

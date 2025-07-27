@@ -4,6 +4,8 @@
 #pragma comment(lib, "d3dcompiler")
 #pragma comment(lib, "dxgi.lib")
 
+#include <filesystem>
+
 #include "Core/asserts.h"
 #include "Engine/camera.h"
 #include "Core/operations.h"
@@ -111,10 +113,10 @@ HRESULT D3D11Interface::createBufferInternal(
     D3D11_SUBRESOURCE_DATA bufferData;
     ZeroMemory(&bufferData, sizeof(D3D11_SUBRESOURCE_DATA));
     // TODO: Fix to handle multiple buffers
-    bufferData.pSysMem = pRHIBuffer->m_pData;
+    bufferData.pSysMem = pRHIBuffer->m_pData.data();
 
     // Create buffer object
-    return m_spDevice->CreateBuffer(&bufferDesc, (pRHIBuffer->m_pData) ? &bufferData : nullptr, (ID3D11Buffer**) &pRHIBuffer->m_spInitResource);
+    return m_spDevice->CreateBuffer(&bufferDesc, pRHIBuffer->m_pData.empty() ? nullptr : &bufferData, (ID3D11Buffer**) &pRHIBuffer->m_spInitResource);
 }
 
 HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
@@ -137,9 +139,10 @@ HRESULT D3D11Interface::createTextureInternal(D3D11Texture* pTexture)
 	D3D11_SUBRESOURCE_DATA oTexData;
 	ZeroMemory(&oTexData, sizeof(D3D11_SUBRESOURCE_DATA));
 
-	oTexData.pSysMem = pTexture->m_pData;
+	oTexData.pSysMem = pTexture->m_pData.data();
+	oTexData.SysMemPitch = pTexture->m_iWidth * GetNumChannels(pTexture->m_eFormat) * IsFloatFormat(pTexture->m_eFormat) ? 4 : 1;
 
-	return m_spDevice->CreateTexture2D(&oTextureDesc, pTexture->m_pData ? &oTexData : nullptr, &pTexture->m_spInitResource);
+	return m_spDevice->CreateTexture2D(&oTextureDesc, pTexture->m_pData.empty() ? nullptr : &oTexData, &pTexture->m_spInitResource);
 }
 
 HRESULT D3D11Interface::createRTVInternal(D3D11Texture *pTexture)
@@ -300,6 +303,18 @@ std::shared_ptr<RHIBuffer> D3D11Interface::CreateBuffer(
 {
 	std::shared_ptr<D3D11Buffer> spBuffer = std::make_shared<D3D11Buffer>(pData, uByteWidth, eFlags, eCPUAccess, eUsage);
 	return spBuffer;
+}
+
+std::shared_ptr<RHITexture> D3D11Interface::CreateTexture(
+	const std::string& sFilePath,
+	ETextureFormat eFormat
+)
+{
+	if (!std::filesystem::exists(sFilePath))
+		return nullptr;
+
+	std::shared_ptr<D3D11Texture> spTexture = std::make_shared<D3D11Texture>(sFilePath, eFormat);
+	return spTexture;
 }
 
 std::shared_ptr<RHITexture> D3D11Interface::CreateTexture(
